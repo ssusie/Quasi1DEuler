@@ -1,0 +1,39 @@
+PGROM:
+    id = [1:4]'
+    fileRoot = 'pgrom'
+    basisUpdate = 'none' /*'border_fast', 'border_exact', 'border', 'none'*/
+    initsnapref = 'ic' /*'clustcenters', 'ic', 'zero', 'prev'*/
+    nsnap = 'all' 
+    snapInt = [0,50] /*Time interval it is valid to collect snapshots*/ 
+    snapDist = []  /*[Random seed #,Distribution,param1,...paramN]*/
+    nY = 16 /*[[15,10]*/
+    saveNL = 2
+    T = [0, timeIntLen] 
+    dt = [] 
+    nstep = numStep
+    maxIter = 10
+    eps = 1e-5
+    nBases = 1 /* 2 */
+    addElemTol = 0.1 
+    basisSelect = 'closest' 
+    timeQuiet = true
+    newtQuiet = true
+    waveName = 'haar' /* 'bior3.3', 'rbio3.5', 'dmey', 'coif4', 'haar' */
+    waveLvl  = 1 /*2*/
+    wavenY = 64 /*desired dimension for low-pass filter*/
+
+GNAT:
+    id = 1 
+    nI = 60 /*[50,40] */
+    nSample = [] 
+    nGreed  = [] 
+    nR = 60 /*[50,40]*/
+    nJ = 60 /*[50,40]*/
+    T = [0, timeIntLen] 
+    dt = [] 
+    nstep = numStep
+    addInd = 'all' 
+    maxIter = 10
+    eps = 1e-5 
+    timeQuiet = true
+    newtQuiet = true

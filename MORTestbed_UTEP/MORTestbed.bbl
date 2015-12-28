@@ -1,0 +1,28 @@
+\begin{thebibliography}{1}
+
+\bibitem{rewienski2003trajectory}
+M.~J. Rewienski, {\em A trajectory piecewise-linear approach to model order
+  reduction of nonlinear dynamical systems}.
+\newblock PhD thesis, Citeseer, 2003.
+
+\bibitem{chaturantabut2009discrete}
+S.~Chaturantabut and D.~Sorensen, ``Discrete empirical interpolation for
+  nonlinear model reduction,'' in {\em Decision and Control, 2009 held jointly
+  with the 2009 28th Chinese Control Conference. CDC/CCC 2009. Proceedings of
+  the 48th IEEE Conference on}, pp.~4316--4321, IEEE, 2009.
+
+\bibitem{barone2009reduced}
+M.~F. Barone, I.~Kalashnikova, M.~R. Brake, and D.~J. Segalman, ``Reduced order
+  modeling of fluid/structure interaction,'' {\em SAND2009-7189, Sandia
+  National Laboratories Report}, 2009.
+
+\bibitem{biegler2003large}
+L.~T. Biegler, O.~Ghattas, M.~Heinkenschloss, and B.~van Bloemen~Waanders, {\em
+  Large-scale PDE-constrained optimization: an introduction}.
+\newblock Springer, 2003.
+
+\bibitem{maccormacknotes}
+R.~W. MacCormack, ``Numerical coomputation of compressible viscous flow.''
+  Lecture Notes for AA214b and AA214c (Stanford University).
+
+\end{thebibliography}

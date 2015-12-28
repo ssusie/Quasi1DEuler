@@ -1,0 +1,45 @@
+This is BibTeX, Version 0.99c (TeX Live 2009)
+The top-level auxiliary file: MORTestbed.aux
+The style file: ieeetr.bst
+Database file #1: /Users/bokie89/Documents/TechDocs/MasterBib.bib.bib
+You've used 5 entries,
+            1876 wiz_defined-function locations,
+            502 strings with 4499 characters,
+and the built_in function-call counts, 988 in all, are:
+= -- 92
+> -- 44
+< -- 0
++ -- 17
+- -- 12
+* -- 60
+:= -- 159
+add.period$ -- 7
+call.type$ -- 5
+change.case$ -- 3
+chr.to.int$ -- 0
+cite$ -- 5
+duplicate$ -- 52
+empty$ -- 97
+format.name$ -- 12
+if$ -- 231
+int.to.chr$ -- 0
+int.to.str$ -- 5
+missing$ -- 4
+newline$ -- 20
+num.names$ -- 5
+pop$ -- 19
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 24
+stack$ -- 0
+substring$ -- 40
+swap$ -- 14
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 8
+width$ -- 6
+write$ -- 46

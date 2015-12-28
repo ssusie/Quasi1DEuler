@@ -1,0 +1,29 @@
+PGROM:
+    id = [1:3]' 
+    fileRoot = 'mems'
+    nsnap = 'all' 
+    snapInt = []  /*Time interval it is valid to collect snapshots*/ 
+    snapDist = []  /*[Random seed #,Distribution,param1,...paramN]*/
+    nY = 5
+    saveNL = 1
+    maxIter = 10
+    eps = 1e-5
+    nBases = [1, 2, 3]' 
+    addElem = true
+    addElemTol = 0.1 
+    basisSelect = 'closest'  
+    timeQuiet = false 
+    newtQuiet = true 
+
+GNAT:
+    id = [1:3]' 
+    nSample = [] 
+    nGreed  = [] 
+    nI = 30 
+    nR = 20 
+    nJ = 20 
+    maxIter = 3
+    eps = 1e-5
+    addInd = 'all'
+    timeQuiet = false 
+    newtQuiet = true 

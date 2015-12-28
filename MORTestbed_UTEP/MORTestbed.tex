@@ -1,0 +1,736 @@
+\documentclass[notitlepage]{report}
+
+\usepackage{graphicx}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{paralist}
+\usepackage{mathtools}
+\usepackage{subfig}
+\usepackage{authblk}
+\usepackage{appendix}
+
+\newtheorem{Thm}{Theorem}[subsection]
+\newtheorem{Prop}{Proposition}[subsection] 
+\newtheorem{Ex}{Exercise}
+\newtheorem{Lemma}{Lemma}
+\newtheorem{Cor}{Corollary}
+\newtheorem{Def}{Definition} 
+\newtheorem*{Rem}{Remarks} 
+\newtheorem*{Tip}{Tip} 
+
+
+\renewcommand\Affilfont{\itshape \small}
+
+\newcommand{\model}{\ensuremath{\textsc{model }}}
+\newcommand{\problem}{\ensuremath{\textsc{problem }}}
+\newcommand{\post}{\ensuremath{\textsc{postprocessing }}}
+\newcommand{\pder}[3]{\ensuremath{\frac{\partial ^{ #3} { #1 }}{\partial { #2 }^{#3}}}}
+\newcommand{\func}[3]{\ensuremath{#1 : #2 \rightarrow #3}}
+\newcommand{\RR}{\ensuremath{\mathbb{R} }}
+\newcommand{\QQ}{\ensuremath{\mathbb{Q} }}
+\newcommand{\ZZ}{\ensuremath{\mathbb{Z} }}
+\newcommand{\NN}{\ensuremath{\mathbb{N} }}
+\newcommand{\CC}{\ensuremath{\mathbb{C}}}
+
+
+\begin{document}
+\author[1]{Matthew J. Zahr}
+\title{MORTestbed User Guide}
+\date{\today}
+
+\affil[1]{Graduate Student.  Institute for Computational and Mathematical Engineering. Stanford University}
+
+\maketitle
+
+\abstract{
+This document presents a brief outline of how to use and program the model order reduction (MOR) testbed, MORTestbed, initially created by the author during an internship for the Army High Performance Computing Research Center (AHPCRC) at Stanford University during the summer of 2010.  Extensive revisions were made during the summer of 2011 to enable its use as a research tool.
+
+\medskip
+
+Since this is a research code, it is being constantly updated and the updates are not usually documented.
+Any questions should be directed to the author directly (phone: 209-652-1251 or email: mzahr@stanford.edu)
+
+\medskip
+
+Location of MORTestbed (FRG members): \hspace{1cm} ssh://hg@ahpcrcfe.stanford.edu/MORTestbed
+}
+\tableofcontents
+
+\part{Nonlinear Module}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Overview}
+MORTestbed was primarily developed by M. Zahr, under the guidance of K. Carlberg and D. Amsallem, in 2010 with funding provided by the Army High Performing Computing Research Center.  Extensive revisions were made in 2011 by M. Zahr.  D. Amsallem provided the core functions for the GNAT model reduction procedure used in the original version of MORTestbed and K. Carlberg offered extensive advice on techniques to accelerate the model reduction methods.  Both individuals made many other significant contributions to the MORTestbed.
+
+MORTestbed is a MATLAB program that provides researchers in the field of nonlinear Model Order Reduction (MOR) the ability to compare common MOR techniques and ideas on a set of benchmark problems.  The code was designed to be dynamic; an object oriented programming approach was used to modularize the code in such a way that researchers can add their own MOR techniques and/or benchmark problems (and then easily compare them to the builtin techniques/problems).  This adaptivity of the code is possible because of the complete separation between the MOR methods and the Problem formulation.
+
+This document is organized as follows: Chapter \ref{ch:codeorg} discusses the organization of the code including the directory hierarchy; Chapter \ref{ch:core} discusses the core features that define the MORTestbed including the MOR techniques, benchmark problems, and functions; Chapter \ref{ch:access} presents all information necessary for using the builtin MORTestbed features to perform an investigation regarding ROMs; Chapter \ref{ch:expand} presents necessary information for successfully hacking MORTestbed; and Chapter \ref{ch:future} presents future directions of the MORTestbed. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Code Organization} \label{ch:codeorg}
+\section{Flow of MORTestbed}
+The MORTestbed is a program designed in an object-oriented paradiagm whose functionality is determined by two major categories of classes: the \model classes and the \problem classes.  A class in the \model category is an reduced order model technique or the full order model; however, the specifics will be discussed later.  At this point, we will view a class in the \model category simply as a class with a nonlinear solver and time stepping algorithm.  A class in the \problem category defines one of the benchmark problems either builtin to the MORTestbed or defined by a user.  Again, the details will be discussed later; for now, we view a class in the \problem category as a class with a method that returns the residual and jacobian given a state and time.
+
+With this level of abstraction, the organization of the MORTestbed is relatively simple.  Via input files to be discussed later, the user defines one or more \problem s (instances of a class in the \problem category) and one or more \model s (instances of a class in the \model category).  These are defined \emph{independently} of each other.  At some point, the model and problem will linked together by storing a pointer to the appropriate problem in the model class.  Now, simulations can be run because the nonlinear solver, time stepping algorithm, and residual/jacobian generator are in place.  I have neglected to mention where the contributions to the nonlinear residual/jacobian from the time integration scheme come into play.  These are defined in classes distinct from the \model and \problem classes. 
+
+\section{Directory Hierarchy}
+After cloning the MORTestbed to any directory on your local machine, there is a predefined directory hierarchy should not be altered.  I will assume that the MORTestbed is cloned to the directory MORTestbed.  To access the nonlinear module, navigate to MORTestbed/Nonlinear, which will be referred to as the Nonlinear Base Directory.  From the Nonlinear Base, the following directory heiarchy defines the MORTestbed:
+\begin{enumerate}
+\item Classes - Contains all classes defining the MORTestbed including CONFIG, \problem classes, \model classes, and \post classes
+\item InputFileFuncs - Contains functions that are recommended to use WITHIN input files
+\item Miscellaneous - Contains functions that did not fit well into any other directory
+\item ReadFunctions - Contains the functions that are used to parse the input files
+\item TimeIntegrate - Contains functions that return the residual and jacobian contributions for all supported time integration schemes
+\item usr - Contains the home directory of all current MORTestbed users
+\item WorkflowFuncs - Contains functions that are recommended to use in workflow scripts
+\end{enumerate} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{MORTestbed Core} \label{ch:core}
+\section{Models}
+\section{Problems}
+The MORTestbed solves systems of nonlinear initial-value ODEs of the form
+\begin{align}\label{eqn:odeform}
+\frac{d \mathbf{\Phi}(t)}{d t} &= f(\mathbf{\Phi}(t), t) + \mathbf{g} + \mathbb{B}\mathbf{u}(t) \\
+ \mathbf{\Phi(0)} &= \mathbf{q}
+\end{align}
+where $\func{\mathbf{\Phi}}{\RR_+}{\RR^N}$ is the unknown, $\mathbf{g} \in \RR^N$ is the source term, $\mathbb{B} \in \RR^{N\times\mu}$ is the input matrix, $\func{\mathbf{u}}{\RR_+}{\RR^\mu}$ is the input vector, $\mathbf{q} \in \RR^N$ is the initial condition, and $\func{f}{\RR^N}{\RR^N}$ nonlinear.  Here, $N$ is the dimension of the problem and there are $\mu$ inputs.  Nearly all \problem s in the MORTestbed are ODEs that arise from the semi-discretization of a PDE.
+%Furthermore, the MORTestbed allows the user to specify linear outputs, $\Theta(t)$, of the form
+%\begin{equation}
+%  \Theta(t) = \mathbb{C}\mathbf{\Phi}(t) + \mathbb{D}\mathbf{u}(t)
+%\end{equation}
+%where $\mathbb{C} \in \RR^{1\times N}$ is the output matrix and $\mathbb{D} \in \RR^{1\times\mu}$ is the feedthrough matrix.
+
+\subsection{1D Burger's Equation}
+\begin{Rem}
+The 1D Burger's Equation is Problem 1 in the MORTestbed and the code for this equation can be found in the \problem class OneDBurgers.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+Burger's equation is a model problem for modeling the nonlinear effects of shock propagation in fluid dynamics.  In one dimension, the governing equation is
+\begin{align*}\label{eqn:burger}
+\pder{U(x;t)}{t}{} + \pder{f(U(x;t))}{x}{} &= g(x) \\
+U(0; t) &= u(t) \\
+U(x; 0) &= q(x)
+\end{align*}
+for all $t > 0$ and $x \in [0, L]$.  In this problem, $U$ is the unknown conserved quantity  (mass, density, heat, etc.) and $f(U) = 0.5U^2$.  
+\subsubsection{Discretization - Finite Volumes}
+This partial differential equation is spatially discretized using Gudnov's scheme (finite volumes) to yield a nonlinear ODE in the form of (\ref{eqn:odeform}).
+\begin{align}%\label{eqn:burgdisc}
+\frac{d \mathbf{U}(t)}{d t} &= F(\mathbf{U}(t), t) + \mathbf{g} + \mathbb{B}u(t)^2 \\
+ \mathbf{U(0)} &= \mathbf{q}
+\end{align}
+See \cite{rewienski2003trajectory} for additional information on governing equations and discretization.
+
+\subsection{Nonlinear Transmission Line}
+\begin{Rem}
+The Nonlinear transmission line is Problem 2 in the MORTestbed and the code for this equation can be found in the \problem class NLTransLine.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{rewienski2003trajectory} for governing equations and discretization.
+
+\subsection{FitzHugh-Nagumo Equations - Neuron Modeling}
+\begin{Rem}
+The FitzHugh-Nagumo Equations are Problem 3 in the MORTestbed and the code for this equation can be found in the \problem class FHN.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{chaturantabut2009discrete} for governing equation and discretization.
+
+\subsection{Highly Nonlinear 2D Steady State Problem}
+\begin{Rem}
+The highly nonlinear 2D steady state problem is Problem 4 in the MORTestbed and the code for this equation can be found in the \problem class HNL2dSS.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{chaturantabut2009discrete} for governing equation and discretization.
+
+\subsection{Convection-Diffusion-Reaction}
+Not currently supported...
+\begin{Rem}
+The convection-diffusion-reaction problem is Problem 5 in the MORTestbed and the code for this equation can be found in the \problem class ConvDiffReact.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{barone2009reduced} for governing equation.  Discretization is with FEM.
+
+\subsection{Micromachined Switch}
+\begin{Rem}
+The micromachined switch is Problem 6 in the MORTestbed and the code for this equation can be found in the \problem class MEMS.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{rewienski2003trajectory} for governing equations and discretization.
+
+\subsection{Potential Nozzle}
+\begin{Rem}
+The potential nozzle is Problem 7 in the MORTestbed and the code for this equation can be found in the \problem class SteadyNozzle.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{biegler2003large} for governing equations and discretization.
+
+\subsection{Quasi-1D Euler Equations}
+\begin{Rem}
+The quasi-1d Euler equations is Problem 8 in the MORTestbed and the code for this equation can be found in the \problem class quasi1dEuler.m.
+\end{Rem}
+\subsubsection{Governing Equation}
+See \cite{maccormacknotes} for governing equations and discretization.
+
+\subsection{1D KdV Equations}
+\begin{Rem}
+The 1d KdV equations is Problem 14 in the MORTestbed and the code for this equation can be found in the \problem class OneDKdV.m.
+\end{Rem}
+
+\subsection{3D Structural Dynamics}
+This is a 3D, unstructured code for nonlinear structural dynamics discretized with the Finite Element Method.  For now, the mesh must be 4 node tetrahedral elements; very straightforward extension to other solid elements coming soon.  Also restricted to St. Venant-Kirchoff material (linear material), but the kinematics are nonlinear.  All assembly type operations are done in C++ (internal force, body force, mass matrix computations).  Only supports nodal external loads for now.
+\begin{Rem}
+The structural dynamics equations are Problem 15 in the MORTestbed and the code for this equation can be found in the \problem class structuralFEM.m.  Code needs to be compiled before it can be used.  There is a Makefile.m in Nonlinear/Classes/Problem/zFEM/ that should be run \emph{from within MATLAB} as follows: 
+\begin{verbatim}
+  >> Makefile(2);  Makefile(3);  Makefile(4);  Makefile(5);  Makefile(6); 
+\end{verbatim}
+\end{Rem}
+
+\subsection{Lid-Driven Cavity (Incompressible Navier-Stokes Equations)}
+Not currently supported
+\begin{Rem}
+The lid-driven cavity is Problem 16 in the MORTestbed and the code for this equation can be found in the \problem class lidINS.m.
+\end{Rem}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{MORTestbed Access}\label{ch:access}
+The nonlinear portion of the MOR testbed is accessed through a series of input text files and the ultimate flow of the program is specified in an M-file (script, not a function) by the researcher.  This drastically improves the robustness of the MORTestbed from its original version.
+
+At a high level, the code is organized into three disjoint collections of classes, the \model classes, the \problem classes, and the \post classes.  The \model classes (FOM.m, ROM.m, GNAT.m, locGNAT.m, and TPWL.m) contain all of the properties and methods of a particular model (whether it be the high fidelity model or one of the reduced models).  A method of a particular \model class may contain as much model-specific code as the researcher wishes to include (this statement will be apparent if the reader looks at the code contained in GNAT.m and locGNAT.m).  The \problem classes (OneDBurgers.m, NLTransLine.m, FHN.m, HNL2dSS.m, and MEMS.m) contain all of the properties and methods for a particular benchmark problem; and each of these classes may contain as much problem-specific code as the researcher wishes.  To maintain this distinction between \model and \problem classes, problem-specific code must never be put in a \model class; model-specific code in a \problem class is OK and at times necessary (particularly when dealing with GNAT).  The \post classes (POSTPROCESS.m, ppFIGURE.m, ppAXES.m, and ppTABLE.m) are used to access and display the results of the simulations that were executed.  There is actually one more class (CONFIG.m) that doesn't fit so nicely into this breakdown because it stores the information for a particular problem configuration, yet does not contain problem specific code.
+
+\begin{Rem}
+  The TPWL class has not been maintained and will probably not work.  The \post class has also not been maintained in quite awhile, but most features will still probably work.  Most MORTestbed users find it more convenient to simply their postprocessing commands in the workflow file and omit the PP files.  The PP files are useful in that they can significantly unclutter a workflow file by putting all postprocessing commands in an input file.
+\end{Rem}
+
+\begin{Rem}
+  This complete distinction between \model classes and \problem classes is the main difference (although there are many) between this version of MORTestbed and the original that makes this version adaptable for researchers looking to incorporate new methods and problems.
+\end{Rem}
+
+A suite of input files are used to define the properties of the above classes and a MATLAB \emph{script} is used to define the flow of the MOR comparison (see \ref{sec:wkflow} for details on this script).
+
+%\begin{Rem}
+%  The ability for the researcher to define the flow of the program has tremendously enhance the utility of MORTestbed.  The original version had about about 5 predetermined workflows that a user could request; analysis requiring anything beyond these predetermined commands was difficult.
+%\end{Rem}
+
+\section{The Input Files: CFG, ROM, and PP}
+At a high level, the MORTestbed needs two collections of information to perform a given analysis: the data and the instructions.  The data for the analysis is specified in a configuration file (CFG), a reduced order model file (ROM), and a postprocessing file (PP).  These files are text files with the extensions .cfg, .rom, and .pp, respectively.  Each of these files will be discussed individually below, but first, it is necessary to make a couple remarks about syntax.
+
+\begin{Rem}
+For the most part, the input files accept standard MATLAB notation with two notable exceptions.
+  \begin{enumerate}
+     \item Comments must begin with /* and end with */ (nested comments are supported)
+     \item Commands must be separate by a line break
+  \end{enumerate}
+\end{Rem}
+
+\begin{Rem}
+In the subsequent sections, I will discuss the fields available to the user to specify in the input functions.  Nearly all fields in the CFG and ROM files have well-defined defaults (although some default values depend on the specific problem choosen), so if certain fields are not specificed in the input file, the default value will be used.
+\end{Rem}
+
+Finally, let me introduce a definition that will be used throughout this document.
+\begin{Def}
+  A \textbf{\emph{type}}\textbf{-block} of text is all of the text contained between \upshape{\textbf{type}}: and the next block declaration, i.e. a FOM-block is all of the text contained between FOM: and the next block declaration.
+\end{Def}
+
+\subsection{The Configuration (CFG) File} 
+The CFG file is used to specify the problem you will be analyzing and all of its parameters as well as information regarding the FOM.  There are four types of blocks in this file: a GVAR-block, a VAR-block, a FOM-block, and (possibly multiple) CONFIG-blocks.  The FOM-block is used to define properties of the high fidelity simulation as well as define the problem to be solved in the subsequent simulaion.  The (possibly) multiple CONFIG-blocks define the parameters for the problem (defined in the FOM-block), which represent different configurations of your problem.
+
+\vspace{2mm}
+\noindent \underline{\textbf{The GVAR-block }} \\
+The GVAR-block is used to defined ``global'' variables that may be used in ANY input file (in the scope of a particular analysis) or in the workflow file.  The variable names can be any valid MATLAB name EXCEPT x, y, z, or t because these are reserved.  For example, if a variable is defined in the GVAR block in the CFG file, it may be used in \emph{any} block in the ROM or PP files OR in the the workflow file.
+
+\vspace{2mm}
+\noindent \underline{\textbf{The VAR-block }} \\
+The VAR-block is used to defined variables that may be used ONLY in the input file where the block is defined.  The variable names can be any valid MATLAB name EXCEPT x, y, z, or t because these are reserved.
+
+\vspace{2mm}
+\noindent \underline{\textbf{The FOM-block }} \\
+There must be one and only one of these in each CFG file
+\begin{itemize}
+  \item fileRoot - Used as the root of the filenames for all binary files that may get saved (usually residual snapshots if saveNL = true)
+  \item problem $\in$ \{1, 2, 3, 4, 6, 7, 8, 14, 15\} specifies the nonlinear system to solve
+  \item T - $1 \times 2$ vector specifying the boundaries of the time domain
+  \item nstep - scalar defining the number of time steps to use in the simulations (must be empty if dt nonempty)
+  \item dt - scalar defining the time step size to use in the simulations (must be empty if nstep nonempty)
+  \item maxIter - scalar indicating the maximum number of Newton iterations that may be performed per time step
+  \item eps - vector indicating the tolerance parameters for convergence of the Newton solver
+      \begin{itemize}
+        \item if eps is a scalar, its value indicates the relative residual tolerance for convergence of Newton's method, i.e. convergence when $R(u_k) < \text{eps}*R(u_0)$
+        \item if eps is a $1 \times 2$ vector, the first entry is the absolute residual tolerance for convergence of Newton's method and the second is a tolerance on the distance between iterates, i.e. convergence when $R(u_k) < \text{eps}(1)$ or $||u_{k} - u_{k-1}|| < \text{eps}(2)$
+        \item if eps is a $1 \times 3$ vector, the first entry is the relative residual tolerance (described in first bullet) and the next two entries are the absolute residual tolerance and absolute iterate tolerance (described in second bullet)
+      \end{itemize}
+  \item timeQuiet - boolean indicating whether to print the progress of the simulation
+  \item newtQuiet - boolean indicating whether to print warnings when the maximum number of Newton iterations is reached
+\end{itemize}
+
+\vspace{2mm}
+\noindent \underline{\textbf{The CONFIG-block }} \\
+There may be as many of these as desired in a given CFG file.  Each defines a new problem configuration.
+\begin{itemize}
+    \item id - scalar used to identify the problem configuration
+    \item type - string indicating whether this configuration is meant as a training configuration or an online configurations.  This is not used by the MORTestbed, it is mainly for the user benefit.
+    \item desc - string that describes the configuration.  Again,  this is not used by the MORTestbed, it is mainly for the user benefit.
+    \item DLim - $n \times 2$ matrix, where $n$ is the number of dimensions in your problem.  The (k,1) entry specifies the lower bound of the k-th dimension of your domain.  Similarly, the (k,2) specifies the upper bound of the k-th dimension of your domain.
+   \item  ndof - scalar indicating the number of unknowns in your system (i.e. after removing dirichlet BCs from the problem)
+    \item nNodes  - $1 \times k$ vector whose k-th indicates the number of nodes in the k-th dimension
+    \item altFile - a filename (not as a string so don't use single quotes) that contains the relevant information for a given problem.  This is currently only availabe for the MEMS problem (it is actually necessary for this problem due to the large number of parameters).
+    \item BFunc - a single line of MATLAB code \emph{OR} a filename (this file must be a M-file function that takes no inputs and returns a single output).  This line of code or file will specify how to make the input matrix B.
+    \item CFunc - a single line of MATLAB code \emph{OR} a filename (this file must be a M-file function that takes no inputs  and returns a single output).  This line of code or file will specify how to make the output matrix C.
+    \item DFunc - a single line of MATLAB code \emph{OR} a filename (this file must be a M-file function that takes no inputs  and returns a single output).  This line of code or file will specify how to make the feedthrough matrix D.
+    \item GFunc - a single line of MATLAB code \emph{OR} a filename (this file must be a M-file function that takes up to k inputs, where k is the dimension of the problem, each input corresponds to the position vector along a particular dimension  and returns a single output).  This line of code or file will specify how to make the source term vector G.
+    \item icFunc- a single line of MATLAB code \emph{OR} a filename (this file must be a M-file function that takes up to k inputs, where k is the dimension of the problem, each input corresponds to the position vector along a particular dimension and returns a single output).  This line of code or file will specify how to make the initial condition.
+    \item param - vector containing the parameters of the problem (problem specific and currently only has meaning for the HNL2dSS problem)
+    \item saveNL - boolean indicating whether to save nonlinear terms during the simulation
+    \item inFunc  = filename (not as a string) that contains the input function.  This file must be an M-file function that accepts 1 input (the time) and returns 1 output (the input vector - the number of entries must be equal to the number of columns in B).
+\end{itemize}
+
+\begin{Rem}
+Even though in the above, I made a distinction between the FOM-block and the CONFIG-block fields, there is actually not much of a difference.  Any property specified in the FOM-block can be specified in any of the CONFIG-block and vice versa.  However, there may be no repeats, i.e. if there is a property specified in the FOM-block, then it may not be specified in the CONFIG-block (an error will be produced if this is attempted).  The distinction between the FOM-block and CONFIG-block comes into play during the assignment of a problem configuration to a high-fidelity simulation.  Any property specified in the FOM-block will be common to ALL high-fidelity simulations specified, whereas properties specifed in the CONFIG-block will be common to that configuration only.  This distinction is more easily understood in an example:  Suppose I want to simulate 10 high-fidelity model that have all of the FOM-block/CONFIG-block properties in common EXCEPT the input function.  In my FOM-block, I would specify all of the above properties expect inFunc.   Then, I would have 10 CONFIG-blocks, each with their own inFunc line.  This feature was meant to alleviate as much code copying as possible.  \emph{The point here is to specify everything common to ALL your simulations in the FOM-block and those specific to a particular configuration in the CONFIG-blocks}.  However, keep in mind that you will eventually be linking your configurations to ROMs, so some foresight will be necessary in your organization (i.e. don't plan everything based on your FOM simulations).
+\end{Rem}
+
+\begin{Rem}
+  In the above, nstep and dt cannot both be specified (even if they are consistent).  Specifying both will results in an error.  This is a convention.
+\end{Rem}
+
+\subsection{The Reduced Order Model (ROM) file}
+The ROM file is used to declare the parameters for any reduced order models (that are supported by MORTestbed) that the user wishes to generate.  There is an important syntactic difference between the blocks in this file vs. those in the CFG file: the user can now specify a parameter for MULTIPLE models in a single line.  As before, these lines adhere to MATLAB syntax and therefore, any MATLAB function can be used to generate these multiple ROM parameters.  This capability becomes important when one wants to compare many ROMs (which is the whole point of the MORTestbed).
+
+\emph{The rules for specifying multiple ROMs in one line are as follows: create a COLUMN vector (either a double vector or cell array) and each entry of the column vector will correspond to the parameter for a different ROM.  For fields that have more than one entry per ROM (i.e. the snapDist field below), then you will specify a matrix (double or cell), where each row corresponds to a different ROM and the columns of a particular row will represents the different entries of the field for a given ROM.}
+
+There will be zero or one of the following blocks in a ROM file: GROM-block (Galerkin projection), PGROM-block (Least Square Petrov-Galerkin), GNAT-block, and TPWL-block.
+
+\vspace{2mm}
+\noindent \underline{\textbf{The GROM-block and PGROM-block}} \\
+The field dimensions given below are based on the assumption that we are generating only 1 ROM object in the block.  Generalization to multiple ROM objects in the block can be acheived by adhering to the convention defined above.
+
+\begin{itemize}
+  \item fileRoot - Used as the root of the filenames for all binary files that may get saved (usually residual snapshots if saveNL > 0)
+    \item id - scalar used to identify the ROM
+    \item snapcoll $\in$ \{`ref\_init',  `ref\_none', `ref\_prev' \} indicating the snapshot collection to use: `ref\_init' = state vectors referencing the initial condition, `ref\_none' = unreferenced state vectors, and `ref\_prev' = state vectors referencing the state vector at the previous step. 
+    nsnap - scalar OR the string 'all' indicating how many snapshots to take in the snapshot interval (defined below)
+    \item snapInt - $1 \times 2$ vector indicating the time interval where it is valid to collect snapshots.  If left empty (or omitted), the entire time interval will be used.
+    \item snapDist - this is used to select snapshots based on a distribution, where the format is a $1 \times 3$ cell array where the first entry is the random seed number (this is included for repeatability of an experiement), the second entry is a string containing the name of the distribution, and the last entry is a vector of doubles (of length $p$) defining parameters of the distribution (i.e. if we have the normal distribution, p = 2 and the parameters are the mean and standard deviation).  This is a pedantic option and is not going to be maintained or updated unless I am contacted with interest in this option.  For more information, contact the author.
+    \item nY - scalar indicating the dimension of the ROM
+    \item saveNL $\in \{0, 1, 2, 3\}$ indicating the nonlinear terms.  saveNL = 0 will not save nonlinear terms (makes ROM computation faster) and saveNL = j (j = 1, 2, or 3) will perform snapshot collection j from Carlberg 2010 et. al).
+  \item maxIter - scalar indicating the maximum number of Newton iterations that may be performed per time step during the ROM simulation
+  \item eps - scalar indicating the tolerance parameter for convergence of the Newton solver for the ROM simulation
+        \begin{itemize}
+        \item if eps is a scalar, its value indicates the relative residual tolerance for convergence of Newton's method, i.e. convergence when $R(u_k) < \text{eps}*R(u_0)$
+        \item if eps is a $1 \times 2$ vector, the first entry is the absolute residual tolerance for convergence of Newton's method and the second is a tolerance on the distance between iterates, i.e. convergence when $R(u_k) < \text{eps}(1)$ or $||u_{k} - u_{k-1}|| < \text{eps}(2)$
+        \item if eps is a $1 \times 3$ vector, the first entry is the relative residual tolerance (described in first bullet) and the next two entries are the absolute residual tolerance and absolute iterate tolerance (described in second bullet)
+      \end{itemize}
+  \item timeQuiet - boolean indicating whether to print the progress of the ROM simulation
+  \item newtQuiet - boolean indicating whether to print warnings when the maximum number of Newton iterations is reached during the ROM simulation
+    \item nBases - scalar indicating the number of local Bases to generate
+    \item addElem - boolean indicating whether to add vectors from adjacent bases so transition between bases is smooth (unused if nBases = 1)
+    \item addElemTol - scalar indicating the percentage of vectors to add to the each basis from the surrounding bases (unused if nBases = 1)
+    \item basisSelect $\in$ \{'closest', 'interpolate'\} determines which algorithm to use in selecting an appropriate basis online (only closest is supported at this time).
+ \end{itemize}
+
+\vspace{2mm}
+\noindent \underline{\textbf{The GNAT-block}} \\
+The field dimensions given below are based on the assumption that we are generating only 1 GNAT object in the block.  Generalization to multiple GNAT objects in the block can be acheived by adhering to the convention defined above.
+
+\begin{itemize}
+    \item id - scalar used to identify the ROM
+    \item nR  - dimension of the subspace we constrain the residual to lie in
+    \item nJ  - dimension of the subspace we constrain the jacobian to lie in
+    \item nI - number of sample INDICIES to use for GNAT simulation (must be empty if nSample and nGreed specified)
+    \item nSample - number of sample NODES to use (must be empty if nI specified) for GNAT simulation
+    \item nGreed  - number of vectors of phiR and phiJ to use when selecting sample nodes (must be empty if nI specified)
+    \item addInd = string indicating which algorithm to use when adding  residual entries that come for ``free''.  Must be either 'all' or 'samevar'.  Contact D. Amsallem for details.
+  \item maxIter - scalar indicating the maximum number of Newton iterations that may be performed per time step during GNAT simulation
+  \item eps - scalar indicating the tolerance parameter for convergence of the Newton solver during GNAT simulation
+        \begin{itemize}
+        \item if eps is a scalar, its value indicates the relative residual tolerance for convergence of Newton's method, i.e. convergence when $R(u_k) < \text{eps}*R(u_0)$
+        \item if eps is a $1 \times 2$ vector, the first entry is the absolute residual tolerance for convergence of Newton's method and the second is a tolerance on the distance between iterates, i.e. convergence when $R(u_k) < \text{eps}(1)$ or $||u_{k} - u_{k-1}|| < \text{eps}(2)$
+        \item if eps is a $1 \times 3$ vector, the first entry is the relative residual tolerance (described in first bullet) and the next two entries are the absolute residual tolerance and absolute iterate tolerance (described in second bullet)
+      \end{itemize}
+  \item timeQuiet - boolean indicating whether to print the progress of the GNAT simulation
+  \item newtQuiet - boolean indicating whether to print warnings when the maximum number of Newton iterations is reached during the GNAT simulation
+ \end{itemize}
+
+\begin{Rem}
+If nBases $> 1$ in the ROM file, then the GNAT model built on top of this ROM will be a local GNAT model (with the same number of bases as the ROM). 
+\end{Rem}
+
+\vspace{2mm}
+\noindent \underline{\textbf{The TPWL-block}} \\
+The field dimensions given below are based on the assumption that we are generating only 1 TPWL object in the block.  Generalization to multiple TPWL objects in the block can be acheived by adhering to the convention defined above.
+
+\subsection{The Postprocessing (PP) File}
+The postprocessing file is used to create figures and tables based on the results of  your simulation.
+The blocks for this function are FIGURE-block, TABLE-block, and AXES-block.  Unlike the other input files, there is a hierarchy in this function in that TABLE-blocks and AXES-blocks must be nested inside FIGURE-blocks.
+
+\vspace{2mm}
+\noindent \underline{\textbf{The FIGURE-block}} \\
+The FIGURE-block is very simple with only 3 fields:
+\begin{itemize}
+  \item id - scalar used to identify the ppFIGURE object
+  \item axesLayout - $1 \times 2$ vector defining the layout of ppAXES objects and ppTABLE objects in the figure.  The first entry denotes the number of rows of subplots/subtables and the second entry denotes the number of columns of subplots/subtables.
+  \item setfig - $1 \times 2k$ $(k \in \NN\cup\{0\})$ cell array of strings indicating any figure properties that the user wishes to set manually.
+\end{itemize}
+
+\vspace{2mm}
+\noindent \underline{\textbf{The AXES-block}} \\
+The AXES-block is more complicated with quite a few more fields:
+\begin{itemize}
+    \item id - scalar used to identify the ppAXES object
+      \item subplotNum - scalar or vector indicating the suplot numbers to plot in (same convention as MATLAB)
+      \item xData - $M \times 1$ cell column array (or $1 \times 1$ cell array) of strings where each entry contains the key word of the data the user wants to be display on the x-axis
+      \item yData - $M \times 1$ cell column array of strings where each entry contains the key word of the data the user wants to be display on the y-axis
+      \item zData - $M \times 1$ cell column array of strings where each entry contains the key word of the data the user wants to be display on the z-axis
+      \item scaleData - $1 \times 3$ array of real numbers containing the factors by which to scale xData, yData, and zData
+      \item xlabel - cell row array where specifying the xlabel and its formatting for the current axes object 
+      \item ylabel - cell row array where specifying the ylabel and its formatting for the current axes object
+      \item zlabel  - cell row array where specifying the zlabel and its formatting for the current axes object
+      \item title - cell row array where specifying the title and its formatting for the current axes object 
+      \item plotspec - $M \times N$ (or $1 \times N$ cell array) specifying the formatting of each plotted object, i.e. the jth row corresponds to the formatting the plot generated with xData\{j\}, yData\{j\}, zData\{j\}, etc.
+      \item model - $M \times 1$ cell column array (or $1 \times 1$ cell array) of strings where each entry contains the key word of the model to be used in the plotting (i.e. which model to extract data from).  Must be either fom\#,  rom\#, gnat\#, or tpwl\#.  The \# indicates which entry in the model array that this corresponds to (this will be demonstrated with an example).
+      \item modelAux - $M \times 1$ cell column array (or $1 \times 1$ cell array) of strings where each entry contains the key word of the auxilary model to be used in the plotting of the model results (this is only necessary to reconstruct the full vectors from the GNAT method).  Must be either ` ' (empty string) or rom\#. The \# indicates which entry in the model array that this corresponds to (this will be demonstrated with an example).
+      \item modelFom - $M \times 1$ cell column array (or $1 \times 1$ cell array) of strings where each entry contains the key word of the FOM that the model to be used in the plotting was based on (mainly for speedup and error computations).  The \# indicates which entry in the model array that this corresponds to (this will be demonstrated with an example).
+      \item pType = $M \times 1$ cell column array of strings where each entry contains the key word of the type of plot to generate: animate (only valid if xData = animate\textbf{I}, see below), plot, semilogx, semilogy, loglog, plot3, surf, surfc, contour, or contourf.
+      \item normType - scalar indicating the norm type to use when computing errors
+      \item numPlotObj - scalar indicating the number of object to include in this axes object (equal to M in the convention used here)
+      \item legend - $1 \times (h+1)$ $(h \in \NN)$ cell array of cells used to define the legend for the current axes, where $h$ is the number of objects that the user wishes to include in the legend.  The first cell is a cell array of strings defining the properties of the legend that the user wishes to set manually (i.e. the interpreter or location) and the remaining cells are $1 \times 2$ cell arrays containing the information to be displayed in the legend.  The first entry of this $1 x 2$ cell contains the object number that their legend entry will be defining and the second entry is the name that the user wishes to assign to that object.
+      \item connWithCurve - only used if the plotted objects are POINTS - cell column array of double vectors indicating the points to connect with a line
+      \item connCurveSpec - only used if the plotted objects are POINTS - cell matrix array of strings (must have either 1 column or the same number of columns as connCurveSpec) that will define the formatting of the lines that connect the points indicated in connWithCurve
+\end{itemize}
+
+\begin{Rem}
+  As with the ROM input file, if $M \geq 1$ objects (in this case plots) are specified, then every field must have either $M$ or $1$ rows.  In only 1 row is used, then the same value of the field will be used for all objects.
+\end{Rem}
+
+\vspace{2mm}
+\noindent \underline{\textbf{The TABLE-block}} \\
+The TABLE-block is yet more complicated with fewer fields, but an implicit structure defined:
+\begin{itemize}
+       \item id - scalar used to identify the ppTABLE object
+       \item subtableNum - identical functionality of subplotNum above for tables
+       \item normType - scalar indicating the norm type to use when computing errors
+       \item numRows - scalar indicating the number of rows the table will have
+       \item numCols = scalar indicating the number of rows the table will have
+       \item rowData - This must be a column cell array of strings containing key words (see below for key words) indicating the data to be included in each row.  In general, key word evaluates to a vector (may be of size 1).  The result is that numCols will be unused and each vector will be placed in the appropriate row.  Should be empty if colData or elemData nonempty.
+       \item colData -  This must be a row cell array of strings containing key words (see below for key words) indicating the data to be included in each column.  In general, key word evaluates to a vector (may be of size 1).  The result is that numRows will be unused and each vector will be placed in the appropriate column.  Should be empty if rowData or elemData nonempty.
+       \item elemData -  This must be a $1 \times 1$ cell array, numRows $\times$ numCols cell array,  1 $\times$ numCols cell array, or numRows $\times$ 1 cell array of strings containing key words.  Each keyword must evaluate to a scalar.  Must be empty if colData or rowData nonempty.  The functionality is defined as follows: \begin{inparaenum}[(1)] \item if elemData is a $1 \times 1$ cell array, the scalar data indicated by keyword will be put in every row and column of the table, \item if elemData is a numRows $\times$ numCols cell array, then the scalar data corresponding to entry $(i, j)$ of elemData will be placed in entry $(i, j)$ of the table, \item if elemData is a numRows $\times$ 1 cell array, then the scalar data corresponding to entry $(i, 1)$ of elemData will be placed in entry $(i, j)$ for $j = 1, \cdots,$ numCols of the table, and \item if elemData is a 1 $\times$ numCols cell array, then the scalar data corresponding to entry $(1, j)$ of elemData will be placed in entry $(i, j)$ for $i = 1, \cdots, $ numRows of the table  \end{inparaenum}.
+       \item title - Not currently used
+       \item rowNames  - cell array containing the rows names (can be either a row cell array or column cell array).  This may be empty ([] or \{\})  or omitted and row names will not be assigned.
+       \item colNames -  cell array containing the column names (can be either a row cell array or column cell array). This may be empty ([] or \{\}) or omitted and column names will not be assigned.
+       \item model - see AXES-block for definition.  May be a $1 \times 1$ cell array of model strings (same model will be used for all entries of table), numRows $\times$ 1 cell array (same model will be used for each row of the table), 1 $\times$ numCols cell array (same model will be used for each column of the table, or a numRows $\times$ numCols cell array (each entry of the table will have its own model). 
+       \item modelAux - see AXES-block for definition.  May be a $1 \times 1$ cell array of model strings (same model will be used for all entries of table), numRows $\times$ 1 cell array (same model will be used for each row of the table), 1 $\times$ numCols cell array (same model will be used for each column of the table, or a numRows $\times$ numCols cell array (each entry of the table will have its own model). 
+       \item modelFom - see above AXES-block for definition.  May be a $1 \times 1$ cell array of model strings (same model will be used for all entries of table), numRows $\times$ 1 cell array (same model will be used for each row of the table), 1 $\times$ numCols cell array (same model will be used for each column of the table, or a numRows $\times$ numCols cell array (each entry of the table will have its own model). 
+\end{itemize}
+
+\subsubsection{Keywords}
+In the following, I will define the keyword that are to be used to request outputs in the PP file.  I will use the convention that the state vector (or state vector-like quantities such as local basis cluster centers or POD vectors) is generated by stacking multiple variables on one another in a vector and thus the state vector-like quantity is: sv = [sv1, sv2, $\dots$, svN]$^T$.  In the below, we also use the convention that a \textbf{bold} letter indicates a variable integer or real number.
+
+\vspace{2mm}
+\noindent \underline{Keywords to be used in the xData, yData, zData fields of the PP File}
+\begin{itemize}
+  \item animate\textbf{I}: This will generate the animation number \textbf{I} for the current problem (see section on problem specifics for information on what \textbf{I} represents for each problem).  This must be specified as xData AND it is assumed that this is the only plot specified for the current figure.  Once this key is encountered, the animation plot will consume the entire figure, erasing all previous axes in the figure and never generating later axes (in the current figure).
+  \item time: This returns a vector of times (length = nstep+1)
+  \item timestep: This returns a vector of timesteps (= [1:nstep])
+  \item xdomain: This returns the mesh points in the 1st dimension
+  \item ydomain: This returns the mesh points in the 2nd dimension
+  \item sv\textbf{I}@x=\textbf{J}: This returns sv\textbf{I} at position x= \textbf{J} (only works for 1D) of the Model using ModelAux (only needed for GNAT)
+  \item sv\textbf{I}@t=\textbf{J}:  This returns sv\textbf{I} at time t= \textbf{J}  of the Model using ModelAux (only needed for GNAT)
+  \item clusCenter\textbf{I}@b=\textbf{J}: This returns the cluster center \textbf{I} for the \textbf{J}th local basis of Model using ModelAux (only needed for GNAT)
+  \item pod\textbf{I}@n=\textbf{J},b=\textbf{K}: This returns the \textbf{J}th pod vector \textbf{I} for the \textbf{K}th local basis of Model using ModelAux (only needed for GNAT)
+  \item output: This returns the output (C*sv) at each time, including initial time,  of the Model using ModelAux (only needed for GNAT)
+  \item ontime: This returns the online time of the Model
+  \item speedup: This returns the online speedup of the Model over the ModelFom
+    \item Aerr[\%]: This returns the absolute error of Model in the \textit{normType} norm at each time (including initial time).  If $\%$ is included, the error will be given as a percent; if it is omitted, the error will not be a percent.
+  \item Rerr[\%]: This returns the relative error of Model in the \textit{normType} norm at each time (including initial time). If $\%$ is included, the error will be given as a percent; if it is omitted, the error will not be a percent.
+  \item MAerr[\%]: This returns the maximum absolute error over all time steps. If $\%$ is included, the error will be given as a percent; if it is omitted, the error will not be a percent.
+  \item MRerr[\%]: This returns the maximum relative error over all time steps. If $\%$ is included, the error will be given as a percent; if it is omitted, the error will not be a percent.
+  \item AvgAerr[\%]: This returns the average absolute error over all time steps. If $\%$ is included, the error will be given as a percent; if it is omitted, the error will not be a percent.
+  \item AvgRerr[\%]: This returns the average relative error over all time steps. If $\%$ is included, the error will be given as a percent; if it is omitted, the error will not be a percent.
+  \item linpt: This returns the linearization points used for TPWL (only valid for TPWL model; will error if you try to plot this for other models)
+  \item prop.\textit{field}: This returns the \textit{field} property of the Model.
+\end{itemize}
+
+\begin{Rem}
+ \textsc{All of the fields specified in all of the input files are evaluated using MATLAB eval command (since they are read as strings).  Therefore, instead of specifying a command inline, the user may define a separate file that returns the appropriately formatted entry (they may even take literals as inputs).  This can become quite important when you want to generate a plot from 100 different gnat simulations.  Instead of typing \{`gnat1'; `gnat2'; `gnat3'; $\dots$ ; `gnat100'\}, one could simply have a separate function that loops from 1 to 100 and stores the string [`gnat', num2str(j)] in the jth entry of a cell array and returns this cell array.  This function is included in the MORTestbed with file name: `createModelField.m'.  I have found the most use for this in the PP files, but could also be employed in the ROM files.}
+\end{Rem}
+
+\section{The Workflow File} \label{sec:wkflow}
+The workflow files are used to run simulations.  These can be either functions or scripts, but scripts are highly recommended.  These allow MORTestbed users to read the data from their input files and turn them in to \model and \problem objects that are used to run their simulations.  Additional details can be found in comments of example files.
+
+\begin{Rem}
+  Before the MORTestbed can be used, the command
+  \begin{verbatim}
+     >> init
+  \end{verbatim} must be run from the command line in the folder: \begin{verbatim} MORTestbed_Dist/Nonlinear/ \end{verbatim}
+\end{Rem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\chapter{Hacking MORTestbed}\label{ch:expand}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Future of MORTestbed}\label{ch:future}
+  \section{ROM-based Optimization}
+  A future direction of the testbed is to include capabilities for PDE-constrained optimization.  This will hopefully be a useful research tool to those interested in determining how one would used ROMs instead of high-fidelity models in an optimization loop.  After usability aspects of the code are addressed, this will be the next major enhancement.
+
+  \section{Linear Module}
+The underlying code for the linear module is complete, but it will undergo extensive revision to enhance performance, usability, and adaptability for use as a research tool.  A front-end text file interface does not currently exist, but will be created using similar syntax as the nonlinear module.  The focus of this project has been nonlinear problems, so they were given precedence.  This will be completed at a later time.  One interesting addition that will be made to this section is the ability to include the techniques developed by D. Amsallem and C. Farhat for parametric ROMs (manifold interpolation).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\appendix
+
+%\chapter{Builtin Functions}
+%There following functions are all builtin to the MORTestbed and should be used in the workflow or input files. 
+%
+%\begin{itemize}
+%  \item init \\ \vspace{1mm}
+%     \emph{Definition:} Script that must be executed in the folder ModularizedFolderNonlin \\ \vspace{1mm}
+%     \emph{Functionality:}  Adds the paths of the builtin MORTestbed functions.\\ \vspace{1mm}
+%     \emph{Inputs:} None.  init.m is a script.\\ \vspace{1mm}
+%     \emph{Outputs:} None.  init.m is a script.
+% \item addGlobVarsAndPaths \\ \vspace{1mm}
+%     \emph{Functionality:}  Makes global variables from CFG file availabe in workflow and adds paths of the default input files.\\ \vspace{1mm}
+%     \emph{Inputs:} 
+%         \begin{itemize}
+%            \item string containing the root filename of the CFG file (no extension)
+%         \end{itemize}
+%     \emph{Outputs:} None.
+%  \item initialize \\ \vspace{1mm}
+%     \emph{Functionality:} Initializes FOM and PROBLEM objects\\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item string containing the root filename of the CFG file (no extension)
+%           \item integer vector prescribing the CONFIG id numbers to initialize
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item array of FOM objects containing the data from the CFG file
+%           \item array of PROBLEM objects containing the data from the CFG file
+%        \end{itemize}
+%  \item FOM  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item ROM  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item genGNAT  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item TPWL  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item executeModel  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item determineSnapshots  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item computePOD  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item pod  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item createGNAT  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item associateFullProblem  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item createTPWL  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item PostProcess  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item clearAllExcept  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item convertFiles2Cell  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item loadObjsIntoCell  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item createModelField  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%  \item concatenateResJacSnapshot  \\ \vspace{1mm}
+%     \emph{Functionality:} \\ \vspace{1mm}
+%     \emph{Inputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%     \emph{Outputs:}
+%        \begin{itemize}
+%           \item 
+%           \item 
+%        \end{itemize}
+%\end{itemize}
+
+%\section{Future of MORTestbed}
+%  \subsection{ROM-based Optimization}
+%  A future direction of the testbed is to include capabilities for PDE-constrained optimization.  This will hopefully be a useful research tool to those interested in determining how one would used ROMs instead of high-fidelity models in an optimization loop.  After usability aspects of the code are addressed, this will be the next major enhancement.
+%
+%  \subsection{Linear Module}
+%The underlying code for the linear module is complete, but it will undergo extensive revision to enhance performance, usability, and adaptability for use as a research tool.  A front-in text file interface is does not currently exist, but will be created using similar syntax as the nonlinear module.  The focus of this project has been nonlinear problems, so they were given precedence.  This will be completed at a later time.  One interesting addition that will be made to this section is the ability to include the techniques developed by D. Amsallem and C. Farhat for parametric ROMs (manifold interpolation).
+
+\bibliographystyle{ieeetr}
+\bibliography{/Users/bokie89/Documents/TechDocs/MasterBib.bib}
+\end{document}

@@ -1,0 +1,33 @@
+PGROM:
+    id = 1
+    fileRoot  = [pwd,SlashBS,'fhn']
+
+    snapcoll = 'ref_init'
+    nsnap = 'all' 
+    snapInt = []  /*Time interval it is valid to collect snapshots*/ 
+    snapDist = []  /*[Random seed #,Distribution,param1,...paramN]*/
+    nY = 10
+    saveNL = 1 
+    maxIter = 20
+    eps = 1e-5
+    nBases = 1
+    addElem = true
+    addElemTol = 0.1 
+    basisSelect = 'closest' 
+    timeQuiet = false 
+    newtQuiet = true 
+
+GNAT:
+    id = 1 
+    fileRoot  = [pwd,SlashBS,'fhn']
+
+    nSample = [] 
+    nGreed  = [] 
+    nR = 20
+    nJ = 20
+    nI = 40 
+    maxIter = 10
+    addInd = 'all'
+    eps = 1e-5
+    timeQuiet = false 
+    newtQuiet = true 

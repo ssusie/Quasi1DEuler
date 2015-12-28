@@ -1,0 +1,38 @@
+\contentsline {part}{I\hspace {1em}Nonlinear Module}{3}
+\contentsline {chapter}{\numberline {1}Overview}{4}
+\contentsline {chapter}{\numberline {2}Code Organization}{5}
+\contentsline {section}{\numberline {2.1}Flow of MORTestbed}{5}
+\contentsline {section}{\numberline {2.2}Directory Hierarchy}{5}
+\contentsline {chapter}{\numberline {3}MORTestbed Core}{6}
+\contentsline {section}{\numberline {3.1}Models}{6}
+\contentsline {section}{\numberline {3.2}Problems}{6}
+\contentsline {subsection}{\numberline {3.2.1}1D Burger's Equation}{6}
+\contentsline {subsubsection}{Governing Equation}{6}
+\contentsline {subsubsection}{Discretization - Finite Volumes}{6}
+\contentsline {subsection}{\numberline {3.2.2}Nonlinear Transmission Line}{7}
+\contentsline {subsubsection}{Governing Equation}{7}
+\contentsline {subsection}{\numberline {3.2.3}FitzHugh-Nagumo Equations - Neuron Modeling}{7}
+\contentsline {subsubsection}{Governing Equation}{7}
+\contentsline {subsection}{\numberline {3.2.4}Highly Nonlinear 2D Steady State Problem}{7}
+\contentsline {subsubsection}{Governing Equation}{7}
+\contentsline {subsection}{\numberline {3.2.5}Convection-Diffusion-Reaction}{7}
+\contentsline {subsubsection}{Governing Equation}{7}
+\contentsline {subsection}{\numberline {3.2.6}Micromachined Switch}{7}
+\contentsline {subsubsection}{Governing Equation}{7}
+\contentsline {subsection}{\numberline {3.2.7}Potential Nozzle}{7}
+\contentsline {subsubsection}{Governing Equation}{7}
+\contentsline {subsection}{\numberline {3.2.8}Quasi-1D Euler Equations}{8}
+\contentsline {subsubsection}{Governing Equation}{8}
+\contentsline {subsection}{\numberline {3.2.9}1D KdV Equations}{8}
+\contentsline {subsection}{\numberline {3.2.10}3D Structural Dynamics}{8}
+\contentsline {subsection}{\numberline {3.2.11}Lid-Driven Cavity (Incompressible Navier-Stokes Equations)}{8}
+\contentsline {chapter}{\numberline {4}MORTestbed Access}{9}
+\contentsline {section}{\numberline {4.1}The Input Files: CFG, ROM, and PP}{9}
+\contentsline {subsection}{\numberline {4.1.1}The Configuration (CFG) File}{10}
+\contentsline {subsection}{\numberline {4.1.2}The Reduced Order Model (ROM) file}{12}
+\contentsline {subsection}{\numberline {4.1.3}The Postprocessing (PP) File}{14}
+\contentsline {subsubsection}{Keywords}{16}
+\contentsline {section}{\numberline {4.2}The Workflow File}{17}
+\contentsline {chapter}{\numberline {5}Future of MORTestbed}{18}
+\contentsline {section}{\numberline {5.1}ROM-based Optimization}{18}
+\contentsline {section}{\numberline {5.2}Linear Module}{18}

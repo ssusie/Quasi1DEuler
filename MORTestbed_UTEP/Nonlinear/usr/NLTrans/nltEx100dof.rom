@@ -1,0 +1,59 @@
+GROM:
+    id = 1 
+    fileRoot  = [pwd,SlashBS,'nltrans']
+
+    snapcoll = 'ref_init' 
+    nsnap = 'all' 
+    snapInt = []  /*Time interval it is valid to collect snapshots*/ 
+    snapDist = []  /*[Random seed #,Distribution,param1,...paramN]*/
+    nY = 15 
+    saveNL = 2 
+
+    maxIter = 10 
+    eps = 1e-5 
+
+    nBases = 1
+    addElem = true
+    addElemTol = 0.1 
+    basisSelect = 'closest'
+
+    timeQuiet = false 
+    newtQuiet = true 
+
+PGROM:
+    id = 1
+    fileRoot  = [pwd,SlashBS,'nltrans']
+
+    snapcoll = 'ref_init'
+    nsnap = 'all' 
+    snapInt = []  /*Time interval it is valid to collect snapshots*/ 
+    snapDist = []  /*[Random seed #,Distribution,param1,...paramN]*/
+    nY = 10
+    saveNL = 2 
+
+    maxIter = 10
+    eps = 1e-5
+
+    nBases = 1 
+    addElem = true
+    addElemTol = 0.1 
+    basisSelect = 'closest' 
+
+    timeQuiet = false 
+    newtQuiet = true 
+
+
+GNAT:
+    id = 1 
+    nSample = [] 
+    nGreed  = []
+    nR = 15
+    nJ = 15
+    nI = 40
+    addInd = 'all'
+
+    maxIter = 3
+    eps = 1e-5
+    
+    timeQuiet = false 
+    newtQuiet = true
