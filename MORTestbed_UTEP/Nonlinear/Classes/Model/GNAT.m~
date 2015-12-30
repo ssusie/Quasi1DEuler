@@ -925,8 +925,7 @@ function  [] = RomConstraints(obj)
             if obj.problem.ncell==1
                 [g,Dg]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
             else
-                [g,Dg]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
-                disp('several domains')
+                [g,Dg]=obj.problem.constrMultiDomain(w_guess);
             end
 
             H=Df'*Df; h=Df'*Rhat;
@@ -952,8 +951,8 @@ function  [] = RomConstraints(obj)
 
         end
 
-        [gReal,~]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
-        %[gReal,~]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
+
+        [gReal,~]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
         disp(['norm of the real constraint   ', num2str(norm(gReal))])
         
         %obj.Cnorm=[obj.Cnorm,norm(gReal)];
@@ -1560,9 +1559,10 @@ function [q,dq]=testMultiDomainForceTerms(obj, w_increment, points, ind)
         q=sq(ind); dq=sdq(ind,:)';
 
 end
-       
+
             
-%%%%%%%%%%%%%%%%%%%%%%% end GNAT multi domain %%%%%%%%%%%%%%%%%%%%
+            
+            
             
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
