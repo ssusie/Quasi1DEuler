@@ -5,7 +5,6 @@ addGlobVarsAndPaths(fname);
 %FOM
 [fom,prob] = initialize(fname,1);
 fom.executeModel;
-soln=fom.sv;
 
 %%
 methodROM=2; %solve with original methods  % 1 = original,  2 = constrained
@@ -22,7 +21,6 @@ rom.executeModel;
 fnameNLbase='NonlinBase';
 NLSnapshot=0;
 methodGNAT=2; % =1 original, =2 Rom constrains; =3 Gnat constraints
-
 readResJacComputePODWriteFcn(fom,fnameNLbase,NLSnapshot,[]);
 gnat = genGNAT([fname,'.rom'],rom,1);
 [phiR,phiJ] = readNonlinBases(fnameNLbase,NLSnapshot,1);

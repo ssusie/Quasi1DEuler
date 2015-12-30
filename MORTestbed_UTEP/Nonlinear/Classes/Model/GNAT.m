@@ -952,7 +952,14 @@ function  [] = RomConstraints(obj)
 
         end
 
-        [gReal,~]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
+        
+        if obj.problem.ncell==1
+            [gReal,~]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
+        else
+            [gReal,~]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
+            disp('several domains')
+        end
+  
         %[gReal,~]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
         disp(['norm of the real constraint   ', num2str(norm(gReal))])
         
@@ -1021,8 +1028,11 @@ function []=GnatConstraints(obj)
 
         end
 
-        
-        [g,~]=obj.ApproxConstr(w_guess);
+        if obj.problem.ncell==1
+                [g,~]=obj.ApproxConstr(w_guess);
+        else
+                [g,~]=obj.constraintsMultipleDomains(w_guess);
+        end
         disp(['norm of the approx constraint   ', num2str(norm(g))])
         
 end

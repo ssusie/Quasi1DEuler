@@ -24,7 +24,7 @@ PGROM:
     basisUpdate = 'border_fast'
     initsnapref = 'ic'
     nsnap = 'all' 
-    nY =20
+    nY =10
     saveNL = 1
     maxIter = 2
     eps     = [1e-5,1e-5,1e-5]
