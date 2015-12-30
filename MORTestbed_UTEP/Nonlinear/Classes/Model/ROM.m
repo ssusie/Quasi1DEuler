@@ -948,8 +948,8 @@ classdef ROM < handle
         end
         
         function   [r,dr]=RightFlux_old(obj, w_increment)
-            
-            SV=obj.sv(:,obj.cTimeIter)+obj.phi*w_increment;
+            Phi=obj.phi(:,1:obj.trunc);          
+            SV=obj.sv(:,obj.cTimeIter)+Phi(:,1:obj.trunc)*w_increment;
             [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
@@ -962,7 +962,7 @@ classdef ROM < handle
             r=Rright(:,end);
             finish=obj.prob.nVol-1;
             derJR=obj.prob.S(finish+1)*droeF(:,:,finish);
-            dr=derJR*obj.phi(3*(finish-1)+1:3*(finish+1),:);
+            dr=derJR*Phi(3*(finish-1)+1:3*(finish+1),:);
             %             if obj.cTimeIter==1
             %                 keyboard
             %                 dr_true=dr; save dr_true dr_true;
@@ -972,7 +972,9 @@ classdef ROM < handle
         
         function   [l,dl]=LeftFlux_old(obj, w_increment)
             
-            SV=obj.sv(:,obj.cTimeIter)+obj.phi*w_increment;
+            Phi = obj.phi(:,1:obj.trunc);
+            SV=obj.sv(:,obj.cTimeIter) + Phi * w_increment;
+            
             [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
@@ -984,13 +986,13 @@ classdef ROM < handle
             l=Rleft(:,1);
             start=1;
             derJL=-obj.prob.S(start+1)*droeF(:,:,start);
-            dl=derJL*obj.phi(3*(start-1)+1:3*(start+1),:);
+            dl=derJL*Phi(3*(start-1)+1:3*(start+1),:);
             
         end
         
         function [sq, sdq]=sumForceTerms_old(obj, w_increment)
-            
-            SV=obj.sv(:,obj.cTimeIter)+obj.phi*w_increment;
+            Phi=obj.phi(:,1:obj.trunc);
+            SV=obj.sv(:,obj.cTimeIter)+Phi*w_increment;
             [~, u, P,~,~,~,~]=obj.prob.getVariables(SV);
             [Q,dQ]=obj.prob.forceTerm(u,P);
             %keyboard
@@ -998,7 +1000,7 @@ classdef ROM < handle
             sdq=zeros(3,obj.trunc);
             for i=2:obj.prob.nVol-1
                 %            derivQ=derivQ+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
-                sdq=sdq+squeeze(dQ(:,:,i))*obj.phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
+                sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
             end
         end
         
@@ -3021,7 +3023,7 @@ end
             %NAND to know which parameter values have been used to generate
             %the current state vectors
             obj.curr_param = obj.prob.p;
-            
+            obj.phi= obj.phi(:,1:obj.trunc);
             obj.openCloseResJacFiles('open');
             switch obj.nBases
                 case 1
@@ -3543,7 +3545,7 @@ end
                         obj.svdUpdateData.normOneMinusVVt,...
                         obj.svdUpdateData.wRef-newIC);
                     obj.phi=obj.phi(:,1:end-1);
-                    
+                    obj.phi=obj.phi(:,1:obj.trunc);
                     obj.svdUpdateData.wRef=newIC;
                     if length(obj.SingVals)==obj.nY, err=0; else err = 100*obj.SingVals(obj.nY+1)/obj.SingVals(1); end;
                     fprintf('Relative 2-norm error in update = %f%%\n',err);
