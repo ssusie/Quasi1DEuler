@@ -230,9 +230,9 @@ classdef FOM < handle
             [tol,tolIt] = determineConvergeCriterion(obj,norm(R,2));
             
             indexAdj=1;
-            if obj.printLevel > 1
-                fprintf('---- Newton Step    # --------- ||R||  ------------ ||du|| ------------- tol -------------- tol_du ---------\n');
-            end 
+            %if obj.printLevel > 1
+            %    fprintf('---- Newton Step    # --------- ||R||  ------------ ||du|| ------------- tol -------------- tol_du ---------\n');
+            %end 
             for i_N = 1:obj.newt.maxIter
                 %Determine step
                 p = -J\R;
@@ -243,9 +243,9 @@ classdef FOM < handle
                     p = alpha*p;
                 end
                 
-                if obj.printLevel > 2
-                    fprintf('---- Newton Step %4i ----- %10.7e ----- %10.7e ----- %10.7e ----- %10.7e ------\n',i_N,norm(R,2),norm(p,2),tol,tolIt);
-                end
+                %if obj.printLevel > 2
+                %    fprintf('---- Newton Step %4i ----- %10.7e ----- %10.7e ----- %10.7e ----- %10.7e ------\n',i_N,norm(R,2),norm(p,2),tol,tolIt);
+                %end
                 
                 %If nan or complex encountered -> kill simulation
                 if sum(isnan(p)) || ~isreal(p)
@@ -276,9 +276,9 @@ classdef FOM < handle
             %Store the number of newton iterations at this time step
             obj.newt.iter(obj.cTimeIter) = i_N;
             
-            if obj.printLevel == 1.5
-                fprintf('---- Newton Step %4i ----- %10.7e ----- %10.7e ----- %10.7e ----- %10.7e ------\n',i_N,norm(R,2),norm(p,2),tol,tolIt);
-            end
+            %if obj.printLevel == 1.5
+            %    fprintf('---- Newton Step %4i ----- %10.7e ----- %10.7e ----- %10.7e ----- %10.7e ------\n',i_N,norm(R,2),norm(p,2),tol,tolIt);
+            %end
             
             %If the maxiumum newton iterations are reached, warn the user
             if ~obj.newt.quiet && (i_N==obj.newt.maxIter)

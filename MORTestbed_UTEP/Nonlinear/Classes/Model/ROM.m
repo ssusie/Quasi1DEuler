@@ -146,10 +146,11 @@ classdef ROM < handle
             
             %Store handle to problem in instance
             obj.prob = probobj;
-            obj.ncell=cellnum;
-            obj.newtonSolver=method;
-            obj.trunc=basNum;
-            %Copy the time structure and store in the class instance
+            obj.ncell = cellnum;
+            obj.newtonSolver = method;
+            obj.trunc = basNum;
+           % keyboard
+	    %Copy the time structure and store in the class instance
             %The default time structure is whatever is stored in CONFIG
             obj.time = probobj.config.time;
             obj.newt = struct('maxIter',[],'eps',[],'iter',[],'quiet',[]);
@@ -1002,6 +1003,7 @@ classdef ROM < handle
                 %            derivQ=derivQ+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
                 sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
             end
+
         end
         
         function [ci,dci]=testConst_old(obj, w_increment,ind)
@@ -2947,7 +2949,8 @@ end
             %--------
             %There are no outputs.
             %--------------------------------------------------------------
-            
+            obj.trunc = min(obj.trunc, obj.nY);
+             
             obj.numExecute = obj.numExecute+1;
             
             if nargin == 3 && ~isempty(augment)
@@ -3092,6 +3095,23 @@ end
                                 
                                 
                                 if jj==1
+
+				   sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
+            			   sdq=zeros(3,obj.trunc);
+				   Phi = obj.phi(:,1:obj.trunc);
+            			   for i=2:obj.prob.nVol-1
+                			sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
+            			   end 
+				   sq_true = sq;
+				   sdq_true = sdq;
+				   save sq_true sq_true
+				   save sdq_true sdq_true
+	    			    
+	
+				    save romroeF roeF
+				    save Fright Fright
+                                    save Fleft Fleft
+                                    save forceQ forceQ
                                     DforceQ=dQ;
                                     save DforceQ DforceQ
                                     J2L_true=J2L;
@@ -3116,19 +3136,16 @@ end
                                 end
                             end
                             
-                            save romroeF romroeF
-                            save Fright Fright
-                            save Fleft Fleft
-                            save forceQ forceQ
+                            %save romroeF romroeF
                             %keyboard
-                            [ur2,sr2,~]=svd(NewFrBasis,0);
-                            [ul2,sl2,~]=svd(NewFlBasis,0);
-                            [ur,sr,~]=svd(Fright,0);
-                            [ul, sl, ~]=svd(Fleft,0);
-                            [uQ,sQ,~]= svd(forceQ,0);
-                            [uroe1,s1,~]=svd(roeF1,0);
-                            [uroe2,s2,~]=svd(roeF2,0);
-                            [uroe3,s3,~]=svd(roeF3,0);
+                            [ur2,sr2,~] = svd(NewFrBasis,0);
+                            [ul2,sl2,~] = svd(NewFlBasis,0);
+                            [ur,sr,~]   = svd(Fright,0);
+                            [ul, sl, ~] = svd(Fleft,0);
+                            [uQ,sQ,~]   = svd(forceQ,0);
+                            [uroe1,s1,~] = svd(roeF1,0);
+                            [uroe2,s2,~] = svd(roeF2,0);
+                            [uroe3,s3,~] = svd(roeF3,0);
                             
 %                             mFr=min(find(cumsum(diag(sr2))/sum(diag(sr2))>0.9999));
 %                             mF=min(find(cumsum(diag(sr))/sum(diag(sr))>0.9999));

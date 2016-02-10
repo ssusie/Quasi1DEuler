@@ -8,7 +8,7 @@ fom.executeModel;
 soln=fom.sv;
 
 %%
-methodROM=2; %solve with original methods  % =1  original,  =2 constrained
+methodROM=2; %solve with constraints  % =1  original,  =2 constrained
 numCell=1; %number of domains for constraints
 basisNumber=10; %truncate basis Phi; if don't want to truncate choose basisNumber=fom.cTimeIter
 rom = ROM([fname,'.rom'],'pg',1,prob,methodROM,numCell,basisNumber);

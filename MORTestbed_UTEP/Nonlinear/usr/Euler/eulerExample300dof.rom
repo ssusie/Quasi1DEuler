@@ -4,7 +4,7 @@ GROM:
     basisUpdate = 'border_fast'
     initsnapref = 'ic'
     nsnap = 'all' 
-    nY = 25
+    nY = 1
     saveNL = 1
     maxIter = 1
     eps     = [1e-5,1e-5,1e-5]
@@ -24,7 +24,7 @@ PGROM:
     basisUpdate = 'border_fast'
     initsnapref = 'ic'
     nsnap = 'all' 
-    nY =10
+    nY = 5
     saveNL = 1
     maxIter = 2
     eps     = [1e-5,1e-5,1e-5]
@@ -45,8 +45,8 @@ GNAT:
 
     nSample = 10
     nGreed  = 10
-    nR = 25
-    nJ = 25
+    nR = 10
+    nJ = 10
     nI = [] 
     addInd = 'none'
     maxIter = 1

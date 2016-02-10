@@ -1240,7 +1240,7 @@ classdef quasi1dEuler < handle
             %Form residual and Jacobian.
             R=[R1;R2(:);R3];
             J1=J1'; J3=J3';
-	%keyboard
+            %keyboard
             J=[J1(:);J2(:);J3(:)];
          end
         
