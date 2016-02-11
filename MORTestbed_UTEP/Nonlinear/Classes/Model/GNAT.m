@@ -22,9 +22,9 @@ classdef GNAT < handle
         constr;
         Cnorm;
         reconFright;
-        reconFright1;
-        reconFright2;
+        reconFrnew
         reconFleft;
+        reconFlnew
         reconQ
         reconQ2;
         
@@ -378,6 +378,8 @@ classdef GNAT < handle
             reconLocs = setdiff(obj.sampleInd,[1,2,3])-3;
             obj.reconFright= obj.problem.phiFright*pinv(obj.problem.phiFright(reconLocs,:));
             obj.reconFleft = obj.problem.phiFleft *pinv(obj.problem.phiFleft(reconLocs,:));
+            obj.reconFrnew= obj.problem.phiFrnew*pinv(obj.problem.phiFrnew(reconLocs,:));
+            obj.reconFlnew = obj.problem.phiFlnew *pinv(obj.problem.phiFlnew(reconLocs,:));            
             obj.reconQ = obj.problem.phiQ(2:3:end,:);
             PhiQ2 = obj.reconQ;
             obj.reconQ2= PhiQ2*pinv(PhiQ2(obj.sampleNodes(2:end),:));
@@ -1079,7 +1081,7 @@ end
  end
 
  
-function [l, dl]=myLeftFlux3fast(obj, w_increment)
+function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
 
             SV=obj.partialUprev+obj.phiYhat*w_increment;
             U = reshape(SV,3,obj.probGNAT.nVolSamp);
@@ -1128,14 +1130,25 @@ function [l, dl]=myLeftFlux3fast(obj, w_increment)
 
             if obj.probGNAT.ind1
                 %reconstruct flux and Jacobian
-                fluxLeft=obj.reconFleft*Rleft(:);
+                fluxLeft  = obj.reconFleft*Rleft(:);
+                fluxLeft2 = obj.reconFlnew*Rleft(:);
                 JhatL=[zeros(18,1);J2L];
                 obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
                 
                 %choose left flux at the left boundary
-                l=fluxLeft(1:3);
-                dl=obj.reconFleft(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
-                
+                l = fluxLeft(1:3);
+                dl = obj.reconFleft(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+                dlnew = obj.reconFlnew(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+%                 load J2L_true
+%                 load Fleft
+%                 norm(Fleft - fluxLeft)
+%                 norm(Fleft - fluxLeft2)
+%                 J = J2L_true(1:3,:) * obj.problem.phi;
+%                 norm(J - dl)
+%                 norm(J - dlnew)
+                returnl = fluxLeft(1:3); %fluxLeft2(1:3);
+                returndl = dl; %dlnew
+%                 keyboard
 %Susie          check if reconstruction of Flux and its derivative is good      
 %                 keyboard
 %                 load Fleft
@@ -1166,7 +1179,7 @@ function [l, dl]=myLeftFlux3fast(obj, w_increment)
 end
 
 
- function [r, dr]=myRightFlux3fast(obj, w_increment)
+ function [returnr, returndr]=myRightFlux3fast(obj, w_increment)
 
             SV=obj.partialUprev+obj.phiYhat*w_increment;
             U = reshape(SV,3,obj.probGNAT.nVolSamp);
@@ -1218,7 +1231,8 @@ end
             if obj.probGNAT.ind1
                 %reconstruct right flux and Jacobian
                 fluxRight=obj.reconFright*Rright(:);
-                %keyboard
+                fluxRight2=obj.reconFrnew*Rright(:);
+                
                 JhatR=[zeros(18,1);J2R];
                 JR=spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
                 JR(obj.reconstJhatInd) = JhatR;
@@ -1226,6 +1240,18 @@ end
                 %choose right flux at the right boundary
                 r=fluxRight(end-2:end);
                 dr=obj.reconFright(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
+                drnew=obj.reconFrnew(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
+%                 load J2R_true
+%                 load Fright
+%                 norm(Fright - fluxRight)
+%                 norm(Fright - fluxRight2)
+%                 J = J2R_true(end-2:end,:) * obj.problem.phi;
+%                 norm(J - dr)
+%                 norm(J - drnew)
+                
+                returnr = fluxRight(end-2:end); % fluxRight2(end-2:end);
+                returndr = dr; % drnew; 
+%                 keyboard
 %Susie          %check if reconstruction is good      
                 %keyboard
                 %load Fright
@@ -1234,7 +1260,8 @@ end
 %*********      % Jacobian is not right by chacking with dr_true saved from
                 % ROM file
                 % load J2R_true
-                % norm(J2R_true-dr)
+                % J = J2R_true(end-2:end,:)*obj.problem.phi;
+                % norm(J - dr) % 1.1937e-04, nstep = 3 
                 
 % load Fright
 % r = load('romroeF');
