@@ -2937,296 +2937,299 @@ end
             end
         end %Done
         
-        function  [] = executeModel(obj,restart,augment)
-            %This function performs the time-stepping for the ROM
-            %simulation defined in this object.
-            %--------------------------------------------------------------
-            %Inputs:
-            %-------
-            %obj     - ROM object
-            %
-            %Outputs:
-            %--------
-            %There are no outputs.
-            %--------------------------------------------------------------
-            obj.trunc = min(obj.trunc, obj.nY);
-             
-            obj.numExecute = obj.numExecute+1;
-            
-            if nargin == 3 && ~isempty(augment)
-                obj.augment = augment;
-            else
-                obj.augment=false;
-            end
-            
-            obj.killflag = false;
-            %nstep = obj.prob.config.time.nstep;
-            nstep = obj.time.nstep;
-            
-            %Determine whether to run simulation with precomputations being
-            %carried out before hand
-            if obj.precompFlag
-                obj.sv=zeros(obj.nY,nstep+1);
-                obj.sv(:,1) = obj.prob.ic;
-                
-                obj.curr_param = obj.prob.p;
-                
-                tROMstart = tic;
-                for i_t = 1:nstep %Loop over each time step to determine all state vectors
-                    if ~obj.time.quiet && rem(i_t,round(nstep*0.1)) == 0
-                        %Generate output so user can see progress
-                        fprintf('%4.0f of %4.0f Timesteps Complete (%2.0f%%)\n',i_t,nstep,100*i_t/nstep)
-                    end
-                    
-                    if obj.TimeScheme.explicit
-                        obj.sv(:,i_t+1) = obj.TimeScheme.ExplicitStep(obj.prob,obj.sv(:,i_t),obj.time.T(1)+obj.TimeScheme.dt*i_t,true);
-                        if sum(isnan(obj.sv(:,i_t+1)))>0
-                            fprintf('NaN encountered on time step %i!\n',i_t);
-                            obj.killflag=true;
-                            return;
-                        end
-                        continue;
-                    end
-                    
-                    %Set current time iteration (so model can keep track)
-                    obj.cTimeIter = i_t;
-                    
-                    %Use Newton's Method to solve nonlinear system of equations
-                    %and store: state vector, residual and jacobian snapshots,
-                    %and number of newton iterations required
-                    if obj.nBases>1
-                        obj.LocBasisHist(obj.cTimeIter,1) = computeDistanceToCenters(obj,obj.UrLoc,obj.cTimeIter);
-                    end
-                    
-                    obj.NewtonRaphson_PrecompGal();
-                    %                     obj.NewtonRaphson();
-                    
-                    if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
-                end
-                obj.ontime = toc(tROMstart); %Record simulation time
-                return;
-            end
-            
-            %Determine restart status and prepare to start simulation
-            if nargin == 2 && ~isempty(restart) && restart == 1
-                OldTime = obj.ontime;
-                firstStep = obj.cTimeIter-1;
-            else
-                OldTime = 0;
-                firstStep = 1;
-                
-                obj.numres = zeros(obj.nBases,1);
-                obj.numswitch = 0;
-                %Set up state vector and store the initial condition.
-                obj.sv = zeros(obj.ndof,obj.time.nstep+1);
-                obj.sv(:,1) = obj.prob.ic;
-            end
-            
-            %Set the current parameter (from prob object) to be used in
-            %NAND to know which parameter values have been used to generate
-            %the current state vectors
-            obj.curr_param = obj.prob.p;
-            obj.phi= obj.phi(:,1:obj.trunc);
-            obj.openCloseResJacFiles('open');
-            switch obj.nBases
-                case 1
-                    tROMstart = tic;
-                    for i_t = firstStep:nstep %Loop over each time step to determine all state vectors
-                        if ((obj.printLevel>0)&&(rem(i_t,round(nstep*0.1)) == 0)) || (obj.printLevel>1)
-                            fprintf('-------------------------- Time Step %4i of %4i (%2i%%) -------------------------- \n',i_t,nstep,ceil(100*i_t/nstep));
-                        end
-                        %                         if ~obj.time.quiet && rem(i_t,round(nstep*0.1)) == 0
-                        %                             %Generate output so user can see progress
-                        %                             fprintf('%4.0f of %4.0f Timesteps Complete (%2.0f%%)\n',i_t,nstep,100*i_t/nstep)
-                        %                         end
-                        
-                        %Set current time iteration (so model can keep track)
-                        obj.cTimeIter = i_t;
-                        
-                        if ~isempty(obj.time.cfl)
-                            obj.time.curr_cfl = obj.time.cfl(i_t,obj);
-                            obj.time.dt = obj.time.curr_cfl*obj.prob.computeCFL(obj.sv(:,i_t));
-                            %                           obj.time.dt = obj.time.cfl(i_t,obj.sv(:,i_t))*obj.prob.computeCFL(obj.sv(:,i_t));
-                            obj.TimeScheme.setDT(obj.time.dt);
-                        end
-                        
-                        
-                        obj.chooseSolver()
-                        
-                        if i_t==nstep
-                            NewFrBasis=[];
-                            NewFlBasis=[];
-                            % load soln
-                            soln=obj.sv;
-                            for jj=1:size(soln,2)
-                                
-                                U = reshape(soln(:,jj),3,obj.prob.nVol);
-                                [rho,u,P,c] = obj.prob.conservativeToPrimitive(U(:,2:end-1));
-                                rho = [U(1,1),rho,U(1,end)]; %Density
-                                u   = [U(2,1),u,U(2,end)]; %Velocity
-                                P   = [U(3,1),P,U(3,end)]; %Pressure
-                                c   = [sqrt(obj.prob.gamma*P(1)/rho(1)),c,sqrt(obj.prob.gamma*P(end)/rho(end))]; %Speed of sound
-                                e   = [P(1)/(obj.prob.gamma-1)+rho(1)*u(1)^2/2,U(3,2:end-1),P(end)/(obj.prob.gamma-1)+rho(end)*u(end)^2/2];
-                                dc_cons = [0.5*obj.prob.gamma./(c.*rho).*(0.5*(obj.prob.gamma-1)*u.*u - P./rho);...
-                                    -0.5*obj.prob.gamma*(obj.prob.gamma-1)*u./(rho.*c);...
-                                    0.5*obj.prob.gamma*(obj.prob.gamma-1)./(rho.*c)]';
-                                [roeF,droeF] = obj.prob.roeFlux(rho,u,P,c,e,dc_cons);
-                                [Q,dQ]=obj.prob.forceTerm(u,P);
-                                
-                                dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
-                                droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
-                                dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
-                                droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
-                                
-                                roeF1(:,jj) = roeF(1,:)';
-                                roeF2(:,jj) = roeF(2,:)';
-                                roeF3(:,jj) = roeF(3,:)';
-                                
-                                Fright(:,jj)= reshape(bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1)), size(roeF,1)*size(roeF(:, 2:end),2),1);
-                                Fleft(:,jj) = reshape(-bsxfun(@times,roeF(:,1:end-1),obj.prob.S(2:end-2)),size(roeF,1)*size(roeF(:,2:end),2),1);
-                                forceQ(:,jj)= reshape(Q, size(Q,1)*size(Q,2), 1);
-                                J2L=zeros(3*(obj.prob.nVol-2), 3*obj.prob.nVol);
-                                J2R=J2L;
-                                for kl= 2:obj.prob.nVol-1
-                                    i=kl-1;
-                                    J2L(3*(i-1)+1:3*i,3*(kl-2)+1:3*kl) = [-obj.prob.S(kl)*droeF(:,1:3,kl-1), -obj.prob.S(kl)*droeF(:,4:6,kl-1)];
-                                    J2R(3*(i-1)+1:3*i,3*(kl-1)+1:3*(kl+1)) = [obj.prob.S(kl+1)*droeF(:,1:3,kl), obj.prob.S(kl+1)*droeF(:,4:6,kl)];
-                                end
-                                
-                                
-                                if jj==1
+function  [] = executeModel(obj,restart,augment)
+    %This function performs the time-stepping for the ROM
+    %simulation defined in this object.
+    %--------------------------------------------------------------
+    %Inputs:
+    %-------
+    %obj     - ROM object
+    %
+    %Outputs:
+    %--------
+    %There are no outputs.
+    %--------------------------------------------------------------
+    obj.trunc = min(obj.trunc, obj.nY);
 
-				   sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
-            			   sdq=zeros(3,obj.trunc);
-				   Phi = obj.phi(:,1:obj.trunc);
-            			   for i=2:obj.prob.nVol-1
-                			sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
-            			   end 
-				   sq_true = sq;
-				   sdq_true = sdq;
-				   save sq_true sq_true
-				   save sdq_true sdq_true
-	    			    
-	
-				    save romroeF roeF
-				    save Fright Fright
-                                    save Fleft Fleft
-                                    save forceQ forceQ
-                                    DforceQ=dQ;
-                                    save DforceQ DforceQ
-                                    J2L_true=J2L;
-                                    J2R_true=J2R;
-                                    save J2R_true J2R_true
-                                    romdroeF= droeF;
-                                    Q2_true=Q(2,:);
-                                    save Q2_true Q2_true
-                                    save J2L_true J2L_true
-                                    save romdroeF romdroeF
-                                end
-                                
-                                NewFrBasis=[NewFrBasis, Fright(:,jj), J2R*obj.phi];
-                                NewFlBasis=[NewFlBasis, Fleft(:,jj), J2L*obj.phi];
-                                romroeF(:,jj)=roeF(:);
-                                if imag(Fright(:,jj))~=0
-                                    disp(['righ flux is complex for snapshot number', num2str(jj)])
-                                elseif imag(Fleft(:,jj))~=0
-                                    disp(['left flux is complex for snapshot number', num2str(jj)])
-                                elseif imag(forceQ)~=0
-                                    disp(['force term is complex for snapshot number', num2str(jj)])
-                                end
-                            end
-                            
-                            %save romroeF romroeF
-                            %keyboard
-                            [ur2,sr2,~] = svd(NewFrBasis,0);
-                            [ul2,sl2,~] = svd(NewFlBasis,0);
-                            [ur,sr,~]   = svd(Fright,0);
-                            [ul, sl, ~] = svd(Fleft,0);
-                            [uQ,sQ,~]   = svd(forceQ,0);
-                            [uroe1,s1,~] = svd(roeF1,0);
-                            [uroe2,s2,~] = svd(roeF2,0);
-                            [uroe3,s3,~] = svd(roeF3,0);
-                            
-%                             mFr=min(find(cumsum(diag(sr2))/sum(diag(sr2))>0.9999));
-%                             mF=min(find(cumsum(diag(sr))/sum(diag(sr))>0.9999));
-%                             mQ=min(find(cumsum(diag(sQ))/sum(diag(sQ))>0.9999));
-%                             mr=min(find(cumsum(diag(s1))/sum(diag(s1))>0.9999));
-                            
-                            %keyboard
-                            
-                            obj.phiFrnew=ur2;%(:,1:mFr);
-                            obj.phiFlnew=ul2;%(:,1:mFr);
-                            obj.phiFright=ur;%(:,1:mF); %99.9%
-                            obj.phiFleft=ul;%(:,1:mF);  %99.9%
-                            obj.phiRoeF1=uroe1;%(:,1:mr);
-                            obj.phiRoeF2=uroe2;%(:,1:mr);
-                            obj.phiRoeF3=uroe3;%(:,1:mr);
-                            obj.phiQ=uQ;%(:,1:mQ);
-                        end
-                        
-                        
-                        if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
-                        
-                    end
-                    obj.ontime = toc(tROMstart)+OldTime; %Record simulation time
-                otherwise
-                    tROMstart = tic;
-                    for i_t = firstStep:nstep %Loop over each time step to determine all state vectors
-                        %                         if ~obj.time.quiet && rem(i_t,round(nstep*0.1)) == 0
-                        %                             %Generate output so user can see progress
-                        %                             fprintf('%4.0f of %4.0f Timesteps Complete (%2.0f%%)\n',i_t,nstep,100*i_t/nstep)
-                        %                         end
-                        
-                        %Set current time iteration (so model can keep track)
-                        obj.cTimeIter = i_t;
-                        
-                        if ~isempty(obj.time.cfl)
-                            obj.time.dt = obj.time.cfl(i_t,obj)*obj.prob.computeCFL(obj.sv(:,i_t));
-                            %                             obj.time.dt = obj.time.cfl(i_t,obj.sv(:,i_t))*obj.prob.computeCFL(obj.sv(:,i_t));
-                            obj.TimeScheme.setDT(obj.time.dt);
-                        end
-                        
-                        %Use Newton's Method to solve nonlinear system of equations
-                        %and store: state vector, residual and jacobian snapshots,
-                        %and number of newton iterations required
-                        %                         switch obj.clustering
-                        %                             case 'kmeans'
-                        obj.LocBasisHist(obj.cTimeIter,1) = computeDistanceToCenters(obj,obj.UrLoc,obj.cTimeIter);
-                        %                             case 'a_priori'
-                        %                                 obj.LocBasisHist(obj.cTimeIter,1) = floor(obj.nBases*obj.cTimeIter/nstep)+1;
-                        %                         end
-                        cbase=obj.LocBasisHist(obj.cTimeIter,1);
-                        
-                        if ((obj.printLevel>0)&&(rem(i_t,round(nstep*0.1)) == 0)) || ((obj.printLevel>1)&&(rem(i_t,round(nstep*0.05)) == 0)) || (obj.printLevel>2)
-                            fprintf('-------------------------- Time Step %4i of %4i (%2i): Basis %i -------------------------- \n',i_t,nstep,100*i_t/nstep,cbase);
-                        end
-                        
-                        %Determine initial ROB components if using fast
-                        %updating
-                        if obj.cTimeIter == 1 && strcmpi(obj.basisUpdate,'border_fast')
-                            obj.initializeROBcompon(cbase);
-                        end
-                        obj.NewtonRaphsonLocal();
-                        if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
-                        
-                        %Check for steady convergence
-                        if obj.time.steadyconverge
-                            if norm(obj.sv(:,i_t+1)-obj.sv(:,i_t)) < obj.time.steadyconverge*norm(obj.sv(:,i_t+1))
-                                obj.ontime = toc(tROMstart)+OldTime;
-                                obj.time.nstep=i_t;
-                                obj.time.T(2) = obj.time.T(1) + i_t*obj.time.dt;
-                                obj.sv(:,i_t+2:end)=[];
-                                obj.openCloseResJacFiles('close');
-                                obj.newt.avgIter = mean(obj.newt.iter);
-                                return;
-                            end
-                        end
-                    end
-                    obj.ontime = toc(tROMstart)+OldTime; %Record simulation time
+    obj.numExecute = obj.numExecute+1;
+
+    if nargin == 3 && ~isempty(augment)
+        obj.augment = augment;
+    else
+        obj.augment=false;
+    end
+
+    obj.killflag = false;
+    %nstep = obj.prob.config.time.nstep;
+    nstep = obj.time.nstep;
+
+    %Determine whether to run simulation with precomputations being
+    %carried out before hand
+    if obj.precompFlag
+        obj.sv=zeros(obj.nY,nstep+1);
+        obj.sv(:,1) = obj.prob.ic;
+
+        obj.curr_param = obj.prob.p;
+
+        tROMstart = tic;
+        for i_t = 1:nstep %Loop over each time step to determine all state vectors
+            if ~obj.time.quiet && rem(i_t,round(nstep*0.1)) == 0
+                %Generate output so user can see progress
+                fprintf('%4.0f of %4.0f Timesteps Complete (%2.0f%%)\n',i_t,nstep,100*i_t/nstep)
             end
-            obj.openCloseResJacFiles('close');
-            obj.newt.avgIter = mean(obj.newt.iter);
-        end %Done
+
+            if obj.TimeScheme.explicit
+                obj.sv(:,i_t+1) = obj.TimeScheme.ExplicitStep(obj.prob,obj.sv(:,i_t),obj.time.T(1)+obj.TimeScheme.dt*i_t,true);
+                if sum(isnan(obj.sv(:,i_t+1)))>0
+                    fprintf('NaN encountered on time step %i!\n',i_t);
+                    obj.killflag=true;
+                    return;
+                end
+                continue;
+            end
+
+            %Set current time iteration (so model can keep track)
+            obj.cTimeIter = i_t;
+
+            %Use Newton's Method to solve nonlinear system of equations
+            %and store: state vector, residual and jacobian snapshots,
+            %and number of newton iterations required
+            if obj.nBases>1
+                obj.LocBasisHist(obj.cTimeIter,1) = computeDistanceToCenters(obj,obj.UrLoc,obj.cTimeIter);
+            end
+
+            obj.NewtonRaphson_PrecompGal();
+            %                     obj.NewtonRaphson();
+
+            if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
+        end
+        obj.ontime = toc(tROMstart); %Record simulation time
+        return;
+    end
+
+    %Determine restart status and prepare to start simulation
+    if nargin == 2 && ~isempty(restart) && restart == 1
+        OldTime = obj.ontime;
+        firstStep = obj.cTimeIter-1;
+    else
+        OldTime = 0;
+        firstStep = 1;
+
+        obj.numres = zeros(obj.nBases,1);
+        obj.numswitch = 0;
+        %Set up state vector and store the initial condition.
+        obj.sv = zeros(obj.ndof,obj.time.nstep+1);
+        obj.sv(:,1) = obj.prob.ic;
+    end
+
+    %Set the current parameter (from prob object) to be used in
+    %NAND to know which parameter values have been used to generate
+    %the current state vectors
+    obj.curr_param = obj.prob.p;
+    obj.phi= obj.phi(:,1:obj.trunc);
+    obj.openCloseResJacFiles('open');
+    switch obj.nBases
+        case 1
+            tROMstart = tic;
+            for i_t = firstStep:nstep %Loop over each time step to determine all state vectors
+                if ((obj.printLevel>0)&&(rem(i_t,round(nstep*0.1)) == 0)) || (obj.printLevel>1)
+                    fprintf('-------------------------- Time Step %4i of %4i (%2i%%) -------------------------- \n',i_t,nstep,ceil(100*i_t/nstep));
+                end
+                %                         if ~obj.time.quiet && rem(i_t,round(nstep*0.1)) == 0
+                %                             %Generate output so user can see progress
+                %                             fprintf('%4.0f of %4.0f Timesteps Complete (%2.0f%%)\n',i_t,nstep,100*i_t/nstep)
+                %                         end
+
+                %Set current time iteration (so model can keep track)
+                obj.cTimeIter = i_t;
+
+                if ~isempty(obj.time.cfl)
+                    obj.time.curr_cfl = obj.time.cfl(i_t,obj);
+                    obj.time.dt = obj.time.curr_cfl*obj.prob.computeCFL(obj.sv(:,i_t));
+                    %                           obj.time.dt = obj.time.cfl(i_t,obj.sv(:,i_t))*obj.prob.computeCFL(obj.sv(:,i_t));
+                    obj.TimeScheme.setDT(obj.time.dt);
+                end
+
+
+                obj.chooseSolver()
+
+                if i_t==nstep
+                    NewFrBasis=[];
+                    NewFlBasis=[];
+                    % load soln
+                    soln=obj.sv;
+                    for jj=1:size(soln,2)
+
+                        U = reshape(soln(:,jj),3,obj.prob.nVol);
+                        [rho,u,P,c] = obj.prob.conservativeToPrimitive(U(:,2:end-1));
+                        rho = [U(1,1),rho,U(1,end)]; %Density
+                        u   = [U(2,1),u,U(2,end)]; %Velocity
+                        P   = [U(3,1),P,U(3,end)]; %Pressure
+                        c   = [sqrt(obj.prob.gamma*P(1)/rho(1)),c,sqrt(obj.prob.gamma*P(end)/rho(end))]; %Speed of sound
+                        e   = [P(1)/(obj.prob.gamma-1)+rho(1)*u(1)^2/2,U(3,2:end-1),P(end)/(obj.prob.gamma-1)+rho(end)*u(end)^2/2];
+                        dc_cons = [0.5*obj.prob.gamma./(c.*rho).*(0.5*(obj.prob.gamma-1)*u.*u - P./rho);...
+                            -0.5*obj.prob.gamma*(obj.prob.gamma-1)*u./(rho.*c);...
+                            0.5*obj.prob.gamma*(obj.prob.gamma-1)./(rho.*c)]';
+                        [roeF,droeF] = obj.prob.roeFlux(rho,u,P,c,e,dc_cons);
+                        [Q,dQ]=obj.prob.forceTerm(u,P);
+
+                        dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+                        droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+                        dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+                        droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+
+                        roeF1(:,jj) = roeF(1,:)';
+                        roeF2(:,jj) = roeF(2,:)';
+                        roeF3(:,jj) = roeF(3,:)';
+
+                        Fright(:,jj)= reshape(bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1)), size(roeF,1)*size(roeF(:, 2:end),2),1);
+                        Fleft(:,jj) = reshape(-bsxfun(@times,roeF(:,1:end-1),obj.prob.S(2:end-2)),size(roeF,1)*size(roeF(:,2:end),2),1);
+                        forceQ(:,jj)= reshape(Q, size(Q,1)*size(Q,2), 1);
+                        J2L=zeros(3*(obj.prob.nVol-2), 3*obj.prob.nVol);
+                        J2R=J2L;
+                        for kl= 2:obj.prob.nVol-1
+                            i=kl-1;
+                            J2L(3*(i-1)+1:3*i,3*(kl-2)+1:3*kl) = [-obj.prob.S(kl)*droeF(:,1:3,kl-1), -obj.prob.S(kl)*droeF(:,4:6,kl-1)];
+                            J2R(3*(i-1)+1:3*i,3*(kl-1)+1:3*(kl+1)) = [obj.prob.S(kl+1)*droeF(:,1:3,kl), obj.prob.S(kl+1)*droeF(:,4:6,kl)];
+                        end
+
+
+                        if jj==1
+
+                            sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
+                            sdq=zeros(3,obj.trunc);
+                            Phi = obj.phi(:,1:obj.trunc);
+                            for i=2:obj.prob.nVol-1
+                                sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
+                            end
+                            sq_true = sq;
+                            sdq_true = sdq;
+                            save sq_true sq_true
+                            save sdq_true sdq_true
+
+                            J2L_true=J2L;
+                            J2R_true=J2R;
+                            DforceQ=dQ;
+                            romdroeF= droeF;
+                            Q2_true=Q(2,:);
+                            
+                            save romroeF roeF
+                            save Fright Fright
+                            save Fleft Fleft
+                            save forceQ forceQ
+
+                            save DforceQ DforceQ
+                            save J2R_true J2R_true
+                            save Q2_true Q2_true
+                            save J2L_true J2L_true
+                            save romdroeF romdroeF
+                        end
+
+                        NewFrBasis = [NewFrBasis, Fright(:,jj), J2R*obj.phi];
+                        NewFlBasis = [NewFlBasis, Fleft(:,jj), J2L*obj.phi];
+%                         NewQBasis  = [NewQBasis, forceQ(:,jj), dQ*obj.phi];
+                        romroeF(:,jj)=roeF(:);
+                        if imag(Fright(:,jj))~=0
+                            disp(['righ flux is complex for snapshot number', num2str(jj)])
+                        elseif imag(Fleft(:,jj))~=0
+                            disp(['left flux is complex for snapshot number', num2str(jj)])
+                        elseif imag(forceQ)~=0
+                            disp(['force term is complex for snapshot number', num2str(jj)])
+                        end
+                    end
+
+                    %save romroeF romroeF
+                    %keyboard
+
+                    [ur2,sr2,~] = svd(NewFrBasis,0);
+                    [ul2,sl2,~] = svd(NewFlBasis,0);
+                    [ur,sr,~]   = svd(Fright,0);
+                    [ul, sl, ~] = svd(Fleft,0);
+                    [uQ,sQ,~]   = svd(forceQ,0);
+                    [uroe1,s1,~] = svd(roeF1,0);
+                    [uroe2,s2,~] = svd(roeF2,0);
+                    [uroe3,s3,~] = svd(roeF3,0);
+
+                    % mFr=min(find(cumsum(diag(sr2))/sum(diag(sr2))>0.9999));
+                    % mF=min(find(cumsum(diag(sr))/sum(diag(sr))>0.9999));
+                    % mQ=min(find(cumsum(diag(sQ))/sum(diag(sQ))>0.9999));
+                    % mr=min(find(cumsum(diag(s1))/sum(diag(s1))>0.9999));
+
+                    %keyboard
+
+                    obj.phiFrnew=ur2;%(:,1:mFr);
+                    obj.phiFlnew=ul2;%(:,1:mFr);
+                    obj.phiFright=ur;%(:,1:mF); %99.9%
+                    obj.phiFleft=ul;%(:,1:mF);  %99.9%
+                    obj.phiRoeF1=uroe1;%(:,1:mr);
+                    obj.phiRoeF2=uroe2;%(:,1:mr);
+                    obj.phiRoeF3=uroe3;%(:,1:mr);
+                    obj.phiQ=uQ;%(:,1:mQ);
+                end
+
+
+                if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
+
+            end
+            obj.ontime = toc(tROMstart)+OldTime; %Record simulation time
+        otherwise
+            tROMstart = tic;
+            for i_t = firstStep:nstep %Loop over each time step to determine all state vectors
+                %                         if ~obj.time.quiet && rem(i_t,round(nstep*0.1)) == 0
+                %                             %Generate output so user can see progress
+                %                             fprintf('%4.0f of %4.0f Timesteps Complete (%2.0f%%)\n',i_t,nstep,100*i_t/nstep)
+                %                         end
+
+                %Set current time iteration (so model can keep track)
+                obj.cTimeIter = i_t;
+
+                if ~isempty(obj.time.cfl)
+                    obj.time.dt = obj.time.cfl(i_t,obj)*obj.prob.computeCFL(obj.sv(:,i_t));
+                    %                             obj.time.dt = obj.time.cfl(i_t,obj.sv(:,i_t))*obj.prob.computeCFL(obj.sv(:,i_t));
+                    obj.TimeScheme.setDT(obj.time.dt);
+                end
+
+                %Use Newton's Method to solve nonlinear system of equations
+                %and store: state vector, residual and jacobian snapshots,
+                %and number of newton iterations required
+                %                         switch obj.clustering
+                %                             case 'kmeans'
+                obj.LocBasisHist(obj.cTimeIter,1) = computeDistanceToCenters(obj,obj.UrLoc,obj.cTimeIter);
+                %                             case 'a_priori'
+                %                                 obj.LocBasisHist(obj.cTimeIter,1) = floor(obj.nBases*obj.cTimeIter/nstep)+1;
+                %                         end
+                cbase=obj.LocBasisHist(obj.cTimeIter,1);
+
+                if ((obj.printLevel>0)&&(rem(i_t,round(nstep*0.1)) == 0)) || ((obj.printLevel>1)&&(rem(i_t,round(nstep*0.05)) == 0)) || (obj.printLevel>2)
+                    fprintf('-------------------------- Time Step %4i of %4i (%2i): Basis %i -------------------------- \n',i_t,nstep,100*i_t/nstep,cbase);
+                end
+
+                %Determine initial ROB components if using fast
+                %updating
+                if obj.cTimeIter == 1 && strcmpi(obj.basisUpdate,'border_fast')
+                    obj.initializeROBcompon(cbase);
+                end
+                obj.NewtonRaphsonLocal();
+                if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
+
+                %Check for steady convergence
+                if obj.time.steadyconverge
+                    if norm(obj.sv(:,i_t+1)-obj.sv(:,i_t)) < obj.time.steadyconverge*norm(obj.sv(:,i_t+1))
+                        obj.ontime = toc(tROMstart)+OldTime;
+                        obj.time.nstep=i_t;
+                        obj.time.T(2) = obj.time.T(1) + i_t*obj.time.dt;
+                        obj.sv(:,i_t+2:end)=[];
+                        obj.openCloseResJacFiles('close');
+                        obj.newt.avgIter = mean(obj.newt.iter);
+                        return;
+                    end
+                end
+            end
+            obj.ontime = toc(tROMstart)+OldTime; %Record simulation time
+    end
+    obj.openCloseResJacFiles('close');
+    obj.newt.avgIter = mean(obj.newt.iter);
+end %Done
         
         function  [] = computeResNormFromSV(obj,flag,nType)
             %This function computes the nType-norm of the residual (from
