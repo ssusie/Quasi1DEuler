@@ -47,3 +47,14 @@ hgnat = plot(uG./cG,'g');
 xlabel('x')
 ylabel('Mach')
 legend([hfom,hrom,hgnat],'FOM','ROM','GNAT')
+
+%%
+% norm of the real and approx constraints
+figure(2)
+% subplot(2,1,1)
+plot(gnat.Anorm,'ko-', 'linewidth', 2), hold on
+plot(gnat.Rnorm,'b*-', 'linewidth', 2)
+legend('norm approx constr','norm real constr')
+% title('running with approx constr')
+
+
