@@ -401,10 +401,8 @@ classdef GNAT < handle
             end
             
             obj.numStep = nstep;
-            if ~obj.augment
+            if obj.augment
                 fileID = fopen(['debugingSizesNotAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
-                fprintf(fileID,  'False');
-                
                 obj.reconFright= obj.problem.phiFright * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
                 obj.reconFleft = obj.problem.phiFleft  * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
             
@@ -440,7 +438,7 @@ classdef GNAT < handle
                 fclose(fileID);
             else
                 fileID = fopen(['debugingSizesAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
-                fprintf(fileID, printing, obj.augment);
+                fprintf(fileID, printi)
                 obj.reconFrnew = obj.problem.phiFrnew(:,1:limSkinny) * pinv(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
                 obj.reconFlnew = obj.problem.phiFlnew(:,1:limSkinny) * pinv(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
             
@@ -1194,11 +1192,7 @@ end
              params.DifferenceStep = 1e-6;
              params.DifferenceType='centered';
              %keyboard
-             if ~obj.augment 
-                 fileID = fopen(['debugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-             else
-                 fileID = fopen(['debugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-             end
+         fileID = fopen(['debugingPoblanoNstep', num2str(obj.numStep),'.txt'], 'a');
 %              f1 = 'timestep  %d';
 %              fprintf(fileID, f1, obj.cTimeIter);
              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
@@ -1286,7 +1280,7 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
             if obj.probGNAT.ind1
 %                 keyboard
                 %reconstruct flux and Jacobian
-                fluxLeft  = obj.reconFl*Rleft(:);
+                fluxLeft  = obj.reconFleft*Rleft(:);
                 fluxLeft2 = obj.reconFlnew*Rleft(:);
                 JhatL=[zeros(18,1);J2L];
                 obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
@@ -1318,12 +1312,7 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
                     nJ1 = norm(J - dl);
                     nJ2 = norm(J - dlnew);
                     
-                    if ~obj.augment
-                        fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-                    
+                  fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
                     formatSpec1 = 'norm(fluxLeft_true - fluxLeft_regular) =  %e \n';
 %                     formatSpec2 = 'norm(fluxLeft_true - fluxLeft_augment) =  %e \n';
                     fprintf(fileID, formatSpec1, nf1);
@@ -1333,9 +1322,9 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
 %                     formatSpec4 = 'norm(JLeft_true - JLeft_augment) =  %e  \n';
                     fprintf(fileID, formatSpec3, nJ1);
 %                     fprintf(fileID, formatSpec4, nJ2);
-                    fclose(fileID);
+                  fclose(fileID);
                 end
-                %
+%                 
                 
 %                 keyboard
 %Susie          check if reconstruction of Flux and its derivative is good      
@@ -1439,14 +1428,8 @@ end
                     J = J2R_true(end-2:end,:) * obj.problem.phi;
                     nJ1 = norm(J - dr);
                     nJ2 = norm(J - drnew);
-                   
-                    if ~obj.augment
-                        fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
                     
-%                   fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
+                  fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
                     formatSpec1 = 'norm(fluxRight_true - fluxRight_regular) =  %e \n';
 %                     formatSpec2 = 'norm(fluxRight_true - fluxRight_augment) =  %e \n \n';
                     fprintf(fileID, formatSpec1, nf1);
@@ -1559,13 +1542,7 @@ end
 %                 nJ1 = norm(J - dr);
 %                 nJ2 = norm(J - drnew);
 %                 
-                    
-                    if ~obj.augment
-                        fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-%                     fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
+                    fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
                     formatSpec1 = 'norm(Q_true - Q_regular) =  %e \n \n';
                     % formatSpec2 = 'norm(Q_true - Q_augment) =  %e \n \n';
                     nf1 = norm(recQ2 - Q2_true');

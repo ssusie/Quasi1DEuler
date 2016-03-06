@@ -1074,8 +1074,6 @@ classdef ROM < handle
         
         function [sq, sdq]=sumForceTerms(obj,SV)
             
-            %        SV=obj.sv(:,obj.cTimeIter)+obj.phi*w_increment;
-            
             [~, u, P,~,~,~,~]=obj.prob.getVariables(SV);
             [Q,dQ]=obj.prob.forceTerm(u,P);
             sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
@@ -1085,7 +1083,46 @@ classdef ROM < handle
                 sdq=sdq+squeeze(dQ(:,:,i))*obj.phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
             end
         end
-        
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ function r = RightFluxAll(obj, SV)
+      
+      [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
+      [roeF, ~ ] = obj.prob.roeFlux(rho,u,P,c,e,dc);
+%       dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+%       droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+%       dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+%       droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+
+      % code from fucntion governEqn      
+      r = reshape(bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1)),...
+          size(roeF,1)*size(roeF(:, 2:end),2),1);
+     
+  end
+  
+  function   l = LeftFluxAll(obj, SV)
+      
+      [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
+      [roeF, ~] = obj.prob.roeFlux(rho,u,P,c,e,dc);
+%       dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+%       droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+%       dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+%       droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+      
+      l = reshape(-bsxfun(@times, roeF(:,1:end-1), obj.prob.S(2:end-2)),...
+          size(roeF, 1) * size(roeF(:, 2:end), 2), 1);
+      
+      
+  end
+  
+  function [force_q,dforce_q] = ForceTermsAll(obj, SV)
+      [~, u, P, ~,~,~,~]  = obj.prob.getVariables(SV);
+      [force_q, dforce_q] = obj.prob.forceTerm(u,P);
+  end
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         
         function [ci,dci]=testConstGNAT(obj, w_increment,sv, ind)
             [g,Dg]=obj.constraintsOneDomain(w_increment,sv);
