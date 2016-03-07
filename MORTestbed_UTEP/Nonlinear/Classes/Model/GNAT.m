@@ -26,9 +26,9 @@ classdef GNAT < handle
         Rnorm1;
         Anorm1;
         
-        reconFright;
+        reconFr;
         reconFrnew;
-        reconFleft;
+        reconFl;
         reconFlnew;
         reconQ;
         numStep;
@@ -399,14 +399,19 @@ classdef GNAT < handle
             if limSkinny > length(obj.reconLocs)
                limSkinny = length(obj.reconLocs);
             end
+            if length(obj.sampleNodes(2:end)) < nstep
+                truncQ = length(obj.sampleNodes(2:end));
+            else
+                truncQ = nstep;
+            end
             
             obj.numStep = nstep;
             if ~obj.augment
                 fileID = fopen(['debugingSizesNotAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
                 fprintf(fileID,  'False');
                 
-                obj.reconFright= obj.problem.phiFright * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
-                obj.reconFleft = obj.problem.phiFleft  * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
+                obj.reconFr = obj.problem.phiFright * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
+                obj.reconFl = obj.problem.phiFleft  * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
             
                 [n1, m1] = size(obj.problem.phiFright(obj.reconLocs, :));
                 [n2, m2] = size(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
@@ -427,11 +432,12 @@ classdef GNAT < handle
                 % need to be a skinny matrix pinv
                 obj.reconQ = obj.problem.phiQ(2:3:end,:);
                 PhiQ2 = obj.reconQ;
-                obj.reconQ2 = PhiQ2*pinv(PhiQ2(obj.sampleNodes(2:end),:));
+                %keyboard
+                obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
                 [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
-                [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:limSkinny));
-                f1 = 'size of not truncated Phi_left inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_left inside pinv =  %d, %d \n \n';
+                [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
+                f2 = 'size of truncated Phi_Q inside pinv =  %d, %d \n \n';
                 fprintf(fileID, f1, n1, m1);
                 fprintf(fileID, f2, n2, m2);
 
@@ -441,8 +447,8 @@ classdef GNAT < handle
             else
                 fileID = fopen(['debugingSizesAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
                 fprintf(fileID, printing, obj.augment);
-                obj.reconFrnew = obj.problem.phiFrnew(:,1:limSkinny) * pinv(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
-                obj.reconFlnew = obj.problem.phiFlnew(:,1:limSkinny) * pinv(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
+                obj.reconFr = obj.problem.phiFrnew(:,1:limSkinny) * pinv(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
+                obj.reconFl = obj.problem.phiFlnew(:,1:limSkinny) * pinv(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
             
                 [n1, m1] = size(obj.problem.phiFrnew(obj.reconLocs, :));
                 [n2, m2] = size(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
@@ -463,11 +469,11 @@ classdef GNAT < handle
                 % need to be a skinny matrix pinv
                 obj.reconQ = obj.problem.phiQ(2:3:end,:);
                 PhiQ2 = obj.reconQ;
-                obj.reconQ2 = PhiQ2*pinv(PhiQ2(obj.sampleNodes(2:end),:));
+                obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
                 [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
-                [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:limSkinny));
-                f1 = 'size of not truncated Phi_left inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_left inside pinv =  %d, %d \n \n';
+                [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
+                f2 = 'size of truncated Phi_Q inside pinv =  %d, %d \n \n';
                 fprintf(fileID, f1, n1, m1);
                 fprintf(fileID, f2, n2, m2);
                 
@@ -1287,15 +1293,13 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
 %                 keyboard
                 %reconstruct flux and Jacobian
                 fluxLeft  = obj.reconFl*Rleft(:);
-                fluxLeft2 = obj.reconFlnew*Rleft(:);
                 JhatL=[zeros(18,1);J2L];
                 obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
                 
                 %choose left flux at the left boundary
                 l  = fluxLeft(1:3);
-                l2 = fluxLeft2(1:3);
-                dl = obj.reconFleft(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
-                dlnew = obj.reconFlnew(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+                dl = obj.reconFl(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+                
 
 %                 load J2L_true
 %                 load Fleft
@@ -1304,8 +1308,8 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
 %                 J = J2L_true(1:3,:) * obj.problem.phi;
 %                 norm(J - dl)
 %                 norm(J - dlnew)
-                returnl = fluxLeft(1:3); %fluxLeft(1:3);
-                returndl = dl; %dlnew
+                returnl = l;
+                returndl = dl;
                 
                
                 if obj.cTimeIter == 1
@@ -1313,10 +1317,9 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
                     load J2L_true
                     load Fleft
                     nf1 = norm(Fleft - fluxLeft);
-                    nf2 = norm(Fleft - fluxLeft2);
+
                     J   = J2L_true(1:3,:) * obj.problem.phi;
                     nJ1 = norm(J - dl);
-                    nJ2 = norm(J - dlnew);
                     
                     if ~obj.augment
                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
@@ -1324,15 +1327,12 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
                     end
                     
-                    formatSpec1 = 'norm(fluxLeft_true - fluxLeft_regular) =  %e \n';
-%                     formatSpec2 = 'norm(fluxLeft_true - fluxLeft_augment) =  %e \n';
+                    formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
                     fprintf(fileID, formatSpec1, nf1);
-%                     fprintf(fileID, formatSpec2, nf2);
                     
-                    formatSpec3 = 'norm(JLeft_true - JLeft_regular) =  %e \n';
-%                     formatSpec4 = 'norm(JLeft_true - JLeft_augment) =  %e  \n';
+                    formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
                     fprintf(fileID, formatSpec3, nJ1);
-%                     fprintf(fileID, formatSpec4, nJ2);
+                    
                     fclose(fileID);
                 end
                 %
@@ -1419,8 +1419,7 @@ end
 
             if obj.probGNAT.ind1
                 %reconstruct right flux and Jacobian
-                fluxRight  = obj.reconFright * Rright(:);
-                fluxRight2 = obj.reconFrnew  * Rright(:);
+                fluxRight  = obj.reconFr * Rright(:);
                 
                 JhatR = [zeros(18,1);J2R];
                 JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
@@ -1428,17 +1427,16 @@ end
                 
                 %choose right flux at the right boundary
                 r  = fluxRight(end-2:end);
-                dr = obj.reconFright(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
-                drnew = obj.reconFrnew(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
+                dr = obj.reconFr(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
                 %keyboard
                 if obj.cTimeIter == 1
                     load J2R_true
                     load Fright
                     nf1 = norm(Fright - fluxRight);
-                    nf2 = norm(Fright - fluxRight2);
+                    
                     J = J2R_true(end-2:end,:) * obj.problem.phi;
                     nJ1 = norm(J - dr);
-                    nJ2 = norm(J - drnew);
+                    
                    
                     if ~obj.augment
                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
@@ -1446,22 +1444,15 @@ end
                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
                     end
                     
-%                   fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
-                    formatSpec1 = 'norm(fluxRight_true - fluxRight_regular) =  %e \n';
-%                     formatSpec2 = 'norm(fluxRight_true - fluxRight_augment) =  %e \n \n';
+                    formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
                     fprintf(fileID, formatSpec1, nf1);
-%                     fprintf(fileID, formatSpec2, nf2);
-                    
-                    formatSpec3 = 'norm(JRight_true - JRight_regular) =  %e \n';
-%                     formatSpec4 = 'norm(JRight_true - JRight_augment) =  %e \n \n';
+
+                    formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
                     fprintf(fileID, formatSpec3, nJ1);
-%                     fprintf(fileID, formatSpec4, nJ2);
                   fclose(fileID);
                 end
                 
-%                 returnr = fluxRight2(end-2:end); % fluxRight(end-2:end);
-%                 returndr = drnew; % dr; 
-                returnr = fluxRight(end-2:end); % fluxRight(end-2:end);
+                returnr = r;
                 returndr = dr; 
                 
 %                 keyboard
@@ -1540,8 +1531,8 @@ end
                 load Q2_true
                 load('sq_true.mat')
                 load DforceQ
-                
-%                 norm(recQ2 - Q2_true');
+               %keyboard
+               norm(recQ2 - Q2_true');
 %                 norm(sQ - sq_true);
 %                 norm(reconDQ2-DforceQ(2,:))
                 dQ1 = DforceQ;
@@ -1549,29 +1540,16 @@ end
                 for i=2:obj.problem.prob.nVol-1
                     sdqtrue = sdqtrue+squeeze(dQ1(:,:,i))*obj.problem.phi(3*i-2:3*i,1:obj.problem.trunc)*(obj.problem.prob.SVol(i).*obj.problem.prob.dx(i));
                 end
-                
-                
-% keyboard
-%                 
-%                 nf1 = norm(Fright - fluxRight);
-%                 nf2 = norm(Fright - fluxRight2);
-%                 J = J2R_true(end-2:end,:) * obj.problem.phi;
-%                 nJ1 = norm(J - dr);
-%                 nJ2 = norm(J - drnew);
-%                 
-                    
+  
                     if ~obj.augment
                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
                     else
                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
                     end
 %                     fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
-                    formatSpec1 = 'norm(Q_true - Q_regular) =  %e \n \n';
-                    % formatSpec2 = 'norm(Q_true - Q_augment) =  %e \n \n';
+                    formatSpec1 = 'norm(Q_true - Q) =  %e \n \n';
                     nf1 = norm(recQ2 - Q2_true');
-                    % nf2 = norm(sdqtrue(2,:) - sdQ);
                     fprintf(fileID, formatSpec1, nf1);
-                    % fprintf(fileID, formatSpec2, nf2);
                     fclose(fileID);                  
             end
            

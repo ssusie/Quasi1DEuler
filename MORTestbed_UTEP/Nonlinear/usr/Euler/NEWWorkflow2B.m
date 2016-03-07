@@ -57,24 +57,24 @@ RomErr = mean(ColumnwiseNorm(rom.sv(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.
 fprintf('Average Relative L2 ROM Error = %f %%\n',RomErr);
 GnatErr = mean(ColumnwiseNorm(svG(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
 fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr);
-GnatErr1 = mean(ColumnwiseNorm(svG1(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
-fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr1);
+% GnatErr1 = mean(ColumnwiseNorm(svG1(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
+% fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr1);
 
 
 [rhoF,uF,PF,cF,eF] = prob.getVariables(fom.sv(:,end));
 [rhoR,uR,PR,cR,eR] = prob.getVariables(rom.sv(:,end));
 [rhoG,uG,PG,cG,eG] = prob.getVariables(svG(:,end));
-[rhoG1,uG1,PG1,cG1,eG1] = prob.getVariables(svG1(:,end));
+% [rhoG1,uG1,PG1,cG1,eG1] = prob.getVariables(svG1(:,end));
 
 figure;
 hfom  = plot(uF./cF,'k','linewidth',2); hold on;
 hrom  = plot(uR./cR,'b--','linewidth',2);
 hgnat = plot(uG./cG,'c');
-hgnat1 = plot(uG1./cG1,'g');
+% hgnat1 = plot(uG1./cG1,'g');
 
 xlabel('x')
 ylabel('Mach')
-legend([hfom,hrom,hgnat, hgnat1],'FOM','ROM','GNATRom', 'GNATapprox')
+legend([hfom,hrom,hgnat],'FOM', 'ROM', 'GNATapprox')
 %%
 % norm of the real and approx constraints
 figure(2)
@@ -82,20 +82,20 @@ figure(2)
 plot(gnat.Anorm,'ko-', 'linewidth', 2), hold on
 plot(gnat.Rnorm,'b*-', 'linewidth', 2)
 legend('norm approx constr','norm real constr')
-title('using Method 4')
+title('using Method 5')
 % subplot(2,1,2)
 % plot(gnat.Anorm(1:end-2),'ko-', 'linewidth', 2), hold on
 % plot(gnat.Rnorm(1:end-2),'b*-', 'linewidth', 2)
 % legend('norm approx constr','norm real constr')
 
 %%
-figure(3)
-% subplot(2,1,1)
-plot(gnat1.Anorm1,'ko-', 'linewidth', 2), hold on
-plot(gnat1.Rnorm1,'b*-', 'linewidth', 2)
-legend('norm approx constr','norm real constr')
-title('using Method 5 with new snapshots')
-
-
+% figure(3)
+% % subplot(2,1,1)
+% plot(gnat1.Anorm1,'ko-', 'linewidth', 2), hold on
+% plot(gnat1.Rnorm1,'b*-', 'linewidth', 2)
+% legend('norm approx constr','norm real constr')
+% title('using Method 5 with new snapshots')
+% 
+% 
 
 
