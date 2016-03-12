@@ -410,8 +410,8 @@ classdef GNAT < handle
                 fileID = fopen(['debugingSizesNotAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
                 fprintf(fileID,  'False');
                 
-                obj.reconFr = obj.problem.phiFright(:,1:limSkinny) * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
-                obj.reconFl = obj.problem.phiFleft(:, 1:limSkinny) * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
+                obj.reconFr = obj.problem.phiFright * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
+                obj.reconFl = obj.problem.phiFleft  * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
             
                 [n1, m1] = size(obj.problem.phiFright(obj.reconLocs, :));
                 [n2, m2] = size(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
@@ -550,8 +550,8 @@ classdef GNAT < handle
                 obj.PsiFright = u_right;
                 obj.PsiFleft  = u_left;
                 obj.PsiFQ     = u_Q;
-%                 keyboard
-                [mFl,nFl] = size(obj.PsiFleft (obj.reconLocs, :));
+                keyboard
+                [mFl,nFl] = obj.PsiFleft (obj.reconLocs, :);
                 if mFl < nFl
                     limSkinny = mFl;
                 else
@@ -564,9 +564,9 @@ classdef GNAT < handle
                     trunc = nQ;
                 end
                 
-                reconFl_g = obj.PsiFleft(:, 1:limSkinny)  * pinv(obj.PsiFleft (obj.reconLocs, 1:limSkinny));
-                reconFr_g = obj.PsiFright(:, 1:limSkinny) * pinv(obj.PsiFright(obj.reconLocs, 1:limSkinny));
-                reconFq_g = obj.PsiFQ(:,1:trunc) * pinv(obj.PsiFQ(obj.sampleNodes(2:end),1:trunc));
+                reconFl_g = obj.PsiFleft  * pinv(obj.PsiFleft (obj.reconLocs, 1:limSkinny));
+                reconFr_g = obj.PsiFright * pinv(obj.PsiFright(obj.reconLocs, 1:limSkinny));
+                reconFq_g = obj.PsiFQ  * pinv(obj.PsiFQ(obj.sampleNodes(2:end),1:trunc));
                 save reconFl_g reconFl_g
                 save reconFr_g reconFr_g
                 save reconFq_g reconFq_g

@@ -3093,7 +3093,6 @@ function  [] = executeModel(obj,restart,augment)
                 if i_t==nstep
                     NewFrBasis=[];
                     NewFlBasis=[];
-                    % load soln
                     soln=obj.sv;
                     for jj=1:size(soln,2)
 

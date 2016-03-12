@@ -5,8 +5,7 @@ addGlobVarsAndPaths(fname);
 %FOM
 [fom,prob] = initialize(fname,1);
 fom.executeModel;
-fom_soln=fom.sv;
-save fom_soln fom_soln
+soln=fom.sv;
 
 %%
 methodROM=2; %solve with constraints  % =1  original,  =2 constrained
@@ -96,17 +95,17 @@ hgnat2 = plot(uG_rom_approx./cG_rom_approx,'m--');
 
 xlabel('x')
 ylabel('Mach')
-legend([hfom,hrom,hgnat,hgnat1, hgnat2],'FOM', 'ROM', 'GNAT ROM snapsh',...
-    'GNAT_real', 'GNAT GNAT snapshots')
+legend([hfom,hrom,hgnat,hgnat1, hgnat2],'FOM', 'ROM', 'GNATapprox',...
+    'GNAT_real', 'GNAT_approx_with_real')
 
 %%
 % norm of the real and approx constraints
 figure(2)
-plot(gnat_approx.Anorm,'co-', 'linewidth', 2), hold on
-plot(gnat_rom.Rnorm,'g*-', 'linewidth', 2), hold on
-plot(gnat_approx_rom.Anorm1,'mo-', 'linewidth', 2)
+plot(gnat_approx.Anorm,'ko-', 'linewidth', 2), hold on
+plot(gnat_rom.Rnorm,'b*-', 'linewidth', 2), hold on
+plot(gnat_approx_rom.Anorm1,'go-', 'linewidth', 2)
 
-legend('ROM snapsh','real constr','GNAT snapsh')
+legend('norm approx constr','norm real constr','norm of approx with real snapsh')
 % legend('norm real constr','norm of approx with real snapsh')
 % title('using Method 5')
 % subplot(2,1,2)
