@@ -5,8 +5,8 @@ addGlobVarsAndPaths(fname);
 %FOM
 [fom,prob] = initialize(fname,1);
 fom.executeModel;
-fom_soln=fom.sv;
-save fom_soln fom_soln
+soln=fom.sv;
+save fom_soln soln
 
 %%
 methodROM=2; %solve with constraints  % =1  original,  =2 constrained
@@ -65,7 +65,23 @@ gnat_approx_rom.createGNAT(prob(1),rom,phiR,phiJ,methodGNAT,augment, 1);
 gnat_approx_rom.executeModel;
 
 gnat_approx_rom.associateFullProblem(prob(1));
-svGapprox_approx_rom = gnat_approx_rom.reconstructFullState(rom);
+svG_approx_rom = gnat_approx_rom.reconstructFullState(rom);
+
+%%
+%GNAT
+fnameNLbase='NonlinBase';
+NLSnapshot = 0;
+methodGNAT = 5; % = 1 original, = 2 Rom constrains; = 3 Gnat constraints
+augment = false;
+
+readResJacComputePODWriteFcn(fom,fnameNLbase,NLSnapshot,[]);
+gnat_fom = genGNAT([fname,'.rom'],rom,1);
+[phiR,phiJ] = readNonlinBases(fnameNLbase,NLSnapshot,1);
+gnat_fom.createGNAT(prob(1),rom,phiR,phiJ,methodGNAT,  augment, 1);
+gnat_fom.executeModel;
+
+gnat_fom.associateFullProblem(prob(1));
+svG_fom = gnat_fom.reconstructFullState(rom);
 
 
 %%
@@ -76,8 +92,10 @@ GnatErr_approx = mean(ColumnwiseNorm(svG_approx(:,end)-fom.sv(:,end),2)./Columnw
 fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr_approx);
 GnatErr_rom = mean(ColumnwiseNorm(svG_rom(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
 fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr_rom);
-GnatErr_rom_approx = mean(ColumnwiseNorm(svGapprox_approx_rom(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
+GnatErr_rom_approx = mean(ColumnwiseNorm(svG_approx_rom(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
 fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr_rom_approx);
+GnatErr_fom = mean(ColumnwiseNorm(svG_fom(:,end)-fom.sv(:,end),2)./ColumnwiseNorm(fom.sv(:,end),2));
+fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr_fom);
 
 
 [rhoF,uF,PF,cF,eF] = prob.getVariables(fom.sv(:,end));
@@ -85,7 +103,8 @@ fprintf('Average Relative L2 GNAT Error = %f %%\n',GnatErr_rom_approx);
 [rhoG_approx,uG_approx,PG_approx,cG_approx,eG_approx] = prob.getVariables(svG_approx(:,end));
 [rhoG_rom,uG_rom,PG_rom,cG_rom,eG_rom] = prob.getVariables(svG_rom(:,end));
 [rhoG_rom_approx,uG_rom_approx,PG_rom_approx,cG_rom_approx,eG_rom_approx] = ...
-    prob.getVariables(svGapprox_approx_rom(:,end));
+    prob.getVariables(svG_approx_rom(:,end));
+[rhoG_fom,uG_fom,PG_fom,cG_fom,eG_fom] = prob.getVariables(svG_fom(:,end));
 % 
 figure(10);
 hfom  = plot(uF./cF,'k','linewidth',2); hold on;
@@ -93,11 +112,12 @@ hrom  = plot(uR./cR,'b','linewidth',2);
 hgnat = plot(uG_approx./cG_approx,'c--');
 hgnat1 = plot(uG_rom./cG_rom,'g--');
 hgnat2 = plot(uG_rom_approx./cG_rom_approx,'m--');
+hgnat3 = plot(uG_fom./cG_fom,'y--');
 
 xlabel('x')
 ylabel('Mach')
-legend([hfom,hrom,hgnat,hgnat1, hgnat2],'FOM', 'ROM', 'GNAT ROM snapsh',...
-    'GNAT_real', 'GNAT GNAT snapshots')
+legend([hfom,hrom,hgnat,hgnat1, hgnat2, hgnat3],'FOM', 'ROM', 'GNAT ROM snapsh',...
+    'GNAT_real', 'GNAT GNAT snapshots', 'GNAT FOM snapshots')
 
 %%
 % norm of the real and approx constraints
@@ -105,8 +125,9 @@ figure(2)
 plot(gnat_approx.Anorm,'co-', 'linewidth', 2), hold on
 plot(gnat_rom.Rnorm,'g*-', 'linewidth', 2), hold on
 plot(gnat_approx_rom.Anorm1,'mo-', 'linewidth', 2)
+plot(gnat_fom.Anorm,'y*-', 'linewidth', 2), hold on
 
-legend('ROM snapsh','real constr','GNAT snapsh')
+legend('ROM snapsh','real constr','GNAT snapsh', 'FOM snapsh')
 % legend('norm real constr','norm of approx with real snapsh')
 % title('using Method 5')
 % subplot(2,1,2)
