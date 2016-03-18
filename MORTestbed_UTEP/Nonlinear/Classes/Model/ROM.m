@@ -34,6 +34,7 @@ classdef ROM < handle
         
         gZim;
         gOrig;
+        Cnorm;
         constr;
         
         curr_param;
@@ -750,6 +751,7 @@ classdef ROM < handle
             
             if obj.cTimeIter==1
                 obj.gOrig=[];
+                obj.Cnorm = [];
                 size(Phi)
             end
             
@@ -834,6 +836,8 @@ classdef ROM < handle
             end
             
             w_guess=Phi'*(obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
+            [g,~]=obj.constraintsOneDomain_old(w_guess);
+            obj.Cnorm = [obj.Cnorm,  norm(g)];
             
             %Write the last nonlinear snapshot.  We note that we are using
             %J^(k+1)*0 if using Snapshot 1.5 or 2 (we don't have a
@@ -916,7 +920,8 @@ classdef ROM < handle
                 end
             end
             [g,~]=obj.constraintsOneDomain_old(w_guess);
-            obj.constr=[obj.constr,g];
+            obj.constr = [obj.constr,g];
+            obj.Cnorm  = [obj.Cnorm,  norm(g)];
             %             constr=obj.constr;
             %             save Zimconstr9999 constr
             

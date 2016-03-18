@@ -2555,3 +2555,1839 @@ poblano norm(J_left  - Jl_true) for coordinate  3  =  3.988135e-07
 poblano norm(J_right - Jr_true) for coordinate  3  =  4.935606e-07 
 poblano norm(J_sumQ - Jsq_true) =  6.255844e-06 
  
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.282685e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.501444e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.467145e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  2.421067e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.045124e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.224251e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.995520e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.071065e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.778960e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.374077e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.074191e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.742947e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.217175e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.505117e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.428680e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.247353e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.051440e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.495218e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.814501e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.510136e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.854579e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.891187e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.431752e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.312235e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.341669e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.822224e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.015861e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.011288e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.016275e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.643859e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.148261e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.731696e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.102141e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.843088e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.995975e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.738392e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.466774e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.648807e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.134264e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.516494e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.486939e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.336026e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  9.031067e-08 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.314348e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.115411e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.226070e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.005233e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.288354e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.110735e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.672116e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.139887e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.806336e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.229734e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.587831e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.458441e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.022059e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.284052e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.304945e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.548239e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.027453e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  9.588256e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.024192e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.937202e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.144367e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.468246e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.252131e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.770515e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.790640e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.307110e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.067426e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.886423e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.564819e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.016782e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.708305e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.633979e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.734813e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.693924e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.141934e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.047153e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.110541e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.290667e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.664589e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.303243e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.473792e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.091249e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.672564e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.584692e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.427254e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.611573e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.307998e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.193626e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.201023e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.582786e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.648518e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.814684e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.523087e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.029790e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.711266e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.325513e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.411808e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.531775e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.473528e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.604643e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.351352e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.736982e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.437500e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.588583e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.087778e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.844151e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.822271e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.159288e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.353587e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.902784e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.294184e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.734807e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.252968e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.784259e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.254168e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.966205e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.492829e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.803060e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.507123e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.558594e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.934377e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.014729e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.227675e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.963773e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.169867e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.760946e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.584385e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  7.644939e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.884062e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.963025e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.620411e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.667687e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  8.153209e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.352067e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.761777e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.531120e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.276541e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.155971e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.185999e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.263602e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.502683e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.187987e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.244308e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.337109e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.905354e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.191026e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.897324e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.168556e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.480972e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.166415e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.103449e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.677552e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.028419e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.770618e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.383151e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.943541e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.123452e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.122771e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.873495e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.770174e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.320337e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.451685e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  7.888785e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.141146e-07 
+poblano norm(J_sumQ - Jsq_true) =  1.966634e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.599242e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.835581e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.185901e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.610731e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.002137e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.752786e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.144893e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.011198e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.554378e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.888471e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.551020e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.261337e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.283785e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.528482e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.198339e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.994962e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.062991e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  2.195200e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.430410e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.285932e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.754229e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.102736e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.189638e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.255148e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.036684e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.683744e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.069193e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.358875e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.846107e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.451659e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.303938e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.355471e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.912911e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.324861e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.885997e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.751026e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.193817e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.941260e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.458683e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.970714e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.445773e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.748591e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.967110e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.547536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.586474e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.626958e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.772532e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.646387e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.153757e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.209127e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.517395e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.239801e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.547256e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.316832e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  4.886243e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.640038e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.856925e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.216024e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.437595e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.553775e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.391997e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.088508e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.855852e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.711943e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  7.041297e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.459703e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.165935e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.178206e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  8.663840e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.918401e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.752801e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.868377e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.087445e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.900663e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.660841e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.407358e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.272761e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.607568e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.017468e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.326952e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.235373e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.327085e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.389466e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.248815e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.603367e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.682174e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  9.544235e-07 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.044536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.518637e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.223015e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.743722e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.680897e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.317108e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.684029e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.238033e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.990155e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.295706e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.239179e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.805543e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.006239e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.745047e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  4.263513e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.921251e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  7.511050e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.130178e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.172601e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.600536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.325176e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.068636e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.602466e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.216498e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.733144e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.256545e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.409845e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.160456e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.613078e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.349652e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.660579e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.253170e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.976846e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.138873e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.552342e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.046775e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.337249e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.327060e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.214098e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.227381e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.364887e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.404909e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.026921e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.425018e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.248623e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.238009e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.047270e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.069934e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.249809e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.180392e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.859657e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.267006e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.263994e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.636970e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.223577e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.672637e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.882131e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.214598e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.186478e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.462679e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.478623e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.399501e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.114350e-07 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.384487e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.837931e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.858083e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.951228e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.639969e-08 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.505906e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.303066e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.249547e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.660371e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.079333e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.069851e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.085050e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.570407e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.269792e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.149179e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.813921e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.293940e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.231224e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.934963e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.690580e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.930706e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.626561e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.657305e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.651805e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.464300e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.481189e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.690961e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.489507e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.049869e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.545100e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.076842e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.978128e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.939158e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.788165e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.126007e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.550977e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.188683e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  8.517038e-07 
+poblano norm(J_sumQ - Jsq_true) =  3.697988e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.064763e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.364491e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.273381e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.115332e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.399011e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.152603e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.994293e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.044012e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.040280e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.466233e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.567759e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.952112e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  5.431799e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.834195e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.294860e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.487139e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.719500e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.221545e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.012102e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.059175e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.283564e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.074302e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.658784e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.130512e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.418753e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.331675e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.224190e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.893697e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.637554e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.479182e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.258999e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.674586e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.224162e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.271579e-06 
+poblano norm(J_sumQ - Jsq_true) =  7.289434e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.200557e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  6.151492e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.035796e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.057132e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.855964e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.232210e-06 
+poblano norm(J_sumQ - Jsq_true) =  6.243010e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.159798e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.444496e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.177073e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.387937e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.466382e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.488350e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.531045e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  6.206051e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.486268e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.968503e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.603798e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.289166e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  5.968315e-07 
+poblano norm(J_sumQ - Jsq_true) =  6.505701e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.887199e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.159755e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.500832e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.474781e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.973605e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.604103e-06 
+poblano norm(J_sumQ - Jsq_true) =  6.701646e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.363684e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.224116e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.215929e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.727880e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.657028e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.106568e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.604466e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.868309e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.368209e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.729934e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.196474e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.753083e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.587846e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.720137e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.935617e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.024500e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.656228e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.674964e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.702832e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.125465e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.545316e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.514958e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.798729e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.360290e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.045726e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.291574e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.575026e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.612880e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.286670e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.346446e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.232883e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.748989e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.908328e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.096333e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.313316e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.991507e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.482062e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.592341e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.298827e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.206066e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.385519e-06 
+poblano norm(J_sumQ - Jsq_true) =  9.071666e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.744500e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.943174e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.242760e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.424983e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.528976e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.038280e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.872393e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.240716e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.058066e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.682600e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  6.909091e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.988135e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  4.935606e-07 
+poblano norm(J_sumQ - Jsq_true) =  6.255844e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.282685e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.501444e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.467145e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  2.421067e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.045124e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.224251e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.995520e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.071065e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.778960e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.374077e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.074191e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.742947e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.217175e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.505117e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.428680e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.247353e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.051440e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.495218e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.814501e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.510136e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.854579e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.891187e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.431752e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.312235e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.341669e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.822224e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.015861e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.011288e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.016275e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.643859e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.148261e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.731696e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.102141e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.843088e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.995975e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.738392e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.466774e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.648807e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.134264e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.516494e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.486939e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.336026e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  9.031067e-08 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.314348e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.115411e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.226070e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.005233e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.288354e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.110735e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.672116e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.139887e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.806336e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.229734e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.587831e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.458441e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.022059e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.284052e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.304945e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.548239e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.027453e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  9.588256e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.024192e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.937202e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.144367e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.468246e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.252131e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.770515e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.790640e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.307110e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.067426e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.886423e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.564819e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.016782e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.708305e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.633979e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.734813e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.693924e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.141934e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.047153e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.110541e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.290667e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.664589e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.303243e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.473792e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.091249e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.672564e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.584692e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.427254e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.611573e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.307998e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.193626e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.201023e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.582786e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.648518e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.814684e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.523087e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.029790e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.711266e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.325513e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.411808e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.531775e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.473528e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.604643e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.351352e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.736982e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.437500e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.588583e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.087778e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.844151e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.822271e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.159288e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.353587e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.902784e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.294184e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.734807e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.252968e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.784259e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.254168e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.966205e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.492829e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.803060e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.507123e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.558594e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.934377e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.014729e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.227675e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.963773e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.169867e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.760946e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.584385e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  7.644939e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.884062e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.963025e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.620411e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.667687e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  8.153209e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.352067e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.761777e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.531120e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.276541e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.155971e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.185999e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.263602e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.502683e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.187987e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.244308e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.337109e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.905354e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.191026e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.897324e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.168556e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.480972e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.166415e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.103449e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.677552e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.028419e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.770618e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.383151e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.943541e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.123452e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.122771e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.873495e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.770174e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.320337e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.451685e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  7.888785e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.141146e-07 
+poblano norm(J_sumQ - Jsq_true) =  1.966634e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.599242e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.835581e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.185901e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.610731e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.002137e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.752786e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.144893e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.011198e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.554378e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.888471e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.551020e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.261337e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.283785e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.528482e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.198339e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.994962e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.062991e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  2.195200e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.430410e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.285932e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.754229e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.102736e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.189638e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.255148e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.036684e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.683744e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.069193e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.358875e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.846107e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.451659e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.303938e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.355471e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.912911e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.324861e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.885997e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.751026e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.193817e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.941260e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.458683e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.970714e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.445773e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.748591e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.967110e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.547536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.586474e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.626958e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.772532e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.646387e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.153757e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.209127e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.517395e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.239801e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.547256e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.316832e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  4.886243e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.640038e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.856925e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.216024e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.437595e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.553775e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.391997e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.088508e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.855852e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.711943e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  7.041297e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.459703e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.165935e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.178206e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  8.663840e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.918401e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.752801e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.868377e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.087445e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.900663e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.660841e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.407358e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.272761e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.607568e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.017468e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.326952e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.235373e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.327085e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.389466e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.248815e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.603367e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.682174e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  9.544235e-07 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.044536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.518637e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.223015e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.743722e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.680897e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.317108e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.684029e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.238033e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.990155e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.295706e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.239179e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.805543e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.006239e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.745047e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  4.263513e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.921251e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  7.511050e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.130178e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.172601e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.600536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.325176e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.068636e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.602466e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.216498e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.733144e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.256545e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.409845e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.160456e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.613078e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.349652e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.660579e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.253170e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.976846e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.138873e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.552342e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.046775e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.337249e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.327060e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.214098e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.227381e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.364887e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.404909e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.026921e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.425018e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.248623e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.238009e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.047270e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.069934e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.249809e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.180392e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.859657e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.267006e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.263994e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.636970e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.223577e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.672637e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.882131e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.214598e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.186478e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.462679e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.478623e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.399501e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.114350e-07 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.384487e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.837931e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.858083e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.951228e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.639969e-08 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.505906e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.303066e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.249547e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.660371e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.079333e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.069851e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.085050e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.570407e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.269792e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.149179e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.813921e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.293940e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.231224e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.934963e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.690580e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.930706e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.626561e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.657305e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.651805e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.464300e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.481189e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.690961e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.489507e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.049869e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.545100e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.076842e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.978128e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.939158e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.788165e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.126007e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.550977e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.188683e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  8.517038e-07 
+poblano norm(J_sumQ - Jsq_true) =  3.697988e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.064763e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.364491e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.273381e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.115332e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.399011e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.152603e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.994293e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.044012e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.040280e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.466233e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.567759e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.952112e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  5.431799e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.834195e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.294860e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.487139e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.719500e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.221545e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.012102e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.059175e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.283564e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.074302e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.658784e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.130512e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.418753e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.331675e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.224190e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.893697e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.637554e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.479182e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.258999e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.674586e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.224162e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.271579e-06 
+poblano norm(J_sumQ - Jsq_true) =  7.289434e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.200557e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  6.151492e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.035796e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.057132e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.855964e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.232210e-06 
+poblano norm(J_sumQ - Jsq_true) =  6.243010e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.159798e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.444496e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.177073e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.387937e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.466382e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.488350e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.531045e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  6.206051e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.486268e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.968503e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.603798e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.289166e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  5.968315e-07 
+poblano norm(J_sumQ - Jsq_true) =  6.505701e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.887199e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.159755e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.500832e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.474781e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.973605e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.604103e-06 
+poblano norm(J_sumQ - Jsq_true) =  6.701646e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.363684e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.224116e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.215929e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.727880e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.657028e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.106568e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.604466e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.868309e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.368209e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.729934e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.196474e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.753083e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.587846e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.720137e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.935617e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.024500e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.656228e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.674964e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.702832e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.125465e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.545316e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.514958e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.798729e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.360290e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.045726e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.291574e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.575026e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.612880e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.286670e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.346446e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.232883e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.748989e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.908328e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.096333e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.313316e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.991507e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.482062e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.592341e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.298827e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.206066e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.385519e-06 
+poblano norm(J_sumQ - Jsq_true) =  9.071666e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.744500e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.943174e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.242760e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.424983e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.528976e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.038280e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.872393e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.240716e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.058066e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.682600e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  6.909091e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.988135e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  4.935606e-07 
+poblano norm(J_sumQ - Jsq_true) =  6.255844e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.282685e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.501444e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.467145e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  2.421067e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.045124e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.224251e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.995520e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.071065e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.778960e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.374077e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.074191e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.742947e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.217175e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.505117e-06 
+ 
+timestep   1  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.428680e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.247353e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.051440e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.495218e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.814501e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.510136e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.854579e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.891187e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.431752e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.312235e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.341669e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.822224e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.015861e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.011288e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.016275e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.643859e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.148261e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.731696e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.102141e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.843088e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.995975e-06 
+ 
+timestep   2  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.738392e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.466774e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.648807e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.134264e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.516494e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.486939e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.336026e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  9.031067e-08 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.314348e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.115411e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.226070e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.005233e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.288354e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.110735e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.672116e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.139887e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.806336e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.229734e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.587831e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.458441e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.022059e-06 
+ 
+timestep   3  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.284052e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.304945e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.548239e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.027453e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  9.588256e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.024192e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.937202e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.144367e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.468246e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.252131e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.770515e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.790640e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.307110e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.067426e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.886423e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.564819e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.016782e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.708305e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.633979e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.734813e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.693924e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.141934e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.047153e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.110541e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.290667e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.664589e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.303243e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.473792e-06 
+ 
+timestep   4  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.091249e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.672564e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.584692e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.427254e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.611573e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.307998e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.193626e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.201023e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.582786e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.648518e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.814684e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.523087e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.029790e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.711266e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.325513e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.411808e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.531775e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.473528e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.604643e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.351352e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.736982e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.437500e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.588583e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.087778e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.844151e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.822271e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.159288e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.353587e-06 
+ 
+timestep   5  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.902784e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.294184e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.734807e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.252968e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.784259e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.254168e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.966205e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.492829e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.803060e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.507123e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.558594e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.934377e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  2.014729e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.227675e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.963773e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.169867e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.760946e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.584385e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  7.644939e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.884062e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.963025e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.620411e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.667687e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  8.153209e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.352067e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.761777e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.531120e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.276541e-06 
+ 
+timestep   6  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.155971e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.185999e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.263602e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.502683e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.187987e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.244308e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.337109e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.905354e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.191026e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.897324e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.168556e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.480972e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.166415e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.103449e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.677552e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.028419e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  7.770618e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.383151e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.943541e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.123452e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.122771e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.873495e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.770174e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.320337e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.451685e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  7.888785e-08 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.141146e-07 
+poblano norm(J_sumQ - Jsq_true) =  1.966634e-06 
+ 
+timestep   7  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.599242e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.835581e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.185901e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.610731e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.002137e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.752786e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.144893e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.011198e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.554378e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.888471e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.551020e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.261337e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.283785e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.528482e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.198339e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.994962e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.062991e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  2.195200e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.430410e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.285932e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.754229e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.102736e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.189638e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.255148e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.036684e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.683744e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.069193e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.358875e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.846107e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.451659e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.303938e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.355471e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.912911e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.324861e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.885997e-06 
+ 
+timestep   8  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.751026e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.193817e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.941260e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.458683e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.970714e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.445773e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.748591e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.967110e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.547536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.586474e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.626958e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.772532e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.646387e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.153757e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.209127e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.517395e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  5.239801e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.547256e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.316832e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  4.886243e-07 
+poblano norm(J_sumQ - Jsq_true) =  2.640038e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.856925e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.216024e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.437595e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.553775e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.391997e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.088508e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.855852e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.711943e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  7.041297e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.459703e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.165935e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.178206e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  8.663840e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.918401e-06 
+ 
+timestep   9  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.752801e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.868377e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  4.087445e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.900663e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.660841e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.407358e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.272761e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  1.607568e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.017468e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.326952e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.235373e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.327085e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.389466e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.248815e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.603367e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.682174e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  9.544235e-07 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.044536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.518637e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.223015e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.743722e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.680897e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.317108e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.684029e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.238033e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.990155e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.295706e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.239179e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.805543e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.006239e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.745047e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  4.263513e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.921251e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  7.511050e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.130178e-06 
+ 
+timestep   10  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.172601e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.600536e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.325176e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.068636e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.602466e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.216498e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.733144e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.256545e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.409845e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  3.160456e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.613078e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.349652e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.660579e-06 
+poblano norm(J_sumQ - Jsq_true) =  3.253170e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.976846e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.138873e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.552342e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.046775e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.337249e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.327060e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.214098e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.227381e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.364887e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.404909e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.026921e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.425018e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.248623e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.238009e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.047270e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.069934e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.249809e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.180392e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.859657e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.267006e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.263994e-06 
+ 
+timestep   11  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.636970e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.223577e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.672637e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.882131e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.214598e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.186478e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.462679e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.478623e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.399501e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  6.114350e-07 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.384487e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.837931e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.858083e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.951228e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.639969e-08 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.505906e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.303066e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.249547e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.660371e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.079333e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.069851e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.085050e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.570407e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.269792e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.149179e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.813921e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.293940e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.231224e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.934963e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.690580e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.930706e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.626561e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.657305e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.651805e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.464300e-06 
+ 
+timestep   12  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.481189e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.690961e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.489507e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.049869e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.545100e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.076842e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.978128e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.939158e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.788165e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.126007e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  5.550977e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.188683e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  8.517038e-07 
+poblano norm(J_sumQ - Jsq_true) =  3.697988e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.064763e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.364491e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.273381e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.115332e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.399011e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.152603e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.994293e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.044012e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.040280e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.466233e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.567759e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.952112e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  5.431799e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.834195e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.294860e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.487139e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.719500e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.221545e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.012102e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.059175e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.283564e-06 
+ 
+timestep   13  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.074302e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.658784e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.130512e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.418753e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.331675e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.224190e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.893697e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.637554e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.479182e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.258999e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.674586e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.224162e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.271579e-06 
+poblano norm(J_sumQ - Jsq_true) =  7.289434e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.200557e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  6.151492e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.035796e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.057132e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.855964e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.232210e-06 
+poblano norm(J_sumQ - Jsq_true) =  6.243010e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.159798e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.444496e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.177073e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.387937e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.466382e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.488350e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.531045e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  6.206051e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.486268e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.968503e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.603798e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.289166e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  5.968315e-07 
+poblano norm(J_sumQ - Jsq_true) =  6.505701e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.887199e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  2.159755e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.500832e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.474781e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  1.973605e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.604103e-06 
+poblano norm(J_sumQ - Jsq_true) =  6.701646e-06 
+ 
+timestep   14  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.363684e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.224116e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  2.215929e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.727880e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.657028e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.106568e-06 
+poblano norm(J_sumQ - Jsq_true) =  2.604466e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.868309e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.368209e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.729934e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  1.196474e-06 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.753083e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.587846e-06 
+poblano norm(J_sumQ - Jsq_true) =  1.720137e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  2.935617e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.024500e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.656228e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.674964e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.702832e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.125465e-06 
+poblano norm(J_sumQ - Jsq_true) =  5.545316e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  3.514958e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.798729e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.360290e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.045726e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.291574e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.575026e-07 
+poblano norm(J_sumQ - Jsq_true) =  5.612880e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.286670e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.346446e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.232883e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  7.748989e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  4.908328e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  9.096333e-07 
+poblano norm(J_sumQ - Jsq_true) =  4.313316e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  4.991507e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  1.482062e-06 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.592341e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  9.298827e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.206066e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.385519e-06 
+poblano norm(J_sumQ - Jsq_true) =  9.071666e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.744500e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  9.943174e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.242760e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  8.424983e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  2.528976e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  1.038280e-06 
+poblano norm(J_sumQ - Jsq_true) =  4.872393e-06 
+ 
+timestep   15  
+poblano norm(J_left  - Jl_true) for coordinate  1  =  5.240716e-07 
+poblano norm(J_right - Jr_true) for coordinate  1  =  8.058066e-07 
+poblano norm(J_left  - Jl_true) for coordinate  2  =  1.682600e-06 
+poblano norm(J_right - Jr_true) for coordinate  2  =  6.909091e-07 
+poblano norm(J_left  - Jl_true) for coordinate  3  =  3.988135e-07 
+poblano norm(J_right - Jr_true) for coordinate  3  =  4.935606e-07 
+poblano norm(J_sumQ - Jsq_true) =  6.255844e-06 
+ 

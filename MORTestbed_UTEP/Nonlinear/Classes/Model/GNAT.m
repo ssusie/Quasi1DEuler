@@ -363,7 +363,7 @@ classdef GNAT < handle
             
             %choose method
             % =1 original, =2 Rom constrains; =3 Gnat constraints
-            obj.solver=method;
+            obj.solver  = method;
             obj.augment = augment; % true: augment reconstruction basis for fluxes
         end
         
@@ -523,8 +523,8 @@ classdef GNAT < handle
                 elseif obj.solver == 2
                     RomConstraints(obj);
                 elseif obj.solver == 3 
-                    GnatConstraints(obj); % 1 is for using ROM snapshots
-                elseif obj.solver == 4;
+                    GnatConstraints(obj); % using ROM snapshots
+                elseif obj.solver == 4; % using GNAT snapshots
                     load reconFl_g
                     load reconFr_g
                     load reconFq_g
@@ -533,7 +533,7 @@ classdef GNAT < handle
                     obj.reconFq_gnat = reconFq_g;
                     GnatConstraints2(obj);
                 else
-                    GnatConstraints3(obj); 
+                    GnatConstraints3(obj); % using FOM snapshots
                 end
                 
                 if obj.killflag, warning('Encountered NaN at Time Step %i. Simulation Killed',obj.cTimeIter); return; end;
@@ -2105,8 +2105,8 @@ function [] = GnatConstraints2(obj)
         itnump1 = obj.cTimeIter + 1;
         if obj.cTimeIter==1
             disp('GNAT with approxconstriants from GNAT snapshots')
-            obj.Anorm1=[];
-            obj.Rnorm1=[];
+            obj.Anorm=[];
+            obj.Rnorm=[];
             obj.fullSV(:,obj.cTimeIter)=obj.problem.sv(:,1);
         end
         t = obj.time.T(1) + obj.time.dt*obj.cTimeIter;
@@ -2163,8 +2163,8 @@ function [] = GnatConstraints2(obj)
             obj.fullSV(:, itnump1) = obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
             [gReal,~] = obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
             [g,~] = obj.ApproxConstr2(w_guess);
-            obj.Rnorm1 = [obj.Rnorm1, norm(gReal)];
-            obj.Anorm1 = [obj.Anorm1, norm(g)];
+            obj.Rnorm = [obj.Rnorm, norm(gReal)];
+            obj.Anorm = [obj.Anorm, norm(g)];
         else
             [g,~]=obj.constraintsMultipleDomains(w_guess);
         end
