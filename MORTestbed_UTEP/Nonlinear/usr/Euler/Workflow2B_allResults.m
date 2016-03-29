@@ -81,7 +81,7 @@ gnat1.associateFullProblem(prob(1));
 svG1 = gnat1.reconstructFullState(rom3);
 SOLN = [SOLN, svG1];
 CONSTR = [CONSTR, gnat1.Rnorm'];
-
+Approx_CONSTR = [gnat1.Anorm_rom', gnat1.Anorm_fom'];
 %%
 % Method 5; GNAT with approx constraints using snapshots from ROM
 
@@ -100,6 +100,7 @@ gnat2.associateFullProblem(prob(1));
 svG2 = gnat2.reconstructFullState(rom3);
 SOLN = [SOLN, svG2];
 CONSTR = [CONSTR, gnat2.Anorm'];
+Real_CONSTR = gnat2.Rnorm';
 
 %%
 % Method 5; GNAT with approx constraints using snapshots from GNAT
@@ -118,7 +119,7 @@ gnat3.associateFullProblem(prob(1));
 svG3 = gnat3.reconstructFullState(rom3);
 SOLN = [SOLN, svG3];
 CONSTR = [CONSTR, gnat3.Anorm'];
-
+Real_CONSTR = [Real_CONSTR ,gnat3.Rnorm'];
 %%
 % Method 5; GNAT with approx constraints using snapshots from FOM
 
@@ -137,7 +138,7 @@ gnat4.associateFullProblem(prob(1));
 svG4 = gnat4.reconstructFullState(rom3);
 SOLN = [SOLN, svG4];
 CONSTR = [CONSTR, gnat4.Anorm'];
-
+Real_CONSTR = [Real_CONSTR ,gnat4.Rnorm'];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -161,7 +162,8 @@ for i = 1 : length(METHODS) - 2
     semilogy(CONSTR(:,i),'LineStyle', style, 'Marker', mark,...
         'color', col, 'linewidth', thick(i)), hold on
     xlabel('time step')
-    ylabel('log of method specific constraints')
+    ylabel('log norm(method specific constraints)')
+    set(gca, 'Xtick', 1:N-1)
 end
 list = { 'Method1\_g', 'Method1\_pg', 'Method2', ...
     'Method4', 'Method5\_ROM', 'Method5\_GNAT', 'Method5\_FOM'};
@@ -179,7 +181,7 @@ for i = 2 : length(METHODS)
     semilogy(z1,'-', 'color', col, 'linewidth', thick(i-1)), hold on
     title('rho')
     xlabel('cell number spatial domain')
-    ylabel('log of Rel error at final time step')
+    ylabel('log of Rel error at final time step for rho')
     legend(METHODS{2:end})
 %     keyboard
     figure(3)
@@ -187,14 +189,14 @@ for i = 2 : length(METHODS)
     semilogy(z2,'-', 'color', col, 'linewidth', thick(i-1)), hold on
     title('rho\_u')
     xlabel('cell number spatial domain')
-    ylabel('log of Rel error at final time step')
+    ylabel('log of Rel error at final time step for rho u')
     legend(METHODS{2:end})
 %     keyboard
     figure(4);
     z3 = abs(SOLN(3:3:end,N*i )- SOLN(3:3:end,N))./norm(SOLN(3:3:end,N),2);
     semilogy(z3,'-', 'color', col, 'linewidth', thick(i-1)); hold on;
     xlabel('cell number spatial domain')
-    ylabel('log of Rel error at final time step')
+    ylabel('log of Rel error at final time step for e')
     title('e')
     legend(METHODS{2:end})
 %     keyboard
@@ -210,8 +212,9 @@ for i = 2 : length(METHODS)
     semilogy(E, 'LineStyle', style, 'Marker', mark, 'color', col, 'linewidth', thick(i-1)); 
     hold on % 2-norm of columns
     legend(METHODS{2:end})
-    xlabel('spatial domain')
-    ylabel('log of Rel error at final time step')
+    xlabel('time step')
+    ylabel('log of Rel error at each time step')
+    set(gca, 'Xtick', 1:N-1)
 end
 
 
@@ -239,7 +242,7 @@ for i = 2 : length(METHODS)
     plot(z1,'-', 'color', col, 'linewidth', thick(i-1)), hold on
     title('rho')
     xlabel('cell number spatial domain')
-    ylabel('Rel error at final time step')
+    ylabel('Rel error at final time step for rho')
     legend(METHODS{2:end})
 
     figure(8)
@@ -247,14 +250,14 @@ for i = 2 : length(METHODS)
     plot(z2,'-', 'color', col, 'linewidth', thick(i-1)), hold on
     title('rho\_u')
     xlabel('cell number spatial domain')
-    ylabel('Rel error at final time step')
+    ylabel('Rel error at final time step for rho u')
     legend(METHODS{2:end})
 
     figure(9);
     z3 = abs(SOLN(3:3:end,N*i )- SOLN(3:3:end,N))./norm(SOLN(3:3:end,N),2);
     plot(z3,'-', 'color', col, 'linewidth', thick(i-1)); hold on;
     xlabel('cell number spatial domain')
-    ylabel('Rel error at final time step')
+    ylabel('Rel error at final time step for e')
     title('e')
     legend(METHODS{2:end})
 
@@ -267,7 +270,31 @@ for i = 2 : length(METHODS)
     end
   
 end
+%%
+figure(10)
+thick2 = [3,2.5,2];
+for i = 1 : 3
+    col = rand(1,3);
+    
+    semilogy(Real_CONSTR(:,i),'-o','color', col, 'linewidth', thick2(i)), 
+    hold on
+%     semilogy(CONSTR(:,4+i),'--+','color', col, 'linewidth', thick2(i)), 
+    xlabel('time step')
+    ylabel('log norm( REAL constr)')
+end
+set(gca, 'Xtick', 1:N-1)
+% list = { 'Method5\_rom\_real', 'Method5\_rom', 'Method5\_GNAT\_real' ...
+%     'Method5\_GNAT', 'Method5\_fom\_real', 'Method5\_fom'};
+list = {  'Method5\_rom', 'Method5\_GNAT', 'Method5\_fom'};
+legend(list)
 
-
+%%
+figure(11)
+semilogy(CONSTR(:,4),'--+','color', 'r', 'linewidth', thick2(2)), hold on
+semilogy(Approx_CONSTR(:,1),'-o','color', 'g', 'linewidth', thick2(2)), 
+semilogy(Approx_CONSTR(:,2),'--v','color', 'b', 'linewidth', thick2(2)), 
+xlabel('time step')
+ylabel('log norm (constr)')
+legend('Method4', 'Method4\_approx\_rom', 'Method4\_approx\_fom')
 
 

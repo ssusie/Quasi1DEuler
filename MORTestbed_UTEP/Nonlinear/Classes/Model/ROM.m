@@ -35,6 +35,7 @@ classdef ROM < handle
         gZim;
         gOrig;
         Cnorm;
+        RealCnorm;
         constr;
         
         curr_param;
@@ -150,7 +151,7 @@ classdef ROM < handle
             obj.ncell = cellnum;
             obj.newtonSolver = method;
             obj.trunc = basNum;
-           % keyboard
+%             keyboard
 	    %Copy the time structure and store in the class instance
             %The default time structure is whatever is stored in CONFIG
             obj.time = probobj.config.time;
@@ -762,13 +763,13 @@ classdef ROM < handle
                     du = -((Phi'*J*Phi)\newR);
                     conv = norm(newR,2);
                     %conv(i_N) = norm(newR,2);
-                    if obj.cTimeIter==1 &i_N==1
-                        disp(['Galerkin'])
+                    if obj.cTimeIter==1 && i_N==1
+                        disp('Galerkin')
                     end
                 elseif strcmpi(obj.Rtype,'Petrov-Galerkin')
                     
-                    if obj.cTimeIter==1 &i_N==1
-                        disp(['Petrov-Galerkin'])
+                    if obj.cTimeIter==1 && i_N==1
+                        disp('Petrov-Galerkin')
                     end
                     newJ = J*Phi;
                     if obj.augment
@@ -1161,159 +1162,161 @@ classdef ROM < handle
         
         
         
-        
-        function  [] = LSPG_subdomains(obj)
-            %%use if 3*obj.ncell < obj.trunc
-            itnump1 = obj.cTimeIter + 1;
-            Phi=obj.phi(:,1:obj.trunc);
-            t = obj.time.T(1) + obj.time.dt*obj.cTimeIter;
-            obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
-            
-            w_guess = Phi'* (obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
-            if obj.printLevel > 1
-                fprintf('---- Newton Step    # --------- ||R|| ------------ ||du|| ------------- \n');
-            end
-            
-            for k=1:obj.newt.maxIter
-                
-                if obj.cTimeIter==1 & k==1
-                    size(Phi)
-                    disp(['LSPG, constraints on several domaines; num of domains ', num2str(obj.ncell)])
-                end
-                obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
-                [Res,Jres]=obj.TimeScheme.TimeIntNLFunc(obj.prob,obj.sv(:,itnump1),obj.sv(:,itnump1-1),t);
-                Df=Jres*Phi;
-                %keyboard
-                [g,Dg]=obj.myconstraints(w_guess);
-                for i=1:length(g)
-                    out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
-                    if out.RelError>1e-4,keyboard, end
-                end
-                
-                H=Df'*Df; h=Df'*Res;
-                P=H\Dg';
-                x=H\h;
-                S=-inv(Dg*P);
-                Qzim=P*S;
-                del_w=Qzim*g-(x+Qzim*Dg*x);
-                
-                
-                w_guess=w_guess+del_w;
-                
-                if norm(del_w,2)<10^(-6)
-                    break;
-                end
-            end
-                    
-            [g,~]=obj.myconstraints(w_guess);
-            disp(['norm of the constraints ', num2str(norm(g))])
-            %disp(['number of iterations in truncated case ',num2str(k)])
+
+function  [] = LSPG_subdomains(obj)
+    %%use if 3*obj.ncell < obj.trunc
+    itnump1 = obj.cTimeIter + 1;
+    Phi=obj.phi(:,1:obj.trunc);
+    t = obj.time.T(1) + obj.time.dt*obj.cTimeIter;
+    obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
+
+    w_guess = Phi'* (obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
+    if obj.printLevel > 1
+        fprintf('---- Newton Step    # --------- ||R|| ------------ ||du|| ------------- \n');
+    end
+
+    for k=1:obj.newt.maxIter
+
+        if obj.cTimeIter==1 && k==1
+            size(Phi)
+            disp(['LSPG, constraints on several domaines; num of domains ', num2str(obj.ncell)])
         end
+        obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
+        [Res,Jres]=obj.TimeScheme.TimeIntNLFunc(obj.prob,obj.sv(:,itnump1),obj.sv(:,itnump1-1),t);
+        Df=Jres*Phi;
+        %                 keyboard
+        [g,Dg]=obj.myconstraints(w_guess);
+%         if obj.cTimeIter == 7, keyboard, end %nstep = 10, ncell = 3, gives warning
+%         for i=1:length(g)
+%             out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
+%             if out.RelError>1e-4,keyboard, end
+%         end
+
+        H=Df'*Df; h=Df'*Res;
+        P=H\Dg';
+        x=H\h;
+%         S=-inv(Dg*P);
+%         Qzim=P*S;
+        Qzim = - P / (Dg * P);    
+        del_w=Qzim*g-(x+Qzim*Dg*x);
+
+
+        w_guess=w_guess+del_w;
+
+        if norm(del_w,2)<10^(-6)
+            break;
+        end
+    end
+     disp(['number of iterations ', num2str(k)])
+    [g,~]=obj.myconstraints(w_guess);
+    disp(['norm of the constraints ', num2str(norm(g))])
+    %disp(['number of iterations in truncated case ',num2str(k)])
+end
         
-%   function [cnstr, Dcnstr]=myconstraints(obj, w_increment)
-%             
-%             dn=floor(obj.prob.nVol/(obj.ncell));
-%             points=1:dn:obj.prob.nVol+1;
-%             if points(end)~=obj.prob.nVol+1 && points(end)~=obj.prob.nVol
-%                 points(end+1)=obj.prob.nVol+1;
-%             else
-%                 points(end)= obj.prob.nVol+1;
-%             end
-%             
-%             Phi=obj.phi(:,1:obj.trunc);
-%             Phi1=Phi(1:3:end,:); %basis for the first conserved quantity rho
-%             Phi2=Phi(2:3:end,:); %basis for the second conserved quantity rho*u
-%             Phi3=Phi(3:3:end,:); %basis for the thirs conserved quantity e
-%             
-%             
-%             SV=obj.sv(:,obj.cTimeIter)+Phi*w_increment;
-%             [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
-%             [Q,dQ]=obj.prob.forceTerm(u,P);
-%             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
-%             
-%             %from function governEqn 
-%             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
-%             droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
-%             dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
-%             droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
-%             
-%             start=1;
-%             finish=points(2)-1;
-%             right=   roeF(:,finish)*obj.prob.S(finish+1);
-%             left = - roeF(:,start)*obj.prob.S(start+1);
-%             %keyboard
-%             current_points = 2:points(2)-1;
-%             cnstr(1:3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
-%                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
-%                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
-%                 obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
-%             
-%             derivQ1=zeros(3,obj.trunc);
-%             for i=2:points(2)-1 %1:points(2)-1
-%                 derivQ1=derivQ1+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
-%             end
-%             
-%             derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
-%             derJR=  obj.prob.S(finish+1)*droeF(:,:,finish);
-%             
-%             Dcnstr(1:3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
-%                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
-%                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
-%                 obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
-%                 derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ1);
-%             
-%             
-%             if obj.ncell>2
-%                 for kk=2:obj.ncell-1
-%                     start=points(kk)-1;
-%                     finish=points(kk+1)-1;
-%                     right=   roeF(:,finish)*obj.prob.S(finish+1);
-%                     left = - roeF(:,start)*obj.prob.S(start+1);
-%                     current_points=start+1:finish;
-%                     cnstr(3*(kk-1)+1:3*kk,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
-%                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
-%                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment]+...
-%                         obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
-%                     %obj.time.dt*(right(:,points(kk+1)-2)+left(:,points(kk)-1)-Q(:,points(kk):points(kk+1)-1)*(obj.prob.SVol(points(kk):points(kk+1)-1).*obj.prob.dx(points(kk):points(kk+1)-1))');
-%                     derivQ=zeros(3,obj.trunc);
-%                     for ii=points(kk):points(kk+1)-1
-%                         derivQ=derivQ+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
-%                     end
-%                     
-%                     derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
-%                     derJR= obj.prob.S(finish+1)*droeF(:,:,finish);
-%                     
-%                     Dcnstr(3*(kk-1)+1:3*kk,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
-%                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
-%                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
-%                         obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
-%                         derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ);
-%                     
-%                 end
-%             end
-%             
-%             
-%             %keyboard
-%             start=points(end-1)-1;
-%             finish=points(end)-2;
-%             right=  roeF(:,finish)*obj.prob.S(finish+1);
-%             left = -roeF(:,start)*obj.prob.S(start+1);
-%             current_points=start+1:finish;
-%             cnstr((obj.ncell-1)*3+1:obj.ncell*3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
-%                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
-%                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
-%                 obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');            
-%             
-%             derivQ3=zeros(3,obj.trunc);
-%             for ii= points(end-1):obj.prob.nVol-1 %points(end-1):obj.prob.nVol
-%                 derivQ3=derivQ3+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
-%             end
-%             
-%            
-%             derJL=-obj.prob.S(start+1)* droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
-%             derJR=obj.prob.S(finish+1)* droeF(:,:,finish);
-%             
-%             Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+        %   function [cnstr, Dcnstr]=myconstraints(obj, w_increment)
+        %
+        %             dn=floor(obj.prob.nVol/(obj.ncell));
+        %             points=1:dn:obj.prob.nVol+1;
+        %             if points(end)~=obj.prob.nVol+1 && points(end)~=obj.prob.nVol
+        %                 points(end+1)=obj.prob.nVol+1;
+        %             else
+        %                 points(end)= obj.prob.nVol+1;
+        %             end
+        %
+        %             Phi=obj.phi(:,1:obj.trunc);
+        %             Phi1=Phi(1:3:end,:); %basis for the first conserved quantity rho
+        %             Phi2=Phi(2:3:end,:); %basis for the second conserved quantity rho*u
+        %             Phi3=Phi(3:3:end,:); %basis for the thirs conserved quantity e
+        %
+        %
+        %             SV=obj.sv(:,obj.cTimeIter)+Phi*w_increment;
+        %             [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
+        %             [Q,dQ]=obj.prob.forceTerm(u,P);
+        %             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
+        %
+        %             %from function governEqn
+        %             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+        %             droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+        %             dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+        %             droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+        %
+        %             start=1;
+        %             finish=points(2)-1;
+        %             right=   roeF(:,finish)*obj.prob.S(finish+1);
+        %             left = - roeF(:,start)*obj.prob.S(start+1);
+        %             %keyboard
+        %             current_points = 2:points(2)-1;
+        %             cnstr(1:3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
+        %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
+        %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
+        %                 obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+        %
+        %             derivQ1=zeros(3,obj.trunc);
+        %             for i=2:points(2)-1 %1:points(2)-1
+        %                 derivQ1=derivQ1+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
+        %             end
+        %
+        %             derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+        %             derJR=  obj.prob.S(finish+1)*droeF(:,:,finish);
+        %
+        %             Dcnstr(1:3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+        %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+        %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+        %                 obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+        %                 derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ1);
+        %
+        %
+        %             if obj.ncell>2
+        %                 for kk=2:obj.ncell-1
+        %                     start=points(kk)-1;
+        %                     finish=points(kk+1)-1;
+        %                     right=   roeF(:,finish)*obj.prob.S(finish+1);
+        %                     left = - roeF(:,start)*obj.prob.S(start+1);
+        %                     current_points=start+1:finish;
+        %                     cnstr(3*(kk-1)+1:3*kk,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
+        %                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
+        %                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment]+...
+        %                         obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+        %                     %obj.time.dt*(right(:,points(kk+1)-2)+left(:,points(kk)-1)-Q(:,points(kk):points(kk+1)-1)*(obj.prob.SVol(points(kk):points(kk+1)-1).*obj.prob.dx(points(kk):points(kk+1)-1))');
+        %                     derivQ=zeros(3,obj.trunc);
+        %                     for ii=points(kk):points(kk+1)-1
+        %                         derivQ=derivQ+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
+        %                     end
+        %
+        %                     derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+        %                     derJR= obj.prob.S(finish+1)*droeF(:,:,finish);
+        %
+        %                     Dcnstr(3*(kk-1)+1:3*kk,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+        %                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+        %                         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+        %                         obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+        %                         derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ);
+        %
+        %                 end
+        %             end
+        %
+        %
+        %             %keyboard
+        %             start=points(end-1)-1;
+        %             finish=points(end)-2;
+        %             right=  roeF(:,finish)*obj.prob.S(finish+1);
+        %             left = -roeF(:,start)*obj.prob.S(start+1);
+        %             current_points=start+1:finish;
+        %             cnstr((obj.ncell-1)*3+1:obj.ncell*3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
+        %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
+        %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
+        %                 obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+        %
+        %             derivQ3=zeros(3,obj.trunc);
+        %             for ii= points(end-1):obj.prob.nVol-1 %points(end-1):obj.prob.nVol
+        %                 derivQ3=derivQ3+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
+        %             end
+        %
+        %
+        %             derJL=-obj.prob.S(start+1)* droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+        %             derJR=obj.prob.S(finish+1)* droeF(:,:,finish);
+        %
+        %             Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
 %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
 %                 (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
 %                 obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
@@ -1466,94 +1469,94 @@ classdef ROM < handle
   
   
   
-  %%%%
-  function [c, dc]=testmyconstraints(obj, w_increment,i)
-            [Cnst,Dcnstr]=obj.myconstraints(w_increment);
-            c=Cnst(i); dc=Dcnstr(i,:)';
-        end
+%%%%
+function [c, dc]=testmyconstraints(obj, w_increment,i)
+    [Cnst,Dcnstr]=obj.myconstraints(w_increment);
+    c=Cnst(i); dc=Dcnstr(i,:)';
+end
        
-        function  [] = solveConstraints(obj)
-            %use if 3*obj.ncell==obj.trunc
-            
-            %keyboard
-            itnump1 = obj.cTimeIter + 1;
-            Phi=obj.phi(:,1:obj.trunc);
-            obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
-            
-            w_guess = Phi'* (obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
-            if obj.printLevel > 1
-                fprintf('---- Newton Step    # --------- ||R|| ------------ ||du|| ------------- \n');
-            end
-            %keyboard
-            if obj.cTimeIter==1 
-                size(Phi)
-                disp('num constraint=num basis vectors ')
-                disp(['several domaines ', num2str(obj.ncell)])
-            end
-            
-            for k=1:20
-                
-                [g,Dg]=obj.myconstraints(w_guess);
-                
-                for i=1:length(g)
-                    out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
-                    if out.RelError>1e-4,keyboard, end
-                end
-                
-                if norm(g,2)<10^(-6)
-                    break
-                end
-                del_w=-Dg\g;
-                w_guess=w_guess+del_w;
-                
-            end
-            obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
-            [g,~]=obj.myconstraints(w_guess);
-            %if norm(g)>10^(-4), keyboard, end
-            disp(['norm of the constraints ', num2str(norm(g))])
-            disp(['number of iterations  ',num2str(k)])
+function  [] = solveConstraints(obj)
+    %use if 3*obj.ncell==obj.trunc
+    
+    keyboard
+    itnump1 = obj.cTimeIter + 1;
+    Phi=obj.phi(:,1:obj.trunc);
+    obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
+    
+    w_guess = Phi'* (obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
+    if obj.printLevel > 1
+        fprintf('---- Newton Step    # --------- ||R|| ------------ ||du|| ------------- \n');
+    end
+    %keyboard
+    if obj.cTimeIter==1
+        size(Phi)
+        disp('num constraint = num basis vectors ')
+        disp(['several domaines ', num2str(obj.ncell)])
+    end
+    
+    for k=1:20
+        
+        [g,Dg]=obj.myconstraints(w_guess);
+        
+        for i=1:length(g)
+            out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
+            if out.RelError>1e-4,keyboard, end
         end
         
-     
-        function  [] = minimizeConstraints(obj)
-            % %use if 3*obj.ncell > obj.trunc
-            itnump1 = obj.cTimeIter + 1;
-            Phi=obj.phi(:,1:obj.trunc);
-            obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
-            
-            w_guess = Phi'* (obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
-            if obj.printLevel > 1
-                fprintf('---- Newton Step    # --------- ||R|| ------------ ||du|| ------------- \n');
-            end
-            %keyboard
-            if obj.cTimeIter==1 
-                size(Phi)
-                disp('num constraint=num basis vectors ')
-                disp(['several domaines ', num2str(obj.ncell)])
-            end
-            
-            for k=1:50
-                
-                [g,Dg]=obj.myconstraints(w_guess);
-                if norm(g,2)<10^(-6)
-                    break
-                end
-                
-                J=Dg'*g; Hess=Dg'*Dg;
-                del_w=-Hess\J;
-                w_guess=w_guess+del_w;
-                if norm(del_w,2)<10^(-6)
-                    break
-                end
-            end
-            
-            [g,~]=obj.myconstraints(w_guess);
-            %if norm(g)>10^(-4), keyboard, end
-            disp(['norm of the constraints ', num2str(norm(g))])
-            disp(['number of iterations  ', num2str(k)])
-            obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
-            
+        if norm(g,2)<10^(-6)
+            break
         end
+        del_w=-Dg\g;
+        w_guess=w_guess+del_w;
+        
+    end
+    obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
+    [g,~]=obj.myconstraints(w_guess);
+    %if norm(g)>10^(-4), keyboard, end
+    disp(['norm of the constraints ', num2str(norm(g))])
+    disp(['number of iterations  ',num2str(k)])
+end
+
+     
+function  [] = minimizeConstraints(obj)
+    % %use if 3*obj.ncell > obj.trunc
+    itnump1 = obj.cTimeIter + 1;
+    Phi=obj.phi(:,1:obj.trunc);
+    obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
+    
+    w_guess = Phi'* (obj.sv(:,itnump1)-obj.sv(:,obj.cTimeIter));
+    if obj.printLevel > 1
+        fprintf('---- Newton Step    # --------- ||R|| ------------ ||du|| ------------- \n');
+    end
+
+    if obj.cTimeIter==1
+        size(Phi)
+        disp('num constraint > num basis vectors ')
+        disp(['several domaines ', num2str(obj.ncell)])
+    end
+    
+    for k=1:50
+        
+        [g,Dg]=obj.myconstraints(w_guess);
+        if norm(g,2)<10^(-6)
+            break
+        end
+        
+        J=Dg'*g; Hess=Dg'*Dg;
+        del_w= - Hess \ J;
+        w_guess=w_guess+del_w;
+        if norm(del_w,2)<10^(-6)
+            break
+        end
+    end
+    
+    [g,~]=obj.myconstraints(w_guess);
+    %if norm(g)>10^(-4), keyboard, end
+    disp(['norm of the constraints ', num2str(norm(g))])
+    disp(['number of iterations  ', num2str(k)])
+    obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
+    
+end
                
 %%%%%%%%%%%%%%%%%%%%%%% Multiple domains for GNAT  %%%%%%%%%%%
 function [cnstr, Dcnstr]=constrMultiDomain(obj,w_increment,SV,delt)

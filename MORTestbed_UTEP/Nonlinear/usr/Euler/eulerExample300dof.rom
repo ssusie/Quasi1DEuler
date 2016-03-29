@@ -24,9 +24,9 @@ PGROM:
     basisUpdate = 'border_fast'
     initsnapref = 'ic'
     nsnap = 'all' 
-    nY = 5
+    nY = 10
     saveNL = 1
-    maxIter = 2
+    maxIter = 10
     eps     = [1e-5,1e-5,1e-5]
 
     TimeScheme = 'quasiEuler1DImplicitPseudoTime'

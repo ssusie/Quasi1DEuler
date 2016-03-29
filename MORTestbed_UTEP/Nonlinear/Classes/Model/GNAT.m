@@ -23,8 +23,8 @@ classdef GNAT < handle
         constr;
         Rnorm;
         Anorm;
-        Rnorm1;
-        Anorm1;
+        Anorm_fom;
+        Anorm_rom;
         
         reconFr;
         reconFr_fom
@@ -1060,7 +1060,8 @@ function  [] = RomConstraints(obj)
         itnump1 = obj.cTimeIter + 1;
         if obj.cTimeIter==1
             disp('GNAT with real constriants and Zimmerman`s method')
-            obj.Anorm=[];
+            obj.Anorm_fom=[];
+            obj.Anorm_rom=[];
             obj.Rnorm=[];
             obj.fullSV(:,obj.cTimeIter)=obj.problem.sv(:,1);
             obj.FL = obj.problem.LeftFluxAll(obj.fullSV(:,obj.cTimeIter)); %left flux initially
@@ -1124,9 +1125,11 @@ function  [] = RomConstraints(obj)
         
         if obj.problem.ncell==1
             [gReal,~] = obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
-%             [gApprox,~] = obj.ApproxConstr(w_guess);
+            [gApproxROM,~] = obj.ApproxConstr(w_guess);
+            [gApproxFOM,~] = obj.ApproxConstr3(w_guess);
             obj.Rnorm = [obj.Rnorm, norm(gReal)];
-%             obj.Anorm = [obj.Anorm, norm(gApprox)];
+            obj.Anorm_rom = [obj.Anorm_rom, norm(gApproxROM)];
+            obj.Anorm_fom = [obj.Anorm_fom, norm(gApproxFOM)];
         else
             [gReal,~]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
             disp('several domains')
@@ -1223,37 +1226,37 @@ end
              [fluxRight,Jright]=obj.myRightFlux3fast(w_increment);
              [sq,dsq]=obj.myQdQfast(w_increment);
              
-             params.DifferenceStep = 1e-6;
-             params.DifferenceType='centered';
-             %keyboard
-             if ~obj.augment 
-                 fileID = fopen(['debugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-             else
-                 fileID = fopen(['debugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-             end
+%              params.DifferenceStep = 1e-6;
+%              params.DifferenceType='centered';
+%              %keyboard
+%              if ~obj.augment 
+%                  fileID = fopen(['debugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%              else
+%                  fileID = fopen(['debugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%              end
 %              f1 = 'timestep  %d';
 %              fprintf(fileID, f1, obj.cTimeIter);
-             fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
-             for ii=1:3
-                 outLeft=gradientcheck( @(w) obj.testmyLeftFlux(w, ii), w_increment, params);
-                 outRight=gradientcheck( @(w) obj.testmyRightFlux(w, ii),w_increment, params);
-                 if outLeft.RelError  > 1e-4,keyboard, end
-                 if outRight.RelError > 1e-4,keyboard, end
-                 
-                 formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
-                 formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
-                 fprintf(fileID, formatSpec1, ii, outLeft.RelError);
-                 fprintf(fileID, formatSpec2, ii, outRight.RelError);
-                
-             end
-             
-             outQ=gradientcheck( @(w) obj.testmyQdQ(w), w_increment, params);
-             if outQ.RelError>1e-4,keyboard, end
-             
-             
-              formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
-             fprintf(fileID, formatSpec3, outQ.RelError);
-         fclose(fileID);
+%              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
+%              for ii=1:3
+%                  outLeft=gradientcheck( @(w) obj.testmyLeftFlux(w, ii), w_increment, params);
+%                  outRight=gradientcheck( @(w) obj.testmyRightFlux(w, ii),w_increment, params);
+%                  if outLeft.RelError  > 1e-4,keyboard, end
+%                  if outRight.RelError > 1e-4,keyboard, end
+%                  
+%                  formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
+%                  formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
+%                  fprintf(fileID, formatSpec1, ii, outLeft.RelError);
+%                  fprintf(fileID, formatSpec2, ii, outRight.RelError);
+%                 
+%              end
+%              
+%              outQ=gradientcheck( @(w) obj.testmyQdQ(w), w_increment, params);
+%              if outQ.RelError>1e-4,keyboard, end
+%              
+%              
+%               formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
+%              fprintf(fileID, formatSpec3, outQ.RelError);
+%          fclose(fileID);
 
              Constr(1:3,:)=[(obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
@@ -1338,29 +1341,29 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
                 returndl = dl;
                 
                
-                if obj.cTimeIter == 1
-%                     keyboard
-                    load J2L_true
-                    load Fleft
-                    nf1 = norm(Fleft - fluxLeft);
-
-                    J   = J2L_true(1:3,:) * obj.problem.phi;
-                    nJ1 = norm(J - dl);
-                    
-                    if ~obj.augment
-                        fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-                    
-                    formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
-                    fprintf(fileID, formatSpec1, nf1);
-                    
-                    formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
-                    fprintf(fileID, formatSpec3, nJ1);
-                    
-                    fclose(fileID);
-                end
+%                 if obj.cTimeIter == 1
+% %                     keyboard
+%                     load J2L_true
+%                     load Fleft
+%                     nf1 = norm(Fleft - fluxLeft);
+% 
+%                     J   = J2L_true(1:3,:) * obj.problem.phi;
+%                     nJ1 = norm(J - dl);
+%                     
+%                     if ~obj.augment
+%                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     else
+%                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     end
+%                     
+%                     formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
+%                     fprintf(fileID, formatSpec1, nf1);
+%                     
+%                     formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
+%                     fprintf(fileID, formatSpec3, nJ1);
+%                     
+%                     fclose(fileID);
+%                 end
                 %
                 
 %                 keyboard
@@ -1455,28 +1458,28 @@ end
                 r  = fluxRight(end-2:end);
                 dr = obj.reconFr(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
                 %keyboard
-                if obj.cTimeIter == 1
-                    load J2R_true
-                    load Fright
-                    nf1 = norm(Fright - fluxRight);
-                    
-                    J = J2R_true(end-2:end,:) * obj.problem.phi;
-                    nJ1 = norm(J - dr);
-                    
-                   
-                    if ~obj.augment
-                        fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-                    
-                    formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
-                    fprintf(fileID, formatSpec1, nf1);
-
-                    formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
-                    fprintf(fileID, formatSpec3, nJ1);
-                  fclose(fileID);
-                end
+%                 if obj.cTimeIter == 1
+%                     load J2R_true
+%                     load Fright
+%                     nf1 = norm(Fright - fluxRight);
+%                     
+%                     J = J2R_true(end-2:end,:) * obj.problem.phi;
+%                     nJ1 = norm(J - dr);
+%                     
+%                    
+%                     if ~obj.augment
+%                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     else
+%                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     end
+%                     
+%                     formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
+%                     fprintf(fileID, formatSpec1, nf1);
+% 
+%                     formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
+%                     fprintf(fileID, formatSpec3, nJ1);
+%                   fclose(fileID);
+%                 end
                 
                 returnr = r;
                 returndr = dr; 
@@ -1552,33 +1555,33 @@ end
             end
             
             sdQ=sumDerivQ2;
-            if obj.cTimeIter == 1
-                
-                load Q2_true
-                load('sq_true.mat')
-                load DforceQ
-               %keyboard
-               norm(recQ2 - Q2_true');
-%                 norm(sQ - sq_true);
-%                 norm(reconDQ2-DforceQ(2,:))
-                dQ1 = DforceQ;
-                sdqtrue=zeros(3,obj.problem.trunc);
-                for i=2:obj.problem.prob.nVol-1
-                    sdqtrue = sdqtrue+squeeze(dQ1(:,:,i))*obj.problem.phi(3*i-2:3*i,1:obj.problem.trunc)*(obj.problem.prob.SVol(i).*obj.problem.prob.dx(i));
-                end
-  
-                    if ~obj.augment
-                        fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-%                     fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
-                    formatSpec1 = 'norm(Q_true - Q) =  %e \n \n';
-                    nf1 = norm(recQ2 - Q2_true');
-                    fprintf(fileID, formatSpec1, nf1);
-                    fclose(fileID);                  
-            end
-           
+%             if obj.cTimeIter == 1
+%                 
+%                 load Q2_true
+%                 load('sq_true.mat')
+%                 load DforceQ
+%                %keyboard
+%                norm(recQ2 - Q2_true');
+% %                 norm(sQ - sq_true);
+% %                 norm(reconDQ2-DforceQ(2,:))
+%                 dQ1 = DforceQ;
+%                 sdqtrue=zeros(3,obj.problem.trunc);
+%                 for i=2:obj.problem.prob.nVol-1
+%                     sdqtrue = sdqtrue+squeeze(dQ1(:,:,i))*obj.problem.phi(3*i-2:3*i,1:obj.problem.trunc)*(obj.problem.prob.SVol(i).*obj.problem.prob.dx(i));
+%                 end
+%   
+%                     if ~obj.augment
+%                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     else
+%                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     end
+% %                     fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
+%                     formatSpec1 = 'norm(Q_true - Q) =  %e \n \n';
+%                     nf1 = norm(recQ2 - Q2_true');
+%                     fprintf(fileID, formatSpec1, nf1);
+%                     fclose(fileID);                  
+%             end
+%            
             
 %Susie          %check if reconstruction is good      
                  %keyboard
@@ -1695,34 +1698,34 @@ end
              params.DifferenceStep = 1e-6;
              params.DifferenceType='centered';
              %keyboard
-             if ~obj.augment 
-                 fileID = fopen(['fomdebugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-             else
-                 fileID = fopen(['fomdebugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-             end
-%              f1 = 'timestep  %d';
-%              fprintf(fileID, f1, obj.cTimeIter);
-             fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
-             for ii=1:3
-                 outLeft=gradientcheck( @(w) obj.testmyLeftFlux3(w, ii), w_increment, params);
-                 outRight=gradientcheck( @(w) obj.testmyRightFlux3(w, ii),w_increment, params);
-                 if outLeft.RelError  > 1e-4,keyboard, end
-                 if outRight.RelError > 1e-4,keyboard, end
-                 
-                 formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
-                 formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
-                 fprintf(fileID, formatSpec1, ii, outLeft.RelError);
-                 fprintf(fileID, formatSpec2, ii, outRight.RelError);
-                
-             end
-             
-             outQ=gradientcheck( @(w) obj.testmyQdQ3(w), w_increment, params);
-             if outQ.RelError>1e-4,keyboard, end
-             
-             
-              formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
-             fprintf(fileID, formatSpec3, outQ.RelError);
-         fclose(fileID);
+%              if ~obj.augment 
+%                  fileID = fopen(['fomdebugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%              else
+%                  fileID = fopen(['fomdebugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%              end
+% %              f1 = 'timestep  %d';
+% %              fprintf(fileID, f1, obj.cTimeIter);
+%              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
+%              for ii=1:3
+%                  outLeft=gradientcheck( @(w) obj.testmyLeftFlux3(w, ii), w_increment, params);
+%                  outRight=gradientcheck( @(w) obj.testmyRightFlux3(w, ii),w_increment, params);
+%                  if outLeft.RelError  > 1e-4,keyboard, end
+%                  if outRight.RelError > 1e-4,keyboard, end
+%                  
+%                  formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
+%                  formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
+%                  fprintf(fileID, formatSpec1, ii, outLeft.RelError);
+%                  fprintf(fileID, formatSpec2, ii, outRight.RelError);
+%                 
+%              end
+%              
+%              outQ=gradientcheck( @(w) obj.testmyQdQ3(w), w_increment, params);
+%              if outQ.RelError>1e-4,keyboard, end
+%              
+%              
+%               formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
+%              fprintf(fileID, formatSpec3, outQ.RelError);
+%          fclose(fileID);
 
              Constr(1:3,:)=[(obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
@@ -1808,30 +1811,30 @@ function [returnl, returndl]=myLeftFlux3fast3(obj, w_increment)
                 returndl = dl;
                 
                
-                if obj.cTimeIter == 1
-%                     keyboard
-                    load fom_J2L_true
-                    load fom_Fleft
-                    nf1 = norm(Fleft(:,1) - fluxLeft);
-
-                    J   = J2L_true(1:3,:) * obj.problem.phi;
-                    nJ1 = norm(J - dl);
-                    
-                    if ~obj.augment
-                        fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-                    
-                    formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
-                    fprintf(fileID, formatSpec1, nf1);
-                    
-                    formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
-                    fprintf(fileID, formatSpec3, nJ1);
-                    
-                    fclose(fileID);
-                end
-                %
+%                 if obj.cTimeIter == 1
+% %                     keyboard
+%                     load fom_J2L_true
+%                     load fom_Fleft
+%                     nf1 = norm(Fleft(:,1) - fluxLeft);
+% 
+%                     J   = J2L_true(1:3,:) * obj.problem.phi;
+%                     nJ1 = norm(J - dl);
+%                     
+%                     if ~obj.augment
+%                         fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     else
+%                         fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     end
+%                     
+%                     formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
+%                     fprintf(fileID, formatSpec1, nf1);
+%                     
+%                     formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
+%                     fprintf(fileID, formatSpec3, nJ1);
+%                     
+%                     fclose(fileID);
+%                 end
+%                 %
                 
 %                 keyboard
 %Susie          check if reconstruction of Flux and its derivative is good      
@@ -1925,28 +1928,28 @@ end
                 r  = fluxRight(end-2:end);
                 dr = obj.reconFr_fom(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
                 %keyboard
-                if obj.cTimeIter == 1
-                    load fom_J2R_true
-                    load fom_Fright
-                    nf1 = norm(Fright(:,1) - fluxRight);
-                    
-                    J = J2R_true(end-2:end,:) * obj.problem.phi;
-                    nJ1 = norm(J - dr);
-                    
-                   
-                    if ~obj.augment
-                        fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-                    
-                    formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
-                    fprintf(fileID, formatSpec1, nf1);
-
-                    formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
-                    fprintf(fileID, formatSpec3, nJ1);
-                  fclose(fileID);
-                end
+%                 if obj.cTimeIter == 1
+%                     load fom_J2R_true
+%                     load fom_Fright
+%                     nf1 = norm(Fright(:,1) - fluxRight);
+%                     
+%                     J = J2R_true(end-2:end,:) * obj.problem.phi;
+%                     nJ1 = norm(J - dr);
+%                     
+%                    
+%                     if ~obj.augment
+%                         fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     else
+%                         fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     end
+%                     
+%                     formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
+%                     fprintf(fileID, formatSpec1, nf1);
+%                     
+%                     formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
+%                     fprintf(fileID, formatSpec3, nJ1);
+%                     fclose(fileID);
+%                 end
                 
                 returnr = r;
                 returndr = dr; 
@@ -2022,32 +2025,32 @@ end
             end
             
             sdQ=sumDerivQ2;
-            if obj.cTimeIter == 1
-                
-                load fom_Q2_true
-                load('sq_true.mat')
-                load fom_DforceQ
-               %keyboard
-               norm(recQ2 - Q2_true');
-%                 norm(sQ - sq_true);
-%                 norm(reconDQ2-DforceQ(2,:))
-                dQ1 = DforceQ;
-                sdqtrue=zeros(3,obj.problem.trunc);
-                for i=2:obj.problem.prob.nVol-1
-                    sdqtrue = sdqtrue+squeeze(dQ1(:,:,i))*obj.problem.phi(3*i-2:3*i,1:obj.problem.trunc)*(obj.problem.prob.SVol(i).*obj.problem.prob.dx(i));
-                end
-  
-                    if ~obj.augment
-                        fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    else
-                        fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-                    end
-%                     fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
-                    formatSpec1 = 'norm(Q_true - Q) =  %e \n \n';
-                    nf1 = norm(recQ2 - Q2_true');
-                    fprintf(fileID, formatSpec1, nf1);
-                    fclose(fileID);                  
-            end
+%             if obj.cTimeIter == 1
+%                 
+%                 load fom_Q2_true
+%                 load('sq_true.mat')
+%                 load fom_DforceQ
+%                %keyboard
+%                norm(recQ2 - Q2_true');
+% %                 norm(sQ - sq_true);
+% %                 norm(reconDQ2-DforceQ(2,:))
+%                 dQ1 = DforceQ;
+%                 sdqtrue=zeros(3,obj.problem.trunc);
+%                 for i=2:obj.problem.prob.nVol-1
+%                     sdqtrue = sdqtrue+squeeze(dQ1(:,:,i))*obj.problem.phi(3*i-2:3*i,1:obj.problem.trunc)*(obj.problem.prob.SVol(i).*obj.problem.prob.dx(i));
+%                 end
+%   
+%                     if ~obj.augment
+%                         fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     else
+%                         fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
+%                     end
+% %                     fileID = fopen(['debugingFirstStepNstep', num2str(obj.numStep),'.txt'], 'a');
+%                     formatSpec1 = 'norm(Q_true - Q) =  %e \n \n';
+%                     nf1 = norm(recQ2 - Q2_true');
+%                     fprintf(fileID, formatSpec1, nf1);
+%                     fclose(fileID);                  
+%             end
            
             
 %Susie          %check if reconstruction is good      
@@ -2184,31 +2187,31 @@ end
              [fluxRight,Jright]=obj.myRightFlux3fast2(w_increment);
              [sq,dsq]=obj.myQdQfast2(w_increment);
              
-             params.DifferenceStep = 1e-6;
-             params.DifferenceType='centered';
-             
-             fileID = fopen(['debugingGnatApprox2', num2str(obj.numStep),'.txt'], 'a');
-             fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
-             for ii=1:3
-                 outLeft=gradientcheck( @(w) obj.testmyLeftFlux2(w, ii), w_increment, params);
-                 outRight=gradientcheck( @(w) obj.testmyRightFlux2(w, ii),w_increment, params);
-                 if outLeft.RelError>1e-4,keyboard, end
-                 if outRight.RelError>1e-4,keyboard, end
-                 
-                 formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
-                 formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
-                 fprintf(fileID, formatSpec1, ii, outLeft.RelError);
-                 fprintf(fileID, formatSpec2, ii, outRight.RelError);
-                 
-             end
-             
-             outQ=gradientcheck( @(w) obj.testmyQdQ2(w), w_increment, params);
-             if outQ.RelError>1e-4,keyboard, end
-             
-             
-             formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
-             fprintf(fileID, formatSpec3, outQ.RelError);
-             fclose(fileID);
+%              params.DifferenceStep = 1e-6;
+%              params.DifferenceType='centered';
+%              
+%              fileID = fopen(['debugingGnatApprox2', num2str(obj.numStep),'.txt'], 'a');
+%              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
+%              for ii=1:3
+%                  outLeft=gradientcheck( @(w) obj.testmyLeftFlux2(w, ii), w_increment, params);
+%                  outRight=gradientcheck( @(w) obj.testmyRightFlux2(w, ii),w_increment, params);
+%                  if outLeft.RelError>1e-4,keyboard, end
+%                  if outRight.RelError>1e-4,keyboard, end
+%                  
+%                  formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
+%                  formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
+%                  fprintf(fileID, formatSpec1, ii, outLeft.RelError);
+%                  fprintf(fileID, formatSpec2, ii, outRight.RelError);
+%                  
+%              end
+%              
+%              outQ=gradientcheck( @(w) obj.testmyQdQ2(w), w_increment, params);
+%              if outQ.RelError>1e-4,keyboard, end
+%              
+%              
+%              formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
+%              fprintf(fileID, formatSpec3, outQ.RelError);
+%              fclose(fileID);
 
              Constr(1:3,:)=[(obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
