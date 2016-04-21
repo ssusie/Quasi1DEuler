@@ -1103,7 +1103,7 @@ function  [] = RomConstraints(obj)
             P = H\Dg';
             S = Dg*P;
             x = H\h;
-            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            del_w = - x - P*(S\(g-Dg*x));
             
             % del_w=obj.doLineSearch(del_w, alpha_guess);
             w_guess=w_guess+del_w;
@@ -1198,7 +1198,7 @@ function []=GnatConstraints(obj)
             P = H\Dg';
             S = Dg*P;
             x = H\h;
-            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            del_w = - x - P*(S\(g-Dg*x));
             
 
             w_guess=w_guess+del_w;
@@ -1674,7 +1674,7 @@ end
             P = H\Dg';
             S = Dg*P;
             x = H\h;
-            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            del_w = - x - P*(S\(g-Dg*x));
 
             w_guess=w_guess+del_w;
             obj.sv(:,itnump1)=w_guess;
@@ -2171,7 +2171,7 @@ function [] = GnatConstraints2(obj)
             P = H\Dg';
             S = Dg*P;
             x = H\h;
-            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            del_w = - x - P*(S\(g-Dg*x));
             
 
             w_guess = w_guess + del_w;
@@ -2592,7 +2592,7 @@ function [l, dl]=myLeftFluxMultiDomain(obj, w_increment, points)
                 droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
             end
 
-        if obj.cTimeIter==9, keyboard, end
+            if obj.cTimeIter==9, keyboard, end
             Rleft =-bsxfun(@times,roeF(:,obj.probGNAT.iarrayFaceI),obj.probGNAT.S(obj.probGNAT.iarrayFace(1+obj.probGNAT.ind1:end-obj.probGNAT.indN)));
 
             J2L=zeros(3*9*(obj.probGNAT.nVolMask-obj.probGNAT.ind1-obj.probGNAT.indN),1);
@@ -2604,8 +2604,8 @@ function [l, dl]=myLeftFluxMultiDomain(obj, w_increment, points)
                  J2L(27*(k-1)+1:27*k)=tempL(:);
 
             end
-if obj.probGNAT.ind1
-
+            if obj.probGNAT.ind1
+                
                 fluxLeft=obj.reconFleft*Rleft(:);
                 ncell=length(points)-1;
                 %keyboard
@@ -2616,11 +2616,11 @@ if obj.probGNAT.ind1
                 l=zeros(3*ncell,1);
                 dl=zeros(3*ncell, length(w_increment));
                 for i =1:length(leftIndex)
-                        l(3*i-2:3*i)=fluxLeft(3*leftIndex(i)-2:3*leftIndex(i));
-                        dl(3*i-2:3*i,:)=obj.reconFleft(3*leftIndex(i)-2:3*leftIndex(i),:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+                    l(3*i-2:3*i)=fluxLeft(3*leftIndex(i)-2:3*leftIndex(i));
+                    dl(3*i-2:3*i,:)=obj.reconFleft(3*leftIndex(i)-2:3*leftIndex(i),:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
                 end
                 
-end
+            end
 end
 
 function [l, dl]=testMultiDomainLeft(obj, w_increment, points, ind)
