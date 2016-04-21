@@ -980,6 +980,11 @@ classdef GNAT < handle
             %Determine time iteration number plus 1
             itnump1 = obj.cTimeIter + 1;
             t = obj.time.T(1) + obj.time.dt*obj.cTimeIter;
+            if obj.cTimeIter==1
+                obj.Rnorm=[];
+                obj.fullSV(:,obj.cTimeIter)=obj.problem.sv(:,1);
+            end
+            
             %Set initial guess as last time step (note that sv is the
             %partial state). Initial guess for the sv = 0 for GNAT, but we
             %do need to update the partial state initial guess.
@@ -1016,6 +1021,7 @@ classdef GNAT < handle
                 end
                 
                 obj.sv(:,itnump1) = obj.sv(:,itnump1) + p;
+                obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*obj.sv(:,itnump1);
                 obj.partialU = obj.partialUprev + obj.phiYhat*obj.sv(:,itnump1);
                 %Compute residual and jacobian with updated vector for next iteration
                 [Rhat,JVhat] = obj.TimeScheme.TimeIntNLFuncGNAT(obj.probGNAT,obj.partialU,obj.partialUprev,t);
@@ -1038,6 +1044,8 @@ classdef GNAT < handle
                     end
                 end
             end
+            [gReal,~] = obj.problem.constraintsForGNAT(obj.sv(:,itnump1), obj.fullSV(:, itnump1), obj.time.dt);
+            obj.Rnorm = [obj.Rnorm, norm(gReal)];
             
             %Store the number of newton iterations at this time step
             obj.newt.iter(obj.cTimeIter+1) = i_N;
@@ -1082,7 +1090,7 @@ function  [] = RomConstraints(obj)
         %if isreal(Rhat)==0, keyboard, end
         obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
 
-        for i_N = 1:20 %loop until the maximum newton iterations are reached
+        for i_N = 1:obj.newt.maxIter 
 
             if obj.problem.ncell==1
                 [g,Dg]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
@@ -1092,12 +1100,11 @@ function  [] = RomConstraints(obj)
             end
 
             H=Df'*Df; h=Df'*Rhat;
-            P=H\Dg';
-            x=H\h;
-            S=-inv(Dg*P);
-            Qzim=P*S;
-            del_w=Qzim*g-(x+Qzim*Dg*x);
-
+            P = H\Dg';
+            S = Dg*P;
+            x = H\h;
+            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            
             % del_w=obj.doLineSearch(del_w, alpha_guess);
             w_guess=w_guess+del_w;
             obj.sv(:,itnump1)=w_guess;
@@ -1165,7 +1172,7 @@ function []=GnatConstraints(obj)
         %if isreal(Rhat)==0, keyboard, end
         %obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
         
-        for i_N = 1:20 %loop until the maximum newton iterations are reached
+        for i_N = 1:obj.newt.maxIter
 
             if obj.problem.ncell==1
                 [g,Dg]=obj.ApproxConstr(w_guess);
@@ -1180,12 +1187,19 @@ function []=GnatConstraints(obj)
                 [g,Dg]=obj.constraintsMultipleDomains(w_guess);
             end
 
+%             H=Df'*Df; h=Df'*Rhat;
+%             P=H\Dg';
+%             x=H\h;
+%             S=-inv(Dg*P);
+%             Qzim=P*S;
+%             del_w=Qzim*g-(x+Qzim*Dg*x);
+            
             H=Df'*Df; h=Df'*Rhat;
-            P=H\Dg';
-            x=H\h;
-            S=-inv(Dg*P);
-            Qzim=P*S;
-            del_w=Qzim*g-(x+Qzim*Dg*x);
+            P = H\Dg';
+            S = Dg*P;
+            x = H\h;
+            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            
 
             w_guess=w_guess+del_w;
             obj.sv(:,itnump1)=w_guess;
@@ -1634,8 +1648,8 @@ end
         %if isreal(Rhat)==0, keyboard, end
         %obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
         
-        for i_N = 1:20 %loop until the maximum newton iterations are reached
-
+        for i_N = 1:obj.newt.maxIter
+            
             if obj.problem.ncell==1
                 [g,Dg]=obj.ApproxConstr3(w_guess);
 %                 params.DifferenceStep = 1e-6;
@@ -1649,12 +1663,18 @@ end
                 [g,Dg]=obj.constraintsMultipleDomains(w_guess);
             end
 
+%             H=Df'*Df; h=Df'*Rhat;
+%             P=H\Dg';
+%             x=H\h;
+%             S=-inv(Dg*P);
+%             Qzim=P*S;
+%             del_w=Qzim*g-(x+Qzim*Dg*x);
+            
             H=Df'*Df; h=Df'*Rhat;
-            P=H\Dg';
-            x=H\h;
-            S=-inv(Dg*P);
-            Qzim=P*S;
-            del_w=Qzim*g-(x+Qzim*Dg*x);
+            P = H\Dg';
+            S = Dg*P;
+            x = H\h;
+            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
 
             w_guess=w_guess+del_w;
             obj.sv(:,itnump1)=w_guess;
@@ -2124,7 +2144,7 @@ function [] = GnatConstraints2(obj)
         %if isreal(Rhat)==0, keyboard, end
 %         obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
         
-        for i_N = 1:20 %loop until the maximum newton iterations are reached
+        for i_N = 1:obj.newt.maxIter
 
             if obj.problem.ncell == 1
                 [g,Dg] = obj.ApproxConstr2(w_guess);
@@ -2140,12 +2160,19 @@ function [] = GnatConstraints2(obj)
                 [g,Dg] = obj.constraintsMultipleDomains(w_guess);
             end
 
-            H = Df' * Df; h=Df' * Rhat;
-            P = H \ Dg';
-            x = H \ h;
-            S = -inv(Dg * P);
-            Qzim  = P * S;
-            del_w = Qzim*g - (x + Qzim * Dg * x);
+%             H = Df' * Df; h=Df' * Rhat;
+%             P = H \ Dg';
+%             x = H \ h;
+%             S = -inv(Dg * P);
+%             Qzim  = P * S;
+%             del_w = Qzim*g - (x + Qzim * Dg * x);
+            
+            H=Df'*Df; h=Df'*Rhat;
+            P = H\Dg';
+            S = Dg*P;
+            x = H\h;
+            del_w = - x - H\(Dg'*(S\(g-Dg*x)));
+            
 
             w_guess = w_guess + del_w;
             obj.sv(:,itnump1) = w_guess;

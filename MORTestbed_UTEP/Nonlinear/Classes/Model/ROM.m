@@ -883,7 +883,7 @@ classdef ROM < handle
                 obj.constr=[];
             end
             
-            for k=1:20 %obj.newt.maxIter
+            for k=1:obj.newt.maxIter
                 
                 if obj.cTimeIter==1 & k==1
                     size(Phi)
@@ -908,12 +908,10 @@ classdef ROM < handle
                 %                 end
                 
                 H=Df'*Df; h=Df'*Res;
-                P=H\Dg';
-                x=H\h;
-                Sm=-inv(Dg*P);
-                Qzim=P*Sm;
-                del_w=Qzim*g-(x+Qzim*Dg*x);
-                
+                P = H\Dg';
+                S = Dg*P;
+                x = H\h;
+                del_w = - x - H\(Dg'*(S\(g-Dg*x)));
                 w_guess=w_guess+del_w;
                 
                 if norm(del_w,2)<10^(-5)
@@ -965,15 +963,10 @@ classdef ROM < handle
             droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
             
             % governEqn
-            Rright= bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1));
-            r=Rright(:,end);
+            r= bsxfun(@times,roeF(:,end),obj.prob.S(end-1));
             finish=obj.prob.nVol-1;
             derJR=obj.prob.S(finish+1)*droeF(:,:,finish);
             dr=derJR*Phi(3*(finish-1)+1:3*(finish+1),:);
-            %             if obj.cTimeIter==1
-            %                 keyboard
-            %                 dr_true=dr; save dr_true dr_true;
-            %             end
         end
         
         
@@ -989,8 +982,7 @@ classdef ROM < handle
             dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
             droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
             
-            Rleft= -bsxfun(@times,roeF(:,1:end-1),obj.prob.S(2:end-2));
-            l=Rleft(:,1);
+            l= -bsxfun(@times,roeF(:,1),obj.prob.S(2));
             start=1;
             derJL=-obj.prob.S(start+1)*droeF(:,:,start);
             dl=derJL*Phi(3*(start-1)+1:3*(start+1),:);
@@ -1494,7 +1486,7 @@ function  [] = solveConstraints(obj)
         disp(['several domaines ', num2str(obj.ncell)])
     end
     
-    for k=1:20
+    for k=1:obj.newt.maxIter
         
         [g,Dg]=obj.myconstraints(w_guess);
         

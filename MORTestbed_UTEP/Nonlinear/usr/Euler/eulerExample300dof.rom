@@ -6,7 +6,7 @@ GROM:
     nsnap = 'all' 
     nY = 1
     saveNL = 1
-    maxIter = 1
+    maxIter = 20
     eps     = [1e-5,1e-5,1e-5]
 
     TimeScheme = 'quasiEuler1DImplicitPseudoTime'
@@ -26,7 +26,7 @@ PGROM:
     nsnap = 'all' 
     nY = 10
     saveNL = 1
-    maxIter = 10
+    maxIter = 20
     eps     = [1e-5,1e-5,1e-5]
 
     TimeScheme = 'quasiEuler1DImplicitPseudoTime'
@@ -49,7 +49,7 @@ GNAT:
     nJ = 10
     nI = [] 
     addInd = 'none'
-    maxIter = 1
+    maxIter = 20
     eps = [1e-5,1e-5,1e-5]
     timeQuiet = false 
     newtQuiet = true 
