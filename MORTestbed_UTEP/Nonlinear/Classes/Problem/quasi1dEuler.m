@@ -30,8 +30,12 @@ classdef quasi1dEuler < handle
         gamma;
         M0;
         T0;
+        ShockLocRatio;
 %         P0;
+        pExitIncrease;
         pExit;
+        rhoExit;
+        uExit;
         R;
         Cv;
         c0;
@@ -138,9 +142,11 @@ classdef quasi1dEuler < handle
             obj.R = obj.config.param{2};
             obj.Pt = obj.config.param{3};
             obj.Tt = obj.config.param{4};
-            obj.pExit = obj.config.param{5};
+            obj.pExitIncrease = obj.config.param{5};
             obj.p = obj.config.param{6}; obj.p = obj.p(:);
             AreaParam = obj.config.param{7};
+            obj.M0 = obj.config.param{8};
+            obj.ShockLocRatio = obj.config.param{9};
             if length(obj.config.param)==8
                 obj.A_Bnd=obj.config.param{8};
             end
@@ -165,12 +171,23 @@ classdef quasi1dEuler < handle
                     obj.Atype = 4;
             end
             [obj.S,obj.SVol,obj.xVol,obj.dSdp] = obj.computeNozzleArea();
+            plot(obj.SVol)
+            factor = 1;
+            obj.S = factor*obj.S;
+            obj.SVol = factor*obj.SVol;
+            obj.xVol = factor*obj.xVol;
+            obj.dSdp = factor*obj.dSdp;
             Ainlet = obj.SVol(1);
             Aexit  = obj.SVol(end);
             Athroat = min(min(obj.S),min(obj.SVol));
             
             %Extract information from altfile
-            [~, P, rho, u, T] = feval(cfgobj.altFile,Ainlet,Aexit,Athroat,obj.gamma,obj.R,obj.Tt,obj.Pt,obj.nVol);
+            ShockLoc = ceil(obj.ShockLocRatio*obj.ndof/3);
+            [~, P, rho, u, T] = feval(cfgobj.altFile,obj.SVol,Athroat,obj.M0,...
+                                      obj.gamma,obj.R,obj.Tt,obj.Pt,obj.nVol,ShockLoc,obj.pExitIncrease);
+            obj.pExit = P(end);
+            obj.rhoExit = rho(end);
+            obj.uExit = u(end);
             
             %Nondimensionalization values
             rho0 = rho(1);

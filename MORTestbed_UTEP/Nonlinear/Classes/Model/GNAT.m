@@ -25,6 +25,8 @@ classdef GNAT < handle
         Anorm;
         Anorm_fom;
         Anorm_rom;
+        i1;
+        ie;
         
         reconFr;
         reconFr_fom
@@ -203,6 +205,8 @@ classdef GNAT < handle
             obj.nI = extractInputROM(GNATtext,N,obj.id,'nI',[]); obj.nI = obj.nI(:);
             obj.nSample = extractInputROM(GNATtext,N,obj.id,'nSample',[]); obj.nSample = obj.nSample(:);
             obj.nGreed  = extractInputROM(GNATtext,N,obj.id,'nGreed',[]); obj.nGreed = obj.nGreed(:);
+            obj.i1           = extractInputROM(GNATtext,N,obj.id,'i1',false);
+            obj.ie           = extractInputROM(GNATtext,N,obj.id,'ie',false);
             
             %%%%%%%%% Determine the 'free' indices to add %%%%%%%%%
             obj.addInd = extractInputROM(GNATtext,N,obj.id,'addInd','none');
@@ -242,6 +246,7 @@ classdef GNAT < handle
             obj.newt.maxIter = extractInputROM(GNATtext,N,obj.id,'maxIter',10);
             obj.newt.eps     = extractInputROM(GNATtext,N,obj.id,'eps',1e-5);
             obj.newt.quiet   = extractInputROM(GNATtext,N,obj.id,'newtQuiet',false);
+          
             obj.newt.iter    = zeros(1,obj.time.nstep);
             %Determine linesearch status and properties
             obj.newt.linesrch.status = extractInputROM(GNATtext,N,obj.id,'linesrch',false);
@@ -703,7 +708,7 @@ classdef GNAT < handle
             
             obj.sampleNodes = [];
             obj.sampleInd = [];
-            
+                        
             %Make sure that we have not specified too few sample nodes.
             if obj.nSample*probobj.ndim < obj.nGreed
                 nSampleOLD = obj.nSample;
@@ -729,6 +734,17 @@ classdef GNAT < handle
             for p = 1:P
                 QQ = QQ + Q(p);
                 for s = 1:S(p)
+                    if obj.i1
+                        obj.sampleNodes = [obj.sampleNodes; 1];
+                        obj.sampleInd = [obj.sampleInd; probobj.node2ind(1)];
+                        obj.i1 = false;  continue;
+                    end
+                    if obj.ie
+                        n = length(probobj.mesh.node);
+                        obj.sampleNodes = [obj.sampleNodes; n]; 
+                        obj.sampleInd = [obj.sampleInd; probobj.node2ind(n)];
+                        obj.ie = false;  continue;
+                    end
                     %Determine the set of indices not already in our sample mesh
                     validNodes = setdiff(1:length(probobj.mesh.node),obj.sampleNodes');
                     temp = zeros(length(validNodes),1);
@@ -1143,7 +1159,7 @@ function  [] = RomConstraints(obj)
         end
   
         %[gReal,~]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
-        disp(['norm of the real constraint   ', num2str(norm(gReal))])
+        fprintf('norm of the real constraint   %e and num. iterations  =  %d', num2str(norm(gReal)),i_N);
         
         %obj.Cnorm=[obj.Cnorm,norm(gReal)];
         %save GnatReal_realConstr99 Rconstr
@@ -1225,7 +1241,7 @@ function []=GnatConstraints(obj)
         else
             [g,~]=obj.constraintsMultipleDomains(w_guess);
         end
-        disp(['norm of the approx constraint   ', num2str(norm(g))])
+        fprintf('norm of the approx constraint   %e and num. iterations  =  %d', num2str(norm(g)),i_N);
         
 end
 
@@ -1555,7 +1571,7 @@ end
             sQ=[0; obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
             %compute Jacobian of sq
-            partialDQ2=zeros(9,900);
+            partialDQ2=zeros(9,obj.probGNAT.ndof);
             for ii=1:9
                 i=obj.sampleNodes(ii+1);
                 partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));
@@ -2031,7 +2047,7 @@ end
             sQ=[0; obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
             %compute Jacobian of sq
-            partialDQ2=zeros(9,900);
+            partialDQ2=zeros(9,obj.probGNAT.ndof);
             for ii=1:9
                 i=obj.sampleNodes(ii+1);
                 partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));
@@ -2415,7 +2431,7 @@ end
             sQ = [0; obj.problem.prob.SVol(2:end-1) .* obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
             %compute Jacobian of sq
-            partialDQ2 = zeros(9,900);
+            partialDQ2 = zeros(9,obj.probGNAT.ndof);
             for ii = 1:9
                 i = obj.sampleNodes(ii+1);
                 partialDQ2(ii,3 * i-2:3 * i) = squeeze(dQ(1,:,ii + 1));
@@ -2720,7 +2736,7 @@ function [ sq, dsq]=myQdQMultiDomain(obj, w_increment, points)
     %if obj.cTimeIter==9, keyboard, end
     [Q,dQ]=obj.probGNAT.forceTermGNAT(u,P);
     recQ2=obj.reconQ2*Q(2,2:end)';
-    partialDQ2=zeros(9,900);
+    partialDQ2=zeros(9,obj.probGNAT.ndof);
     for ii=1:9
         i=obj.sampleNodes(ii+1);
         partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));

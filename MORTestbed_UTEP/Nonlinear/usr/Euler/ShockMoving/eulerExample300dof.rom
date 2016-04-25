@@ -1,0 +1,57 @@
+GROM:
+    id = 1
+    fileRoot = 'grom'
+    basisUpdate = 'border_fast'
+    initsnapref = 'ic'
+    nsnap = 'all' 
+    nY = 1
+    saveNL = 1
+    maxIter = 20
+    eps     = [1e-5,1e-5,1e-5]
+
+    TimeScheme = 'quasiEuler1DImplicitPseudoTime'
+
+    nBases = 1
+    addElem = true
+    addElemTol = 0.1
+    basisSelect = 'closest'
+    timeQuiet = false 
+    newtQuiet = true 
+
+PGROM:
+    id = 1
+    fileRoot = 'pgrom'
+    basisUpdate = 'border_fast'
+    initsnapref = 'ic'
+    nsnap = 'all' 
+    nY = 10
+    saveNL = 1
+    maxIter = 20
+    eps     = [1e-5,1e-5,1e-5]
+
+    TimeScheme = 'quasiEuler1DImplicitPseudoTime'
+
+    nBases = 1
+    addElem = true
+    addElemTol = 0.2
+    basisSelect = 'closest'
+    timeQuiet = false 
+    newtQuiet = true 
+
+GNAT:
+    id = 1 
+
+    TimeScheme = 'quasiEuler1DImplicitPseudoTime'
+
+    nSample = 10
+    nGreed  = 10
+    i1 = true
+    ie = false
+    nR = 10
+    nJ = 10
+    nI = [] 
+    addInd = 'none'
+    maxIter = 200
+    eps = [1e-5,1e-5,1e-5]
+    timeQuiet = false 
+    newtQuiet = true 

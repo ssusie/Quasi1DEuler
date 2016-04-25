@@ -1,4 +1,8 @@
-function [M P rho u T] = init_conds(A_inlet, A_exit, A_throat, gamma, R, Tt, Pt, nVol)
+function [M P rho u T] = init_conds(A, A_throat, Mach_ref, gamma, R, Tt, Pt, nVol, ShockLoc, PexitIncrease)
+% function [M P rho u T] = init_conds(A_inlet, A_exit, A_throat, gamma, R, Tt, Pt, nVol)
+
+A_inlet = A(1);
+A_exit = A(end);
 
 M_inlet = fzero(@(Mach) mach_eq(Mach,A_inlet,A_throat,gamma), .1);
 M_exit = fzero(@(Mach) mach_eq(Mach,A_exit,A_throat,gamma), 2);

@@ -30,7 +30,7 @@ switch flag
     case {'saveNL','steadyconverge'}
         baseunit = {'double','logical'};
         basecols = 1;
-    case {'timeQuiet','newtQuiet','linesrch'}
+    case {'timeQuiet','newtQuiet','linesrch','i1','ie'}
         baseunit = {'logical'};
         basecols = 1;
     case 'T'
