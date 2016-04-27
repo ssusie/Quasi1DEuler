@@ -28,6 +28,8 @@ classdef GNAT < handle
         i1;
         ie;
         
+        reconFlux;
+        reconFlux_fom;
         reconFr;
         reconFr_fom
         reconFrnew;
@@ -401,102 +403,106 @@ classdef GNAT < handle
             %NAND to know which parameter values have been used to generate
             %the current state vectors
             obj.curr_param = obj.probGNAT(1).p;
-            obj.reconLocs = setdiff(obj.sampleInd,[1,2,3])-3;
-            
+            n = obj.sampleNodes(end);
+            obj.reconLocs = setdiff(obj.sampleInd,[[1,2,3],obj.probGNAT.node2ind(n)])-3;
       
-            limSkinny = size(obj.problem.phiFright,2);
+            limSkinny = size(obj.problem.phiFright,2); %YC: needs to be generalize for predictive case
             if limSkinny > length(obj.reconLocs)
                limSkinny = length(obj.reconLocs);
             end
-            if length(obj.sampleNodes(2:end)) < nstep+1
+            if length(obj.sampleNodes(2:end)) < nstep+1 %YC: Why? Why not bigger truncQ?
                 truncQ = length(obj.sampleNodes(2:end));
             else
                 truncQ = nstep+1;
             end
             
             obj.numStep = nstep;
-            if ~obj.augment
-                fileID = fopen(['debugingSizesNotAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
-                fprintf(fileID,  'False');
-                
-                obj.reconFr = obj.problem.phiFright(:,1:limSkinny) * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
-                obj.reconFl = obj.problem.phiFleft(:, 1:limSkinny) * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
-%                 keyboard
-                obj.reconFr_fom = obj.problem.phiFright_fom(:,1:limSkinny) * pinv(obj.problem.phiFright_fom(obj.reconLocs, 1:limSkinny));
-                obj.reconFl_fom = obj.problem.phiFleft_fom(:, 1:limSkinny) * pinv(obj.problem.phiFleft_fom(obj.reconLocs, 1:limSkinny));
-            
-                
-                [n1, m1] = size(obj.problem.phiFright(obj.reconLocs, :));
-                [n2, m2] = size(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
-                f1 = 'size of not truncated Phi_right inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_right inside pinv =  %d, %d \n \n';
-                fprintf(fileID, f1, n1, m1);
-                fprintf(fileID, f2, n2, m2);
-
-                disp(['size phi FR  ',num2str(size(obj.problem.phiFright)) ])
-                [n1, m1] = size(obj.problem.phiFleft(obj.reconLocs, :));
-                [n2, m2] = size(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
-                f1 = 'size of not truncated Phi_left inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_left inside pinv =  %d, %d \n \n';
-                fprintf(fileID, f1, n1, m1);
-                fprintf(fileID, f2, n2, m2);
-                disp(['size phi FL  ',num2str(size(obj.problem.phiFleft)) ])
-
-                % need to be a skinny matrix pinv
-                obj.reconQ = obj.problem.phiQ(2:3:end,:);
-                obj.reconQ_fom = obj.problem.phiQ_fom(2:3:end,:);
-                PhiQ2 = obj.reconQ; 
-                PhiQ2_fom = obj.reconQ_fom;
-                %keyboard
-                obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
-                obj.reconQ2_fom = PhiQ2_fom(:, 1:truncQ) * pinv(PhiQ2_fom(obj.sampleNodes(2:end),1:truncQ));
-                [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
-                [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
-                f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_Q inside pinv =  %d, %d \n \n';
-                fprintf(fileID, f1, n1, m1);
-                fprintf(fileID, f2, n2, m2);
-
-                disp(['size phi PhiQ2  ',num2str(size(PhiQ2)) ])
-
-                fclose(fileID);
-            else
-                fileID = fopen(['debugingSizesAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
-                fprintf(fileID, 'True');
-                obj.reconFr = obj.problem.phiFrnew(:,1:limSkinny) * pinv(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
-                obj.reconFl = obj.problem.phiFlnew(:,1:limSkinny) * pinv(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
-            
-                [n1, m1] = size(obj.problem.phiFrnew(obj.reconLocs, :));
-                [n2, m2] = size(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
-                f1 = 'size of not truncated Phi_right inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_right inside pinv =  %d, %d \n \n';
-                fprintf(fileID, f1, n1, m1);
-                fprintf(fileID, f2, n2, m2);
-                
-                disp(['size phi FR  ',num2str(size(obj.problem.phiFright)) ])
-                [n1, m1] = size(obj.problem.phiFlnew(obj.reconLocs, :));
-                [n2, m2] = size(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
-                f1 = 'size of not truncated Phi_left inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_left inside pinv =  %d, %d \n \n';
-                fprintf(fileID, f1, n1, m1);
-                fprintf(fileID, f2, n2, m2);
-                disp(['size phi FL  ',num2str(size(obj.problem.phiFleft)) ])
-                
-                % need to be a skinny matrix pinv
-                obj.reconQ = obj.problem.phiQ(2:3:end,:);
-                PhiQ2 = obj.reconQ;
-                obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
-                [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
-                [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
-                f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
-                f2 = 'size of truncated Phi_Q inside pinv =  %d, %d \n \n';
-                fprintf(fileID, f1, n1, m1);
-                fprintf(fileID, f2, n2, m2);
-                
-                disp(['size phi PhiQ2  ',num2str(size(PhiQ2)) ])
-                
-                fclose(fileID);
-                
+            if obj.solver > 2
+                if ~obj.augment
+                    fileID = fopen(['debugingSizesNotAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
+                    fprintf(fileID,  'False');
+                    
+                    obj.reconFlux = obj.problem.phiFlux(:,1:limSkinny) * pinv(obj.problem.phiFlux(obj.reconLocs, 1:limSkinny));
+                    obj.reconFr = obj.problem.phiFright(:,1:limSkinny) * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
+                    obj.reconFl = obj.problem.phiFleft(:, 1:limSkinny) * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
+                    %                 keyboard
+                    obj.reconFlux_fom = obj.problem.phiFlux_fom(:,1:limSkinny) * pinv(obj.problem.phiFlux_fom(obj.reconLocs, 1:limSkinny));
+                    obj.reconFr_fom = obj.problem.phiFright_fom(:,1:limSkinny) * pinv(obj.problem.phiFright_fom(obj.reconLocs, 1:limSkinny));
+                    obj.reconFl_fom = obj.problem.phiFleft_fom(:, 1:limSkinny) * pinv(obj.problem.phiFleft_fom(obj.reconLocs, 1:limSkinny));
+                    
+                    
+                    [n1, m1] = size(obj.problem.phiFright(obj.reconLocs, :));
+                    [n2, m2] = size(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
+                    f1 = 'size of not truncated Phi_right inside pinv =  %d, %d \n';
+                    f2 = 'size of truncated Phi_right inside pinv =  %d, %d \n \n';
+                    fprintf(fileID, f1, n1, m1);
+                    fprintf(fileID, f2, n2, m2);
+                    
+                    disp(['size phi FR  ',num2str(size(obj.problem.phiFright)) ])
+                    [n1, m1] = size(obj.problem.phiFleft(obj.reconLocs, :));
+                    [n2, m2] = size(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
+                    f1 = 'size of not truncated Phi_left inside pinv =  %d, %d \n';
+                    f2 = 'size of truncated Phi_left inside pinv =  %d, %d \n \n';
+                    fprintf(fileID, f1, n1, m1);
+                    fprintf(fileID, f2, n2, m2);
+                    disp(['size phi FL  ',num2str(size(obj.problem.phiFleft)) ])
+                    
+                    % need to be a skinny matrix pinv
+                    obj.reconQ = obj.problem.phiQ(2:3:end,:);
+                    obj.reconQ_fom = obj.problem.phiQ_fom(2:3:end,:);
+                    PhiQ2 = obj.reconQ;
+                    PhiQ2_fom = obj.reconQ_fom;
+                    %keyboard
+                    obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                    obj.reconQ2_fom = PhiQ2_fom(:, 1:truncQ) * pinv(PhiQ2_fom(obj.sampleNodes(2:end),1:truncQ));
+                    [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
+                    [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                    f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
+                    f2 = 'size of truncated Phi_Q inside pinv =  %d, %d \n \n';
+                    fprintf(fileID, f1, n1, m1);
+                    fprintf(fileID, f2, n2, m2);
+                    
+                    disp(['size phi PhiQ2  ',num2str(size(PhiQ2)) ])
+                    
+                    fclose(fileID);
+                else
+                    fileID = fopen(['debugingSizesAughment_nstep', num2str(obj.numStep),'.txt'], 'w');
+                    fprintf(fileID, 'True');
+                    obj.reconFr = obj.problem.phiFrnew(:,1:limSkinny) * pinv(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
+                    obj.reconFl = obj.problem.phiFlnew(:,1:limSkinny) * pinv(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
+                    
+                    [n1, m1] = size(obj.problem.phiFrnew(obj.reconLocs, :));
+                    [n2, m2] = size(obj.problem.phiFrnew(obj.reconLocs, 1:limSkinny));
+                    f1 = 'size of not truncated Phi_right inside pinv =  %d, %d \n';
+                    f2 = 'size of truncated Phi_right inside pinv =  %d, %d \n \n';
+                    fprintf(fileID, f1, n1, m1);
+                    fprintf(fileID, f2, n2, m2);
+                    
+                    disp(['size phi FR  ',num2str(size(obj.problem.phiFright)) ])
+                    [n1, m1] = size(obj.problem.phiFlnew(obj.reconLocs, :));
+                    [n2, m2] = size(obj.problem.phiFlnew(obj.reconLocs, 1:limSkinny));
+                    f1 = 'size of not truncated Phi_left inside pinv =  %d, %d \n';
+                    f2 = 'size of truncated Phi_left inside pinv =  %d, %d \n \n';
+                    fprintf(fileID, f1, n1, m1);
+                    fprintf(fileID, f2, n2, m2);
+                    disp(['size phi FL  ',num2str(size(obj.problem.phiFleft)) ])
+                    
+                    % need to be a skinny matrix pinv
+                    obj.reconQ = obj.problem.phiQ(2:3:end,:);
+                    PhiQ2 = obj.reconQ;
+                    obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                    [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
+                    [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                    f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
+                    f2 = 'size of truncated Phi_Q inside pinv =  %d, %d \n \n';
+                    fprintf(fileID, f1, n1, m1);
+                    fprintf(fileID, f2, n2, m2);
+                    
+                    disp(['size phi PhiQ2  ',num2str(size(PhiQ2)) ])
+                    
+                    fclose(fileID);
+                    
+                end
             end
 
             tGNATstart = tic;
@@ -1348,11 +1354,11 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
                  J2L(27*(k-1)+1:27*k)=tempL(:);
             end
 
-            if obj.probGNAT.ind1
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
 %                 keyboard
                 %reconstruct flux and Jacobian
                 fluxLeft  = obj.reconFl*Rleft(:);
-                JhatL=[zeros(18,1);J2L];
+                JhatL=[zeros(18,1);J2L;zeros(18,1)];
                 obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
                 
                 %choose left flux at the left boundary
@@ -1423,6 +1429,8 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
 %     a2 = [a2, find((ismember(r.roeF,roeF(:,i))))]; %
 % end
 % a2(3,:)/3
+            else
+                error('For now, you must include both first and end nodes in sample nodes');
             end
 end
 

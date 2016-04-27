@@ -7,7 +7,6 @@ METHODS = {'FOM', 'Method1\_g', 'Method1\_pg', 'Method2', 'Method3',...
 [fom,prob] = initialize(fname,10);
 fom.executeModel;
 soln=fom.sv;
-save fom_soln soln
 SOLN = fom.sv;
 %% 
 % Method 1; original ROM with 'g' or 'pg'
@@ -24,7 +23,6 @@ rom1.executeModel;
 SOLN = [SOLN, rom1.sv];
 CONSTR = rom1.Cnorm';
 %%
-
 rom2 = ROM([fname,'.rom'], Gal_PetGal{2}, 1, prob, methodROM, numCell, basisNumber);
 rom2.clusterSnapsOnly(fom,trainIC);
 rom2.computePOD('fromClustSnaps');
@@ -86,6 +84,8 @@ Approx_CONSTR = [gnat1.Anorm_rom', gnat1.Anorm_fom'];
 %%
 % Method 5; GNAT with approx constraints using snapshots from ROM
 
+rom3.buildFluxBasis(rom3.sv); % build flux basis from ROM snapshots.
+
 fnameNLbase='NonlinBase';
 NLSnapshot = 0;
 methodGNAT = 3; % = 1 original, = 2 Rom constrains; = 3 Gnat constraints
@@ -123,6 +123,7 @@ CONSTR = [CONSTR, gnat3.Anorm'];
 Real_CONSTR = [Real_CONSTR ,gnat3.Rnorm'];
 %%
 % Method 5; GNAT with approx constraints using snapshots from FOM
+rom3.buildFluxBasis(fom.sv);
 
 fnameNLbase='NonlinBase';
 NLSnapshot = 0;

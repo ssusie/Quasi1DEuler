@@ -46,7 +46,7 @@ GNAT:
     nSample = 10
     nGreed  = 10
     i1 = true
-    ie = false
+    ie = true
     nR = 10
     nJ = 10
     nI = [] 

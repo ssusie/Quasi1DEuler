@@ -286,7 +286,7 @@ classdef FOM < handle
                     num2str(norm(R,2)/tol),'  eps = ',num2str(obj.newt.eps), '***']);
             end
         end
-                
+
         function  [] = executeModel(obj,restart)
             %This function performs the time-stepping for the FOM
             %simulation defined in this object.

@@ -6,8 +6,6 @@ METHODS = {'FOM', 'Method1\_g', 'Method1\_pg', 'Method2', 'Method3',...
 %FOM
 [fom,prob] = initialize(fname,1);
 fom.executeModel;
-soln=fom.sv;
-save fom_soln soln
 SOLN = fom.sv;
 %% 
 % Method 1; original ROM with 'g' or 'pg'
@@ -85,6 +83,7 @@ CONSTR = [CONSTR, gnat1.Rnorm'];
 Approx_CONSTR = [gnat1.Anorm_rom', gnat1.Anorm_fom'];
 %%
 % Method 5; GNAT with approx constraints using snapshots from ROM
+rom3.buildFluxBasis(rom3.sv); % build flux basis from ROM snapshots.
 
 fnameNLbase='NonlinBase';
 NLSnapshot = 0;
@@ -123,7 +122,7 @@ CONSTR = [CONSTR, gnat3.Anorm'];
 Real_CONSTR = [Real_CONSTR ,gnat3.Rnorm'];
 %%
 % Method 5; GNAT with approx constraints using snapshots from FOM
-
+rom3.buildFluxBasis(fom.sv); 
 fnameNLbase='NonlinBase';
 NLSnapshot = 0;
 methodGNAT = 5; % = 1 original, = 2 Rom constrains; = 3 Gnat constraints
