@@ -23,24 +23,18 @@ classdef GNAT < handle
         constr;
         Rnorm;
         Anorm;
-        Anorm_fom;
         Anorm_rom;
         i1;
         ie;
         
         reconFlux;
-        reconFlux_fom;
         reconFr;
-        reconFr_fom
         reconFrnew;
         reconFl;
-        reconFl_fom
         reconFlnew;
         reconQ;
-        reconQ_fom;
         numStep;
         reconQ2;
-        reconQ2_fom;
         
         FL;
         FR;
@@ -404,8 +398,17 @@ classdef GNAT < handle
             %the current state vectors
             obj.curr_param = obj.probGNAT(1).p;
             n = obj.sampleNodes(end);
-            obj.reconLocs = setdiff(obj.sampleInd,[[1,2,3],obj.probGNAT.node2ind(n)])-3;
-      
+            if obj.probGNAT.indN && obj.probGNAT.ind1
+                obj.reconLocs = setdiff(obj.sampleInd,[[1,2,3],obj.probGNAT.node2ind(n)])-3;
+            elseif obj.probGNAT.indN && ~obj.probGNAT.ind1
+                obj.reconLocs = setdiff(obj.sampleInd,obj.probGNAT.node2ind(n))-3;
+            elseif ~obj.probGNAT.indN && obj.probGNAT.ind1
+                obj.reconLocs = setdiff(obj.sampleInd,[1,2,3])-3;
+            else
+                obj.reconLocs = obj.sampleInd-3;
+            end
+                
+                
             limSkinny = size(obj.problem.phiFright,2); %YC: needs to be generalize for predictive case
             if limSkinny > length(obj.reconLocs)
                limSkinny = length(obj.reconLocs);
@@ -426,11 +429,7 @@ classdef GNAT < handle
                     obj.reconFr = obj.problem.phiFright(:,1:limSkinny) * pinv(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
                     obj.reconFl = obj.problem.phiFleft(:, 1:limSkinny) * pinv(obj.problem.phiFleft(obj.reconLocs, 1:limSkinny));
                     %                 keyboard
-                    obj.reconFlux_fom = obj.problem.phiFlux_fom(:,1:limSkinny) * pinv(obj.problem.phiFlux_fom(obj.reconLocs, 1:limSkinny));
-                    obj.reconFr_fom = obj.problem.phiFright_fom(:,1:limSkinny) * pinv(obj.problem.phiFright_fom(obj.reconLocs, 1:limSkinny));
-                    obj.reconFl_fom = obj.problem.phiFleft_fom(:, 1:limSkinny) * pinv(obj.problem.phiFleft_fom(obj.reconLocs, 1:limSkinny));
-                    
-                    
+
                     [n1, m1] = size(obj.problem.phiFright(obj.reconLocs, :));
                     [n2, m2] = size(obj.problem.phiFright(obj.reconLocs, 1:limSkinny));
                     f1 = 'size of not truncated Phi_right inside pinv =  %d, %d \n';
@@ -449,12 +448,10 @@ classdef GNAT < handle
                     
                     % need to be a skinny matrix pinv
                     obj.reconQ = obj.problem.phiQ(2:3:end,:);
-                    obj.reconQ_fom = obj.problem.phiQ_fom(2:3:end,:);
                     PhiQ2 = obj.reconQ;
-                    PhiQ2_fom = obj.reconQ_fom;
+                    
                     %keyboard
                     obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
-                    obj.reconQ2_fom = PhiQ2_fom(:, 1:truncQ) * pinv(PhiQ2_fom(obj.sampleNodes(2:end),1:truncQ));
                     [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
                     [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
                     f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
@@ -1089,13 +1086,12 @@ function  [] = RomConstraints(obj)
     
         itnump1 = obj.cTimeIter + 1;
         if obj.cTimeIter==1
-            disp('GNAT with real constriants and Zimmerman`s method')
-            obj.Anorm_fom=[];
-            obj.Anorm_rom=[];
+            disp('GNAT with real constriants')
             obj.Rnorm=[];
             obj.fullSV(:,obj.cTimeIter)=obj.problem.sv(:,1);
-            obj.FL = obj.problem.LeftFluxAll(obj.fullSV(:,obj.cTimeIter)); %left flux initially
-            obj.FR = obj.problem.RightFluxAll(obj.fullSV(:,obj.cTimeIter)); %righ flux initially
+            flux = obj.problem.FluxAll(obj.fullSV(:,obj.cTimeIter));
+            obj.FL = -flux(1:end-3,1);
+            obj.FR = flux(4:end,1);
             fq = obj.problem.ForceTermsAll(obj.fullSV(:,obj.cTimeIter));
             obj.FQ = fq(2,:)'; %left flux initially
 %             keyboard
@@ -1118,7 +1114,6 @@ function  [] = RomConstraints(obj)
                 [g,Dg]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
             else
                 [g,Dg]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
-                disp('several domains')
             end
 
             H=Df'*Df; h=Df'*Rhat;
@@ -1144,31 +1139,23 @@ function  [] = RomConstraints(obj)
         end
         
 %         keyboard
-        fl = obj.problem.LeftFluxAll (obj.fullSV(:,itnump1));
-        obj.FL = [obj.FL, fl]; %left flux 
-        fr = obj.problem.RightFluxAll(obj.fullSV(:,itnump1));
-        obj.FR = [obj.FR, fr]; %righ flux 
+        flux = obj.problem.FluxAll(obj.fullSV(:,itnump1));
+        
+        obj.FL = [obj.FL, -flux(1:end-3,1)]; %left flux 
+        obj.FR = [obj.FR, flux(4:end,1)];
         fq = obj.problem.ForceTermsAll(obj.fullSV(:,itnump1));
         obj.FQ = [obj.FQ, fq(2,:)'];%left flux 
-        
-        
+
         if obj.problem.ncell==1
             [gReal,~] = obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
-            [gApproxROM,~] = obj.ApproxConstr(w_guess);
-            [gApproxFOM,~] = obj.ApproxConstr3(w_guess);
             obj.Rnorm = [obj.Rnorm, norm(gReal)];
-            obj.Anorm_rom = [obj.Anorm_rom, norm(gApproxROM)];
-            obj.Anorm_fom = [obj.Anorm_fom, norm(gApproxFOM)];
         else
             [gReal,~]=obj.problem.constrMultiDomain(w_guess,obj.fullSV(:, itnump1), obj.time.dt);
-            disp('several domains')
+            obj.Rnorm = [obj.Rnorm, norm(gReal)];
         end
-  
-        %[gReal,~]=obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
-        fprintf('norm of the real constraint   %e and num. iterations  =  %d', num2str(norm(gReal)),i_N);
+
+        fprintf('norm of the real constraint   %e and num. iterations  =  %d\n', norm(gReal),i_N);
         
-        %obj.Cnorm=[obj.Cnorm,norm(gReal)];
-        %save GnatReal_realConstr99 Rconstr
 end
 
             
@@ -1198,23 +1185,9 @@ function []=GnatConstraints(obj)
 
             if obj.problem.ncell==1
                 [g,Dg]=obj.ApproxConstr(w_guess);
-%                 params.DifferenceStep = 1e-6;
-%                 params.DifferenceType='centered';
-%                 for ii=1:3
-%                     out=gradientcheck( @(w) obj.testApproxConstr(w, ii), w_guess, params);
-%                     if out.RelError>1e-4,keyboard, end
-%                 end
-            
             else
                 [g,Dg]=obj.constraintsMultipleDomains(w_guess);
             end
-
-%             H=Df'*Df; h=Df'*Rhat;
-%             P=H\Dg';
-%             x=H\h;
-%             S=-inv(Dg*P);
-%             Qzim=P*S;
-%             del_w=Qzim*g-(x+Qzim*Dg*x);
             
             H=Df'*Df; h=Df'*Rhat;
             P = H\Dg';
@@ -1246,8 +1219,12 @@ function []=GnatConstraints(obj)
             obj.Anorm = [obj.Anorm, norm(g)];
         else
             [g,~]=obj.constraintsMultipleDomains(w_guess);
+            obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
+            [gReal,~] = obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
+            obj.Anorm = [obj.Anorm, norm(g)];
+            obj.Rnorm = [obj.Rnorm, norm(gReal)];
         end
-        fprintf('norm of the approx constraint   %e and num. iterations  =  %d', num2str(norm(g)),i_N);
+        fprintf('norm of the approx constraint   %e and num. iterations  =  %d\n', norm(g),i_N);
         
 end
 
@@ -1257,42 +1234,10 @@ end
          Phi2=obj.problem.phi(2:3:end,1:obj.problem.trunc); %basis for the second conserved quantity rho*u
          Phi3=obj.problem.phi(3:3:end,1:obj.problem.trunc); %basis for the thirs conserved quantity e
           
-         if obj.probGNAT.ind1
+%          if obj.probGNAT.ind1
              [fluxLeft, Jleft] = obj.myLeftFlux3fast(w_increment);
              [fluxRight,Jright]=obj.myRightFlux3fast(w_increment);
              [sq,dsq]=obj.myQdQfast(w_increment);
-             
-%              params.DifferenceStep = 1e-6;
-%              params.DifferenceType='centered';
-%              %keyboard
-%              if ~obj.augment 
-%                  fileID = fopen(['debugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%              else
-%                  fileID = fopen(['debugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%              end
-%              f1 = 'timestep  %d';
-%              fprintf(fileID, f1, obj.cTimeIter);
-%              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
-%              for ii=1:3
-%                  outLeft=gradientcheck( @(w) obj.testmyLeftFlux(w, ii), w_increment, params);
-%                  outRight=gradientcheck( @(w) obj.testmyRightFlux(w, ii),w_increment, params);
-%                  if outLeft.RelError  > 1e-4,keyboard, end
-%                  if outRight.RelError > 1e-4,keyboard, end
-%                  
-%                  formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
-%                  formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
-%                  fprintf(fileID, formatSpec1, ii, outLeft.RelError);
-%                  fprintf(fileID, formatSpec2, ii, outRight.RelError);
-%                 
-%              end
-%              
-%              outQ=gradientcheck( @(w) obj.testmyQdQ(w), w_increment, params);
-%              if outQ.RelError>1e-4,keyboard, end
-%              
-%              
-%               formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
-%              fprintf(fileID, formatSpec3, outQ.RelError);
-%          fclose(fileID);
 
              Constr(1:3,:)=[(obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
@@ -1303,7 +1248,7 @@ end
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:);
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi3(2:end-1,:) ]+...
                  obj.time.dt*(Jleft +Jright-[zeros(1,length(w_increment));dsq;zeros(1,length(w_increment))]);
-         end
+%          end
  end
 
  
@@ -1354,84 +1299,38 @@ function [returnl, returndl]=myLeftFlux3fast(obj, w_increment)
                  J2L(27*(k-1)+1:27*k)=tempL(:);
             end
 
-            if obj.probGNAT.ind1 && obj.probGNAT.indN
-%                 keyboard
+%            if obj.probGNAT.ind1
                 %reconstruct flux and Jacobian
                 fluxLeft  = obj.reconFl*Rleft(:);
-                JhatL=[zeros(18,1);J2L;zeros(18,1)];
+                if obj.probGNAT.ind1 && obj.probGNAT.indN
+                    JhatL=[zeros(18,1);J2L;zeros(18,1)];
+                elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                    JhatL=[zeros(18,1);J2L];
+                elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                    JhatL=[J2L;zeros(18,1)];
+                else
+                    JhatL=J2L;
+                end
                 obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
                 
                 %choose left flux at the left boundary
                 l  = fluxLeft(1:3);
-                dl = obj.reconFl(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
                 
+                if obj.probGNAT.ind1 && obj.probGNAT.indN
+                    dl = obj.reconFl(1:3,:)*obj.JhatFluxL(4:end-3,:)*obj.phiYhat;
+                elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                    dl = obj.reconFl(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+                elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                    dl = obj.reconFl(1:3,:)*obj.JhatFluxL(1:end-3,:)*obj.phiYhat;
+                else
+                    dl = obj.reconFl(1:3,:)*obj.JhatFluxL*obj.phiYhat;
+                end
 
-%                 load J2L_true
-%                 load Fleft
-%                 norm(Fleft - fluxLeft)
-%                 norm(Fleft - fluxLeft2)
-%                 J = J2L_true(1:3,:) * obj.problem.phi;
-%                 norm(J - dl)
-%                 norm(J - dlnew)
                 returnl = l;
                 returndl = dl;
-                
-               
-%                 if obj.cTimeIter == 1
-% %                     keyboard
-%                     load J2L_true
-%                     load Fleft
-%                     nf1 = norm(Fleft - fluxLeft);
-% 
-%                     J   = J2L_true(1:3,:) * obj.problem.phi;
-%                     nJ1 = norm(J - dl);
-%                     
-%                     if ~obj.augment
-%                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     else
-%                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     end
-%                     
-%                     formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
-%                     fprintf(fileID, formatSpec1, nf1);
-%                     
-%                     formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
-%                     fprintf(fileID, formatSpec3, nJ1);
-%                     
-%                     fclose(fileID);
-%                 end
-                %
-                
-%                 keyboard
-%Susie          check if reconstruction of Flux and its derivative is good      
-%                 keyboard
-%                 load Fleft
-%                 norm(Fleft(:,1)-fluxLeft) %=4.1546e-09
-%                 load J2L_true
-%                 J=J2L_true(1:3,:)*obj.problem.phi %calculates derivative wrt w_hat
-%                 norm(J-dl)   % = 2.3560e-04
-
-% load Fleft
-% r = load('romroeF');
-% load J2L_true
-% F = reshape(Fleft, 3, 298);
-% 
-% a = [];
-% for i = 1 : length(Rleft(1,:))
-%     a = [a; find((ismember(F,Rleft(:,i))))]; % = setdiff(obj.sampleInd,[1,2,3])-3
-% end
-% 
-% norm(Fleft(a) - reshape(Rleft, 3*9,1)); % = 0
-
-% norm(r.roeF(:,obj.sampleNodes(2:end)-roeF(:,obj.probGNAT.iarrayFaceI+1)) % = 0
-% a2=[];
-% for i = 1 : length(roeF(1,:))
-%     a2 = [a2, find((ismember(r.roeF,roeF(:,i))))]; %
-% end
-% a2(3,:)/3
-            else
-                error('For now, you must include both first and end nodes in sample nodes');
-            end
+%            else
+%                error('For now, you must include first node in sample nodes');
+%            end
 end
 
 
@@ -1484,71 +1383,37 @@ end
 
             end
 
-            if obj.probGNAT.ind1
-                %reconstruct right flux and Jacobian
-                fluxRight  = obj.reconFr * Rright(:);
-                
+            
+            %reconstruct right flux and Jacobian
+            fluxRight  = obj.reconFr * Rright(:);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatR = [zeros(18,1);J2R;zeros(18,1)];
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatR = [J2R;zeros(18,1)];
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
                 JhatR = [zeros(18,1);J2R];
-                JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
-                JR(obj.reconstJhatInd) = JhatR;
-                
-                %choose right flux at the right boundary
-                r  = fluxRight(end-2:end);
-                dr = obj.reconFr(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
-                %keyboard
-%                 if obj.cTimeIter == 1
-%                     load J2R_true
-%                     load Fright
-%                     nf1 = norm(Fright - fluxRight);
-%                     
-%                     J = J2R_true(end-2:end,:) * obj.problem.phi;
-%                     nJ1 = norm(J - dr);
-%                     
-%                    
-%                     if ~obj.augment
-%                         fileID = fopen(['debugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     else
-%                         fileID = fopen(['debugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     end
-%                     
-%                     formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
-%                     fprintf(fileID, formatSpec1, nf1);
-% 
-%                     formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
-%                     fprintf(fileID, formatSpec3, nJ1);
-%                   fclose(fileID);
-%                 end
-                
-                returnr = r;
-                returndr = dr; 
-                
-%                 keyboard
-%Susie          %check if reconstruction is good      
-                %keyboard
-                %load Fright
-                %norm(Fright-fluxRight)  %=1.4842e-08
-                
-%*********      % Jacobian is not right by chacking with dr_true saved from
-                % ROM file
-                % load J2R_true
-                % J = J2R_true(end-2:end,:)*obj.problem.phi;
-                % norm(J - dr) % 1.1937e-04, nstep = 3 
-                
-% load Fright
-% r = load('romroeF');
-% load J2R_true
-% F = reshape(Fright, 3, 298);
-% 
-% a = [];
-% for i = 1 : length(Rright(1,:))
-%     a = [a; find((ismember(F,Rright(:,i))))]; % = setdiff(obj.sampleInd,[1,2,3])-3
-% end
-% gmp = setdiff(obj.sampleInd,[1,2,3])-3;
-% norm(a - gmp)
-% Fright(a) - reshape(Rright, 3*9,1) % = 0
-% norm(Fright - fluxRight)
-
+            else 
+                JhatR = J2R;
             end
+                
+            JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
+            JR(obj.reconstJhatInd) = JhatR;
+            
+            %choose right flux at the right boundary
+            r  = fluxRight(end-2:end);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                dr = obj.reconFr(end-2:end,:)*JR(4:end-3,:)*obj.phiYhat;
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                dr = obj.reconFr(end-2:end,:)*JR(1:end-3,:)*obj.phiYhat;
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                dr = obj.reconFr(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
+            else 
+                dr = obj.reconFr(end-2:end,:)*JR*obj.phiYhat;
+            end            
+           
+            returnr = r;
+            returndr = dr;
+
  end   
        
      
@@ -1676,23 +1541,9 @@ end
             
             if obj.problem.ncell==1
                 [g,Dg]=obj.ApproxConstr3(w_guess);
-%                 params.DifferenceStep = 1e-6;
-%                 params.DifferenceType='centered';
-%                 for ii=1:3
-%                     out=gradientcheck( @(w) obj.testApproxConstr(w, ii), w_guess, params);
-%                     if out.RelError>1e-4,keyboard, end
-%                 end
-            
             else
                 [g,Dg]=obj.constraintsMultipleDomains(w_guess);
             end
-
-%             H=Df'*Df; h=Df'*Rhat;
-%             P=H\Dg';
-%             x=H\h;
-%             S=-inv(Dg*P);
-%             Qzim=P*S;
-%             del_w=Qzim*g-(x+Qzim*Dg*x);
             
             H=Df'*Df; h=Df'*Rhat;
             P = H\Dg';
@@ -1723,6 +1574,10 @@ end
             obj.Anorm = [obj.Anorm, norm(g)];
         else
             [g,~]=obj.constraintsMultipleDomains(w_guess);
+            obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
+            [gReal,~] = obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
+            obj.Anorm = [obj.Anorm, norm(g)];
+            obj.Rnorm = [obj.Rnorm, norm(gReal)];
         end
         disp(['norm of the approx constraint   ', num2str(norm(g))])
         
@@ -1734,42 +1589,13 @@ end
          Phi2=obj.problem.phi(2:3:end,1:obj.problem.trunc); %basis for the second conserved quantity rho*u
          Phi3=obj.problem.phi(3:3:end,1:obj.problem.trunc); %basis for the thirs conserved quantity e
           
-         if obj.probGNAT.ind1
+%          if obj.probGNAT.ind1
              [fluxLeft, Jleft] = obj.myLeftFlux3fast3(w_increment);
              [fluxRight,Jright]=obj.myRightFlux3fast3(w_increment);
              [sq,dsq]=obj.myQdQfast3(w_increment);
              
              params.DifferenceStep = 1e-6;
              params.DifferenceType='centered';
-             %keyboard
-%              if ~obj.augment 
-%                  fileID = fopen(['fomdebugingPobl_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%              else
-%                  fileID = fopen(['fomdebugingPobl_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%              end
-% %              f1 = 'timestep  %d';
-% %              fprintf(fileID, f1, obj.cTimeIter);
-%              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
-%              for ii=1:3
-%                  outLeft=gradientcheck( @(w) obj.testmyLeftFlux3(w, ii), w_increment, params);
-%                  outRight=gradientcheck( @(w) obj.testmyRightFlux3(w, ii),w_increment, params);
-%                  if outLeft.RelError  > 1e-4,keyboard, end
-%                  if outRight.RelError > 1e-4,keyboard, end
-%                  
-%                  formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
-%                  formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
-%                  fprintf(fileID, formatSpec1, ii, outLeft.RelError);
-%                  fprintf(fileID, formatSpec2, ii, outRight.RelError);
-%                 
-%              end
-%              
-%              outQ=gradientcheck( @(w) obj.testmyQdQ3(w), w_increment, params);
-%              if outQ.RelError>1e-4,keyboard, end
-%              
-%              
-%               formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
-%              fprintf(fileID, formatSpec3, outQ.RelError);
-%          fclose(fileID);
 
              Constr(1:3,:)=[(obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
@@ -1780,7 +1606,7 @@ end
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:);
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi3(2:end-1,:) ]+...
                  obj.time.dt*(Jleft +Jright-[zeros(1,length(w_increment));dsq;zeros(1,length(w_increment))]);
-         end
+%          end
  end
 
  
@@ -1830,84 +1656,36 @@ function [returnl, returndl]=myLeftFlux3fast3(obj, w_increment)
                     - obj.probGNAT.S(obj.probGNAT.iarrayFace(k+obj.probGNAT.ind1))*droeF(:,4:6,obj.probGNAT.iarrayFaceI(k)),zeros(3)]';
                  J2L(27*(k-1)+1:27*k)=tempL(:);
             end
-            
-            
-            if obj.probGNAT.ind1
-                %keyboard
-                %reconstruct flux and Jacobian
-                fluxLeft  = obj.reconFl_fom * Rleft(:);
+
+            %keyboard
+            %reconstruct flux and Jacobian
+            fluxLeft  = obj.reconFl * Rleft(:);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN     
+                JhatL=[zeros(18,1);J2L;zeros(18,1)];
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN     
+                JhatL=[J2L;zeros(18,1)];
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN     
                 JhatL=[zeros(18,1);J2L];
-                obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
-                
-                %choose left flux at the left boundary
-                l  = fluxLeft(1:3);
-                dl = obj.reconFl_fom (1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
-                
-
-%                 load J2L_true
-%                 load Fleft
-%                 norm(Fleft - fluxLeft)
-%                 norm(Fleft - fluxLeft2)
-%                 J = J2L_true(1:3,:) * obj.problem.phi;
-%                 norm(J - dl)
-%                 norm(J - dlnew)
-                returnl = l;
-                returndl = dl;
-                
-               
-%                 if obj.cTimeIter == 1
-% %                     keyboard
-%                     load fom_J2L_true
-%                     load fom_Fleft
-%                     nf1 = norm(Fleft(:,1) - fluxLeft);
-% 
-%                     J   = J2L_true(1:3,:) * obj.problem.phi;
-%                     nJ1 = norm(J - dl);
-%                     
-%                     if ~obj.augment
-%                         fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     else
-%                         fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     end
-%                     
-%                     formatSpec1 = 'norm(fluxLeft_true - fluxLeft) =  %e \n';
-%                     fprintf(fileID, formatSpec1, nf1);
-%                     
-%                     formatSpec3 = 'norm(JLeft_true - JLeft) =  %e \n';
-%                     fprintf(fileID, formatSpec3, nJ1);
-%                     
-%                     fclose(fileID);
-%                 end
-%                 %
-                
-%                 keyboard
-%Susie          check if reconstruction of Flux and its derivative is good      
-%                 keyboard
-%                 load Fleft
-%                 norm(Fleft(:,1)-fluxLeft) %=4.1546e-09
-%                 load J2L_true
-%                 J=J2L_true(1:3,:)*obj.problem.phi %calculates derivative wrt w_hat
-%                 norm(J-dl)   % = 2.3560e-04
-
-% load Fleft
-% r = load('romroeF');
-% load J2L_true
-% F = reshape(Fleft, 3, 298);
-% 
-% a = [];
-% for i = 1 : length(Rleft(1,:))
-%     a = [a; find((ismember(F,Rleft(:,i))))]; % = setdiff(obj.sampleInd,[1,2,3])-3
-% end
-% 
-% norm(Fleft(a) - reshape(Rleft, 3*9,1)); % = 0
-
-% norm(r.roeF(:,obj.sampleNodes(2:end)-roeF(:,obj.probGNAT.iarrayFaceI+1)) % = 0
-% a2=[];
-% for i = 1 : length(roeF(1,:))
-%     a2 = [a2, find((ismember(r.roeF,roeF(:,i))))]; %
-% end
-% a2(3,:)/3
+            else
+                JhatL=J2L;
             end
+            obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
+
+            %choose left flux at the left boundary
+            l  = fluxLeft(1:3);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN 
+                dl = obj.reconFl(1:3,:)*obj.JhatFluxL(4:end-3,:)*obj.phiYhat;
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN 
+                dl = obj.reconFl(1:3,:)*obj.JhatFluxL(1:end-3,:)*obj.phiYhat;
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN 
+                dl = obj.reconFl(1:3,:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
+            else
+                dl = obj.reconFl(1:3,:)*obj.JhatFluxL*obj.phiYhat;
+            end
+
+            returnl = l;
+            returndl = dl;
+
 end
 
 
@@ -1960,71 +1738,36 @@ end
 
             end
 
-            if obj.probGNAT.ind1
-                %reconstruct right flux and Jacobian
-                fluxRight  = obj.reconFr_fom * Rright(:);
-                
+            
+            %reconstruct right flux and Jacobian
+            fluxRight  = obj.reconFr * Rright(:);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN    
+                JhatR = [zeros(18,1);J2R;zeros(18,1)];
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN    
                 JhatR = [zeros(18,1);J2R];
-                JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
-                JR(obj.reconstJhatInd) = JhatR;
-                
-                %choose right flux at the right boundary
-                r  = fluxRight(end-2:end);
-                dr = obj.reconFr_fom(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
-                %keyboard
-%                 if obj.cTimeIter == 1
-%                     load fom_J2R_true
-%                     load fom_Fright
-%                     nf1 = norm(Fright(:,1) - fluxRight);
-%                     
-%                     J = J2R_true(end-2:end,:) * obj.problem.phi;
-%                     nJ1 = norm(J - dr);
-%                     
-%                    
-%                     if ~obj.augment
-%                         fileID = fopen(['fomdebugingFirstStep_notAugm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     else
-%                         fileID = fopen(['fomdebugingFirstStep_Augm_Nstep', num2str(obj.numStep),'.txt'], 'a');
-%                     end
-%                     
-%                     formatSpec1 = 'norm(fluxRight_true - fluxRight) =  %e \n';
-%                     fprintf(fileID, formatSpec1, nf1);
-%                     
-%                     formatSpec3 = 'norm(JRight_true - JRight) =  %e \n';
-%                     fprintf(fileID, formatSpec3, nJ1);
-%                     fclose(fileID);
-%                 end
-                
-                returnr = r;
-                returndr = dr; 
-                
-%                 keyboard
-%Susie          %check if reconstruction is good      
-                %keyboard
-                %load Fright
-                %norm(Fright-fluxRight)  %=1.4842e-08
-                
-%*********      % Jacobian is not right by chacking with dr_true saved from
-                % ROM file
-                % load J2R_true
-                % J = J2R_true(end-2:end,:)*obj.problem.phi;
-                % norm(J - dr) % 1.1937e-04, nstep = 3 
-                
-% load Fright
-% r = load('romroeF');
-% load J2R_true
-% F = reshape(Fright, 3, 298);
-% 
-% a = [];
-% for i = 1 : length(Rright(1,:))
-%     a = [a; find((ismember(F,Rright(:,i))))]; % = setdiff(obj.sampleInd,[1,2,3])-3
-% end
-% gmp = setdiff(obj.sampleInd,[1,2,3])-3;
-% norm(a - gmp)
-% Fright(a) - reshape(Rright, 3*9,1) % = 0
-% norm(Fright - fluxRight)
-
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN    
+                JhatR = [J2R;zeros(18,1)];
+            else
+                JhatR = J2R;
             end
+            JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
+            JR(obj.reconstJhatInd) = JhatR;
+
+            %choose right flux at the right boundary
+            r  = fluxRight(end-2:end);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                dr = obj.reconFr(end-2:end,:)*JR(4:end-3,:)*obj.phiYhat;
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                dr = obj.reconFr(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                dr = obj.reconFr(end-2:end,:)*JR(1:end-3,:)*obj.phiYhat;
+            else
+                dr = obj.reconFr(end-2:end,:)*JR*obj.phiYhat;
+            end
+            
+            returnr = r;
+            returndr = dr; 
+  
  end   
        
      
@@ -2050,7 +1793,7 @@ end
             [Q,dQ]=obj.probGNAT.forceTermGNAT(u,P);
             %keyboard
             %reconstruct the force term Q=[0,Q2,0]
-            recQ2=obj.reconQ2_fom * Q(2,2:end)';
+            recQ2=obj.reconQ2 * Q(2,2:end)';
             %sum of (force term*S*dx) needed for constraints
             sQ=[0; obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
@@ -2060,7 +1803,7 @@ end
                 i=obj.sampleNodes(ii+1);
                 partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));
             end
-            reconDQ2=obj.reconQ2_fom * partialDQ2;
+            reconDQ2=obj.reconQ2 * partialDQ2;
             % sum of (force term*S*dx)
             sumDerivQ2=zeros(1, length(w_increment));
 
@@ -2221,6 +1964,10 @@ function [] = GnatConstraints2(obj)
             obj.Anorm = [obj.Anorm, norm(g)];
         else
             [g,~]=obj.constraintsMultipleDomains(w_guess);
+            obj.fullSV(:, itnump1)=obj.fullSV(:,obj.cTimeIter)+obj.problem.phi*w_guess;
+            [gReal,~] = obj.problem.constraintsForGNAT(w_guess, obj.fullSV(:, itnump1), obj.time.dt);
+            obj.Anorm = [obj.Anorm, norm(g)];
+            obj.Rnorm = [obj.Rnorm, norm(gReal)];
         end
         disp(['norm of the approx constraint   ', num2str(norm(g))])
         
@@ -2233,36 +1980,10 @@ end
          Phi3=obj.problem.phi(3:3:end,1:obj.problem.trunc); %basis for the thirs conserved quantity e
 
           
-         if obj.probGNAT.ind1
+%          if obj.probGNAT.ind1
              [fluxLeft, Jleft] = obj.myLeftFlux3fast2(w_increment);
              [fluxRight,Jright]=obj.myRightFlux3fast2(w_increment);
              [sq,dsq]=obj.myQdQfast2(w_increment);
-             
-%              params.DifferenceStep = 1e-6;
-%              params.DifferenceType='centered';
-%              
-%              fileID = fopen(['debugingGnatApprox2', num2str(obj.numStep),'.txt'], 'a');
-%              fprintf(fileID, 'timestep   %d  \n', obj.cTimeIter);
-%              for ii=1:3
-%                  outLeft=gradientcheck( @(w) obj.testmyLeftFlux2(w, ii), w_increment, params);
-%                  outRight=gradientcheck( @(w) obj.testmyRightFlux2(w, ii),w_increment, params);
-%                  if outLeft.RelError>1e-4,keyboard, end
-%                  if outRight.RelError>1e-4,keyboard, end
-%                  
-%                  formatSpec1 = 'poblano norm(J_left  - Jl_true) for coordinate  %d  =  %e \n';
-%                  formatSpec2 = 'poblano norm(J_right - Jr_true) for coordinate  %d  =  %e \n';
-%                  fprintf(fileID, formatSpec1, ii, outLeft.RelError);
-%                  fprintf(fileID, formatSpec2, ii, outRight.RelError);
-%                  
-%              end
-%              
-%              outQ=gradientcheck( @(w) obj.testmyQdQ2(w), w_increment, params);
-%              if outQ.RelError>1e-4,keyboard, end
-%              
-%              
-%              formatSpec3 = 'poblano norm(J_sumQ - Jsq_true) =  %e \n \n';
-%              fprintf(fileID, formatSpec3, outQ.RelError);
-%              fclose(fileID);
 
              Constr(1:3,:)=[(obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                  (obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
@@ -2273,7 +1994,7 @@ end
                  (obj.problem.prob.SVol(2:end - 1) .* obj.problem.prob.dx(2:end-1))*Phi2(2:end-1,:);
                  (obj.problem.prob.SVol(2:end - 1) .* obj.problem.prob.dx(2:end-1))*Phi3(2:end-1,:) ]+...
                  obj.time.dt*(Jleft + Jright - [zeros(1,length(w_increment));dsq;zeros(1,length(w_increment))]);
-         end
+%          end
  end
 
  
@@ -2324,22 +2045,36 @@ function [returnl, returndl]=myLeftFlux3fast2(obj, w_increment)
                  J2L(27*(k-1)+1:27*k)=tempL(:);
             end
 
-            if obj.probGNAT.ind1
+            
 %                  keyboard
                 %reconstruct flux and Jacobian
-                fluxLeft  = obj.reconFl_gnat * Rleft(:);
+            fluxLeft  = obj.reconFl_gnat * Rleft(:);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN    
+                JhatL = [zeros(18,1);J2L;zeros(18,1)];
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
                 JhatL = [zeros(18,1);J2L];
-                obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
-                
-                %choose left flux at the left boundary
-                l = fluxLeft(1:3);
-                dl = obj.reconFl_gnat(1:3,:) * obj.JhatFluxL(4:end,:) * obj.phiYhat;
-
-                returnl  = l; %fluxLeft(1:3);
-                returndl = dl; %dlnew
-                
-
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatL = [J2L;zeros(18,1)];
+            else
+                JhatL = J2L;
             end
+            obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
+                
+            %choose left flux at the left boundary
+            l = fluxLeft(1:3);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN  
+                dl = obj.reconFl_gnat(1:3,:) * obj.JhatFluxL(4:end-3,:) * obj.phiYhat;
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN  
+                dl = obj.reconFl_gnat(1:3,:) * obj.JhatFluxL(4:end,:) * obj.phiYhat;
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN  
+                dl = obj.reconFl_gnat(1:3,:) * obj.JhatFluxL(1:end-3,:) * obj.phiYhat;
+            else
+                dl = obj.reconFl_gnat(1:3,:) * obj.JhatFluxL * obj.phiYhat;
+            end
+
+            returnl  = l; %fluxLeft(1:3);
+            returndl = dl; %dlnew
+
 end
 
 
@@ -2391,24 +2126,36 @@ end
                  J2R(27*(k-1)+1:27*k)=tempR(:);
 
             end
-
-            if obj.probGNAT.ind1
-                %reconstruct right flux and Jacobian
-                fluxRight  = obj.reconFr_gnat * Rright(:);
-                
+          
+            %reconstruct right flux and Jacobian
+            fluxRight  = obj.reconFr_gnat * Rright(:);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN   
+                JhatR = [zeros(18,1);J2R;zeros(18,1)];
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
                 JhatR = [zeros(18,1);J2R];
-                JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
-                JR(obj.reconstJhatInd) = JhatR;
-                
-                %choose right flux at the right boundary
-                r  = fluxRight(end-2:end);
-                dr = obj.reconFr_gnat(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
-                
-                returnr = r; % fluxRight(end-2:end);
-                returndr = dr; % drnew 
-
-
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatR = [J2R;zeros(18,1)];
+            else
+                JhatR = J2R;
             end
+            JR = spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
+            JR(obj.reconstJhatInd) = JhatR;
+                
+            %choose right flux at the right boundary
+            r  = fluxRight(end-2:end);
+            if obj.probGNAT.ind1 && obj.probGNAT.indN 
+                dr = obj.reconFr_gnat(end-2:end,:)*JR(4:end-3,:)*obj.phiYhat;
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN 
+                dr = obj.reconFr_gnat(end-2:end,:)*JR(1:end-3,:)*obj.phiYhat;
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN 
+                dr = obj.reconFr_gnat(end-2:end,:)*JR(4:end,:)*obj.phiYhat;
+            else
+                dr = obj.reconFr_gnat(end-2:end,:)*JR*obj.phiYhat;
+            end
+                
+            returnr = r; % fluxRight(end-2:end);
+            returndr = dr; % drnew 
+
  end   
        
      
@@ -2520,7 +2267,7 @@ function  [Constr, DerivConstr] = constraintsMultipleDomains(obj, w_increment)
     current_points=1:dn:obj.problem.prob.nVol+1;
     numCell=obj.problem.ncell;
     %keyboard
-    if obj.probGNAT.ind1
+%     if obj.probGNAT.ind1
         %                  [fluxLeft, Jleft] = obj.myLeftFlux3fast(w_increment);
         %                  [fluxRight,Jright]=obj.myRightFlux3fast(w_increment);
         %                  [sq,dsq]=obj.myQdQfast(w_increment);
@@ -2573,7 +2320,7 @@ function  [Constr, DerivConstr] = constraintsMultipleDomains(obj, w_increment)
             sdx*Phi3(lastCellpoints,:) ]+...
             obj.time.dt*(Jleft(3*numCell-2:3*numCell,:) +Jright(3*numCell-2:3*numCell,:)-dsq(3*numCell-2:3*numCell,:));
         clear sdx
-    end
+%     end
     
 end
 
@@ -2616,7 +2363,6 @@ function [l, dl]=myLeftFluxMultiDomain(obj, w_increment, points)
                 droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
             end
 
-            if obj.cTimeIter==9, keyboard, end
             Rleft =-bsxfun(@times,roeF(:,obj.probGNAT.iarrayFaceI),obj.probGNAT.S(obj.probGNAT.iarrayFace(1+obj.probGNAT.ind1:end-obj.probGNAT.indN)));
 
             J2L=zeros(3*9*(obj.probGNAT.nVolMask-obj.probGNAT.ind1-obj.probGNAT.indN),1);
@@ -2628,22 +2374,37 @@ function [l, dl]=myLeftFluxMultiDomain(obj, w_increment, points)
                  J2L(27*(k-1)+1:27*k)=tempL(:);
 
             end
-            if obj.probGNAT.ind1
-                
-                fluxLeft=obj.reconFleft*Rleft(:);
-                ncell=length(points)-1;
-                %keyboard
+
+            fluxLeft=obj.reconFl*Rleft(:);
+            ncell=length(points)-1;
+            %keyboard
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatL=[zeros(18,1);J2L;zeros(18,1)];
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatL=[J2L;zeros(18,1)];
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
                 JhatL=[zeros(18,1);J2L];
-                obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
-                leftIndex=[1, points(2:ncell-1)-1, points(end-1)-1];
-                %rightIndex=[points(2)-1, points(3:obj.problem.ncell)-1, points(end)-2];
-                l=zeros(3*ncell,1);
-                dl=zeros(3*ncell, length(w_increment));
-                for i =1:length(leftIndex)
-                    l(3*i-2:3*i)=fluxLeft(3*leftIndex(i)-2:3*leftIndex(i));
-                    dl(3*i-2:3*i,:)=obj.reconFleft(3*leftIndex(i)-2:3*leftIndex(i),:)*obj.JhatFluxL(4:end,:)*obj.phiYhat;
-                end
-                
+            else
+                JhatL=J2L;
+            end
+            obj.JhatFluxL(obj.reconstJhatInd) = JhatL;
+            leftIndex=[1, points(2:ncell-1)-1, points(end-1)-1];
+            %rightIndex=[points(2)-1, points(3:obj.problem.ncell)-1, points(end)-2];
+            l=zeros(3*ncell,1);
+            dl=zeros(3*ncell, length(w_increment));
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatFL = obj.JhatFluxL(4:end-3,:);
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                JhatFL = obj.JhatFluxL(4:end,:);
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                JhatFL = obj.JhatFluxL(1:end-3,:);
+            else
+                JhatFL = obj.JhatFluxL;
+            end
+            
+            for i =1:length(leftIndex)
+                l(3*i-2:3*i)=fluxLeft(3*leftIndex(i)-2:3*leftIndex(i));
+                dl(3*i-2:3*i,:)=obj.reconFl(3*leftIndex(i)-2:3*leftIndex(i),:)*JhatFL*obj.phiYhat;
             end
 end
 
@@ -2691,7 +2452,6 @@ function [r, dr]=myRightFluxMultiDomain(obj, w_increment, points)
         droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
     end
     
-    if obj.cTimeIter==9, keyboard, end
     Rright= bsxfun(@times,roeF(:,obj.probGNAT.iarrayFaceI+1),obj.probGNAT.S(obj.probGNAT.iarrayFace(1+obj.probGNAT.ind1:end-obj.probGNAT.indN)+1));
     
     J2R=zeros(3*9*(obj.probGNAT.nVolMask-obj.probGNAT.ind1-obj.probGNAT.indN),1);
@@ -2702,27 +2462,40 @@ function [r, dr]=myRightFluxMultiDomain(obj, w_increment, points)
         J2R(27*(k-1)+1:27*k)=tempR(:);
         
     end
-    if obj.probGNAT.ind1
+    
         
-        ncell=length(points)-1;
-        fluxRight=obj.reconFright*Rright(:);
-        rightIndex=[points(2)-1, points(3:ncell)-1, points(end)-2]-1;
-        %                 keyboard
+    ncell=length(points)-1;
+    fluxRight=obj.reconFr*Rright(:);
+    rightIndex=[points(2)-1, points(3:ncell)-1, points(end)-2]-1;
+    if obj.probGNAT.ind1 && obj.probGNAT.indN
+        JhatR=[zeros(18,1);J2R;zeros(18,1)];
+    elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
         JhatR=[zeros(18,1);J2R];
-        %keyboard
-        JR=spalloc(obj.nI,length(unique(obj.jrow)),length(obj.reconstJhatInd));
-        JR(obj.reconstJhatInd) = JhatR;
-        
-        obj.JhatFluxR(obj.reconstJhatInd) = JhatR;
-        
-        r=zeros(3*ncell,1);
-        dr=zeros(3*ncell, length(w_increment));
-        for i =1:length(rightIndex)
-            r(3*i-2:3*i)=fluxRight(3*rightIndex(i)-2:3*rightIndex(i));
-            dr(3*i-2:3*i,:)=obj.reconFright(3*rightIndex(i)-2:3*rightIndex(i),:)*obj.JhatFluxR(4:end,:)*obj.phiYhat;
-            
-        end
+    elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+        JhatR=[J2R;zeros(18,1)];
+    else
+        JhatR=J2R;
     end
+
+    obj.JhatFluxR(obj.reconstJhatInd) = JhatR;
+    r=zeros(3*ncell,1);
+    dr=zeros(3*ncell, length(w_increment));
+    if obj.probGNAT.ind1 && obj.probGNAT.indN
+        JhatFR = obj.JhatFluxR(4:end-3,:);
+    elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+        JhatFR = obj.JhatFluxR(4:end,:);
+    elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+        JhatFR = obj.JhatFluxR(1:end-3,:);
+    else
+        JhatFR = obj.JhatFluxR;
+    end
+
+    for i =1:length(rightIndex)
+        r(3*i-2:3*i)=fluxRight(3*rightIndex(i)-2:3*rightIndex(i));
+        dr(3*i-2:3*i,:)=obj.reconFr(3*rightIndex(i)-2:3*rightIndex(i),:)*JhatFR*obj.phiYhat;
+
+    end
+
 end
 
 

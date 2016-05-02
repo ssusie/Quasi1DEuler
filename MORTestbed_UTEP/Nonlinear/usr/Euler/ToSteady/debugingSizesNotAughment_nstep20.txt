@@ -1,1 +1,9 @@
-False
+Falsesize of not truncated Phi_right inside pinv =  24, 21 
+size of truncated Phi_right inside pinv =  24, 21 
+ 
+size of not truncated Phi_left inside pinv =  24, 21 
+size of truncated Phi_left inside pinv =  24, 21 
+ 
+size of not truncated Phi_Q inside pinv =  9, 21 
+size of truncated Phi_Q inside pinv =  9, 9 
+ 

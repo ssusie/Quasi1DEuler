@@ -47,6 +47,8 @@ GNAT:
     nGreed  = 10
     nR = 10
     nJ = 10
+    i1 = false
+    ie = false
     nI = [] 
     addInd = 'none'
     maxIter = 20

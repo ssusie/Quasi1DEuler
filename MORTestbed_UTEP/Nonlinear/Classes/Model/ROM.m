@@ -755,7 +755,7 @@ classdef ROM < handle
             if obj.cTimeIter==1
                 obj.gOrig=[];
                 obj.Cnorm = [];
-                size(Phi)
+%                 size(Phi)
             end
             
             for i_N = 1:obj.newt.maxIter
@@ -888,7 +888,7 @@ classdef ROM < handle
             for k=1:obj.newt.maxIter
                 
                 if obj.cTimeIter==1 & k==1
-                    size(Phi)
+%                     size(Phi)
                     disp(['improved number of cells  ', num2str(obj.ncell)])
                 end
                 obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
@@ -1099,8 +1099,20 @@ classdef ROM < handle
       r = reshape(bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1)),...
           size(roeF,1)*size(roeF(:, 2:end),2),1);
      
-  end
+ end
   
+ function flux = FluxAll(obj, SV)
+      [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
+      [roeF, ~] = obj.prob.roeFlux(rho,u,P,c,e,dc);
+%       dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+%       droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+%       dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+%       droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+      
+      flux = reshape(bsxfun(@times, roeF, obj.prob.S(2:end-1)),...
+          size(roeF, 1) * size(roeF, 2), 1); 
+ end
+ 
   function   l = LeftFluxAll(obj, SV)
       
       [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
@@ -1172,7 +1184,7 @@ function  [] = LSPG_subdomains(obj)
     for k=1:obj.newt.maxIter
 
         if obj.cTimeIter==1 && k==1
-            size(Phi)
+%             size(Phi)
             disp(['LSPG, constraints on several domaines; num of domains ', num2str(obj.ncell)])
         end
         obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
@@ -1180,11 +1192,6 @@ function  [] = LSPG_subdomains(obj)
         Df=Jres*Phi;
         %                 keyboard
         [g,Dg]=obj.myconstraints(w_guess);
-%         if obj.cTimeIter == 7, keyboard, end %nstep = 10, ncell = 3, gives warning
-%         for i=1:length(g)
-%             out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
-%             if out.RelError>1e-4,keyboard, end
-%         end
 
         H=Df'*Df; h=Df'*Res;
         P = H\Dg';
@@ -1201,6 +1208,7 @@ function  [] = LSPG_subdomains(obj)
      disp(['number of iterations ', num2str(k)])
     [g,~]=obj.myconstraints(w_guess);
     disp(['norm of the constraints ', num2str(norm(g))])
+    obj.Cnorm = [obj.Cnorm,  norm(g)];
     %disp(['number of iterations in truncated case ',num2str(k)])
 end
         
@@ -1478,7 +1486,7 @@ function  [] = solveConstraints(obj)
     end
     %keyboard
     if obj.cTimeIter==1
-        size(Phi)
+%         size(Phi)
         disp('num constraint = num basis vectors ')
         disp(['several domaines ', num2str(obj.ncell)])
     end
@@ -1519,7 +1527,7 @@ function  [] = minimizeConstraints(obj)
     end
 
     if obj.cTimeIter==1
-        size(Phi)
+%         size(Phi)
         disp('num constraint > num basis vectors ')
         disp(['several domaines ', num2str(obj.ncell)])
     end

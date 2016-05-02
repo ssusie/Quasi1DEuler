@@ -45,13 +45,13 @@ GNAT:
 
     nSample = 10
     nGreed  = 10
-    i1 = true
-    ie = true
+    i1 = false
+    ie = false
     nR = 10
     nJ = 10
     nI = [] 
     addInd = 'none'
-    maxIter = 200
+    maxIter = 500
     eps = [1e-5,1e-5,1e-5]
     timeQuiet = false 
     newtQuiet = true 
