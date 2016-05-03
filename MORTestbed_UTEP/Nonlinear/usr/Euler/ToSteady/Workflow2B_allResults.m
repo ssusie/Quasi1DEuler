@@ -33,7 +33,7 @@ CONSTR = [CONSTR, rom2.Cnorm'];
 %%
 % Method 2; Rom with constraints
 methodROM=2; %solve with constraints  % =1  original,  =2 constrained
-numCell=3; %number of domains for constraints
+numCell=1; %number of domains for constraints
 basisNumber=10; %truncate basis Phi; if don't want to truncate choose basisNumber=fom.cTimeIter
 rom3 = ROM([fname,'.rom'],'pg', 1, prob, methodROM, numCell, basisNumber);
 trainIC = prob.ic;

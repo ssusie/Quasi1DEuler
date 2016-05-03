@@ -414,7 +414,15 @@ classdef GNAT < handle
                limSkinny = length(obj.reconLocs);
             end
             if length(obj.sampleNodes(2:end)) < nstep+1 %YC: Why? Why not bigger truncQ?
-                truncQ = length(obj.sampleNodes(2:end));
+                if obj.probGNAT.ind1 && obj.probGNAT.indN
+                    truncQ = length(obj.sampleNodes(2:end-1));
+                elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                    truncQ = length(obj.sampleNodes(2:end));
+                elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                    truncQ = length(obj.sampleNodes(1:end-1));
+                else
+                    truncQ = length(obj.sampleNodes);
+                end
             else
                 truncQ = nstep+1;
             end
@@ -451,7 +459,7 @@ classdef GNAT < handle
                     PhiQ2 = obj.reconQ;
                     
                     %keyboard
-                    obj.reconQ2 = PhiQ2(:, 1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
+                    obj.reconQ2 = PhiQ2(:,1:truncQ) * pinv(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
                     [n1, m1] = size(PhiQ2(obj.sampleNodes(2:end),:));
                     [n2, m2] = size(PhiQ2(obj.sampleNodes(2:end),1:truncQ));
                     f1 = 'size of not truncated Phi_Q inside pinv =  %d, %d \n';
@@ -1439,13 +1447,22 @@ end
             [Q,dQ]=obj.probGNAT.forceTermGNAT(u,P);
             %keyboard
             %reconstruct the force term Q=[0,Q2,0]
-            recQ2=obj.reconQ2*Q(2,2:end)';
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                recQ2=obj.reconQ2*Q(2,2:end-1)';
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                recQ2=obj.reconQ2*Q(2,1:end-1)';
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                recQ2=obj.reconQ2*Q(2,2:end)';
+            else
+                recQ2=obj.reconQ2*Q(2,:)';
+            end
             %sum of (force term*S*dx) needed for constraints
             sQ=[0; obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
             %compute Jacobian of sq
-            partialDQ2=zeros(9,obj.probGNAT.ndof);
-            for ii=1:9
+            nSampleNodes = length(obj.sampleNodes)-1;
+            partialDQ2=zeros(nSampleNodes,obj.probGNAT.ndof);
+            for ii=1:nSampleNodes
                 i=obj.sampleNodes(ii+1);
                 partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));
             end
@@ -1793,13 +1810,22 @@ end
             [Q,dQ]=obj.probGNAT.forceTermGNAT(u,P);
             %keyboard
             %reconstruct the force term Q=[0,Q2,0]
-            recQ2=obj.reconQ2 * Q(2,2:end)';
+            if obj.probGNAT.ind1 && obj.probGNAT.indN
+                recQ2=obj.reconQ2*Q(2,2:end-1)';
+            elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+                recQ2=obj.reconQ2*Q(2,1:end-1)';
+            elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+                recQ2=obj.reconQ2*Q(2,2:end)';
+            else
+                recQ2=obj.reconQ2*Q(2,:)';
+            end
             %sum of (force term*S*dx) needed for constraints
             sQ=[0; obj.problem.prob.SVol(2:end-1).*obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
             %compute Jacobian of sq
-            partialDQ2=zeros(9,obj.probGNAT.ndof);
-            for ii=1:9
+            nSampleNodes = length(obj.sampleNodes)-1;
+            partialDQ2=zeros(nSampleNodes,obj.probGNAT.ndof);
+            for ii=1:nSampleNodes
                 i=obj.sampleNodes(ii+1);
                 partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));
             end
@@ -2186,8 +2212,9 @@ end
             sQ = [0; obj.problem.prob.SVol(2:end-1) .* obj.problem.prob.dx(2:end-1)*recQ2(2:end-1); 0];
 
             %compute Jacobian of sq
-            partialDQ2 = zeros(9,obj.probGNAT.ndof);
-            for ii = 1:9
+            nSampleNodes = length(obj.sampleNodes)-1;
+            partialDQ2 = zeros(nSampleNodes,obj.probGNAT.ndof);
+            for ii = 1:nSampleNodes
                 i = obj.sampleNodes(ii+1);
                 partialDQ2(ii,3 * i-2:3 * i) = squeeze(dQ(1,:,ii + 1));
             end
@@ -2516,9 +2543,18 @@ function [ sq, dsq]=myQdQMultiDomain(obj, w_increment, points)
     end
     %if obj.cTimeIter==9, keyboard, end
     [Q,dQ]=obj.probGNAT.forceTermGNAT(u,P);
-    recQ2=obj.reconQ2*Q(2,2:end)';
-    partialDQ2=zeros(9,obj.probGNAT.ndof);
-    for ii=1:9
+    if obj.probGNAT.ind1 && obj.probGNAT.indN
+        recQ2=obj.reconQ2*Q(2,2:end-1)';
+    elseif ~obj.probGNAT.ind1 && obj.probGNAT.indN
+        recQ2=obj.reconQ2*Q(2,1:end-1)';
+    elseif obj.probGNAT.ind1 && ~obj.probGNAT.indN
+        recQ2=obj.reconQ2*Q(2,2:end)';
+    else
+        recQ2=obj.reconQ2*Q(2,:)';
+    end
+    nSampleNodes = length(obj.sampleNodes)-1;
+    partialDQ2=zeros(nSampleNodes,obj.probGNAT.ndof);
+    for ii=1:nSampleNodes
         i=obj.sampleNodes(ii+1);
         partialDQ2(ii,3*i-2:3*i)=squeeze(dQ(1,:,ii+1));
     end
