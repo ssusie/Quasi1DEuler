@@ -171,7 +171,7 @@ classdef quasi1dEuler < handle
                     obj.Atype = 4;
             end
             [obj.S,obj.SVol,obj.xVol,obj.dSdp] = obj.computeNozzleArea();
-            plot(obj.SVol)
+%             plot(obj.SVol)
             factor = 1;
             obj.S = factor*obj.S;
             obj.SVol = factor*obj.SVol;
@@ -230,7 +230,7 @@ classdef quasi1dEuler < handle
             
         end
         
-        function  [rho,u,P,c,dcdU] = conservativeToPrimitive(obj,U)
+        function  [rho,u,P,c,dcdU,flag] = conservativeToPrimitive(obj,U)
             %This function extracts the primitive variables from the 3 x N
             %array of conservative variables.
             %--------------------------------------------------------------
@@ -248,7 +248,7 @@ classdef quasi1dEuler < handle
             %dcdU - 3 x N array of sound speed derivatives; dcdU(:,i) =
             %       [dc_drho(i); dc_drhou(i); dc_de(i)]
             %--------------------------------------------------------------
-            
+            flag = false;
             rho = U(1,:);
             u = U(2,:)./U(1,:);
             P = (obj.gamma-1)*(U(3,:) - 0.5*rho.*u.*u);
@@ -257,6 +257,14 @@ classdef quasi1dEuler < handle
                     -0.5*obj.gamma*(obj.gamma-1)*u./(rho.*c);...
                     0.5*obj.gamma*(obj.gamma-1)./(rho.*c)];
             %M = u./ (sqrt(obj.gamma*P./rho));
+            if(min(rho)<0)
+%                error('Negative density detected');
+                flag = true;
+            end
+            if(min(P)<0)
+%                error('Negative pressure detected');
+                flag = true;
+            end
         end
         
         function  [R,J,Cp,Cpp,dCp,dCpp] = ResJac(obj,U,~)
@@ -464,6 +472,118 @@ classdef quasi1dEuler < handle
                                
                 droeF(:,:,i)=[Jblk1,Jblk2];
             end
+            
+        end
+        
+        function  [roeF,droeF] = roeFluxAtInterface(obj,rho,u,P,c,e,dc)
+            %This function computes the Roe flux and Jacobian at a specified
+            %inter-cell face (i.e., interf). 
+            %Roe Flux at the interface between cell interf and i+1:
+            %F_{i+1/2} = 0.5*(F_{i} + F_{i+1}) - 0.5*|\hat{A}_{i+1/2}|*(U_{i+1}-U_{i})
+            %This requires F_{j}, U_{j} for j= i, i+1
+            %--------------------------------------------------------------
+            %Input:
+            %------
+            %obj - quasi1dEuler object
+            %rho - 1x2 array of densities in each volume
+            %u   - 1x2 array of velocities in each volume
+            %P   - 1x2 array of pressures in each volume
+            %c   - 1x2 array of sound speeds in each volume
+            %e   - 1x2 array of energies in each volume
+            %dc  - 3x2 array of derivatives of sound speed w.r.t.
+            %      CONSERVATIVE VARIABLES in each volume.
+            %      dc = [dcdrho_i , dcdrho_(i+1); ...
+            %            dcdrhou_i, dcdrhou_(i+1); ...
+            %            dcde_i  , dcde_(i+1)]
+            %
+            %Output:
+            %-------
+            %roeF  - 3x1 array of Roe flux at each interface.  The
+            %        first dimension respresents the component of the flux
+            %        (rho, rho*u, e).
+            %droeF - 3x6 array of Roe flux derivatives at each
+            %        interface.  The first dimension represents the
+            %        component of the flux (rho, rho*u, e), the second
+            %        dimension represents the derivative taken w.r.t..
+            %        Since F_{i+1/2} only depends on U_{i} and U_{i+1}, the
+            %        Jacobian of F_{i+1/2} only depends on the state at
+            %        volumes i and i+1.  Therefore (in the second dimension
+            %        of drhoF), instead of storing the derivative w.r.t.
+            %        3*nVol variables (where most are zero), we store the
+            %        derivative w.r.t. only 6 variables (rho_i, rhou_i,
+            %        e_i, rho_{i+1}, rhou_{i+1}, e_{i+1}) 
+            %--------------------------------------------------------------
+
+            %Compute nonlinear term at each cell volume
+            F=obj.eulerNonlin(rho,u,e,P);
+            
+            %Compute the Roe adjusted values at each interface as well as
+            %their derivatives w.r.t. state.  See rhoTerms for description
+            %of each variable.
+            [rhoH,uH,cH,drhoH,duH,dcH] = obj.roeTermsAtInterface(rho,u,P,e);
+     
+            %Initialize roeF and droeF
+            roeF = 0.5*(F(:,1)+F(:,2));
+            droeF = zeros(3,6);
+
+            %Form conservative state variables at volume i and i+1
+            U_ip1=[rho(2);rho(2)*u(2);e(2)];
+            U_i  =[rho(1);rho(1)*u(1);e(1)];
+            dU = U_ip1-U_i;
+            
+            %Compute terms for \hat{A} and its derivative w.r.t. state
+            [S,Si,CA,CAi,Lam,dS,dSi,dCA,dCAi] = obj.eulerJac(rhoH,uH,cH);
+            
+            %Apply entropy correction to Lam
+            [Lam(1,1),Lam(2,2),Lam(3,3),dlam_u,dlam_upc,dlam_umc]=obj.entropyCorrect(rho,u,c,dc,uH,cH,duH,dcH);
+            sgn=sign(diag(Lam));
+            
+            %Derivative contributions from absolute value
+            dlam_u=sgn(1)*dlam_u;
+            dlam_upc=sgn(2)*dlam_upc;
+            dlam_umc=sgn(3)*dlam_umc;
+            
+            %Form \hat{A}
+            Ahat=(Si*CAi*abs(Lam)*CA*S);
+            
+            %Compute the derivative of \hat{A} w.r.t. state time dU (chain rule).
+            %Data will be stored according to:
+            %dAhatTimesDU(:,1,1) = dAhat/drho_{i}*dU
+            %dAhatTimesDU(:,1,2) = dAhat/drho_{i+1}*dU
+            %The middle index corresponds to the derivative that is
+            %taken: 1 = rho, 2 = rho*u, 3 = e
+            dAhatTimesDU = zeros(3,3,2);
+            for j = 1:2 %j = 1 -> d/d()_i, j = 2 -> d/d()_{i+1}
+                %dAhat/drho * dU
+                dAhatTimesDU(:,1,j) = (dSi(:,:,1)*drhoH(j)+dSi(:,:,2)*duH(1,j,1))*(CAi*(abs(Lam)*(CA*(S*dU)))) + ...
+                    Si*((dCAi(:,:,1)*drhoH(j)+dCAi(:,:,2)*dcH(1,j,1))*(abs(Lam)*(CA*(S*dU)))) + ...
+                    Si*(CAi*(diag([dlam_u(j,1),dlam_upc(j,1),dlam_umc(j,1)])*(CA*(S*dU)))) + ...
+                    Si*(CAi*(abs(Lam)*((dCA(:,:,1)*drhoH(j)+dCA(:,:,2)*dcH(1,j,1))*(S*dU)))) + ...
+                    Si*(CAi*(abs(Lam)*(CA*((dS(:,:,1)*drhoH(j)+dS(:,:,2)*duH(1,j,1))*dU))));
+                %dAhat/drhou * dU
+                dAhatTimesDU(:,2,j) = (dSi(:,:,2)*duH(1,j,2))*(CAi*(abs(Lam)*(CA*(S*dU)))) + ...
+                    Si*((dCAi(:,:,2)*dcH(1,j,2))*(abs(Lam)*(CA*(S*dU)))) + ...
+                    Si*(CAi*(diag([dlam_u(j,2),dlam_upc(j,2),dlam_umc(j,2)])*(CA*(S*dU)))) + ...
+                    Si*(CAi*(abs(Lam)*((dCA(:,:,2)*dcH(1,j,2))*(S*dU)))) + ...
+                    Si*(CAi*(abs(Lam)*(CA*((dS(:,:,2)*duH(1,j,2))*dU))));
+                %dAhat/de * dU
+                dAhatTimesDU(:,3,j) = Si*((dCAi(:,:,2)*dcH(1,j,3))*(abs(Lam)*(CA*(S*dU)))) + ...
+                    Si*(CAi*(diag([dlam_u(j,3),dlam_upc(j,3),dlam_umc(j,3)])*(CA*(S*dU)))) + ...
+                    Si*(CAi*(abs(Lam)*((dCA(:,:,2)*dcH(1,j,3))*(S*dU))));
+            end
+            
+            %Compute Roe flux between volume i and i+1
+            roeF = roeF - 0.5*Ahat*dU;
+            
+            %Compute Jacobian of Roe flux between volumne i and i+1
+            [S,Si,CA,CAi,Lam] = obj.eulerJac(rho(1),u(1),c(1));
+            Jblk1 = 0.5*(Si*CAi*Lam*CA*S - dAhatTimesDU(:,:,1) + Ahat);
+            
+            [S,Si,CA,CAi,Lam] = obj.eulerJac(rho(2),u(2),c(2));
+            Jblk2 = 0.5*(Si*CAi*Lam*CA*S - dAhatTimesDU(:,:,2) - Ahat);
+            
+            droeF=[Jblk1,Jblk2];
+
             
         end
         
@@ -949,13 +1069,10 @@ classdef quasi1dEuler < handle
             else
                 [Q,dQ] = obj.forceTerm(u,P);
             end
-            
-            
-           right = bsxfun(@rdivide,bsxfun(@times,roeF(:,2:end),obj.S(3:end-1)),(obj.SVol(2:end-1).*obj.dx(2:end-1)));
-	   left=  bsxfun(@rdivide,-bsxfun(@times,roeF(:,1:end-1),obj.S(2:end-2)),(obj.SVol(2:end-1).*obj.dx(2:end-1)));
 
-           
- 
+            right = bsxfun(@rdivide,bsxfun(@times,roeF(:,2:end),obj.S(3:end-1)),(obj.SVol(2:end-1).*obj.dx(2:end-1)));
+            left=  bsxfun(@rdivide,-bsxfun(@times,roeF(:,1:end-1),obj.S(2:end-2)),(obj.SVol(2:end-1).*obj.dx(2:end-1)));
+
             %Compute residual
             R2 = bsxfun(@rdivide,(bsxfun(@times,roeF(:,2:end),obj.S(3:end-1)) ...
                                -  bsxfun(@times,roeF(:,1:end-1),obj.S(2:end-2))),...
@@ -1469,6 +1586,89 @@ classdef quasi1dEuler < handle
             
             dcH(:,1,3) = (obj.gamma-1)*(0.5./cH).*dhH(:,1,3)';
             dcH(:,2,3) = (obj.gamma-1)*(0.5./cH).*dhH(:,2,3)';
+        end
+        
+        function  [rhoH,uH,cH,drhoH,duH,dcH] = roeTermsAtInterface(obj,rho,u,P,e)
+            %This function returns the Roe averaged density, velocity, and
+            %sound speed at a specified face, and their derivatives.
+            %--------------------------------------------------------------
+            %Input:
+            %------
+            %obj          - quasi1dEuler object
+            %rho, u, P, e - 1 x 2 array of density, velocity,
+            %               pressure, and energy, respectively
+            %
+            %Output:
+            %-------
+            %rhoH  - a scalar of Roe adjusted density at cell
+            %        interface, i. rhoH(i) = \hat{\rho}{i+1/2} = see notes
+            %        for expression in terms of \rho_{i} and \rho_{i+1}
+            %uH    - a scalar of Roe adjusted velocity at cell
+            %        interface, i.  uH(i) = \hat{u}{i+1/2} = see notes
+            %        for expression in terms of u_{i} and \u_{i+1}
+            %cH    - a scalar of Roe adjusted sound speed at cell
+            %        interfaces.  c(i) = \hat{c}{i+1/2} = see notes
+            %        for expression in terms of c_{i} and c_{i+1}
+            %drhoH - 1 x 2 array of derivatives of Roe adjusted
+            %        densities at cell interface. The first
+            %        index corresponds to whether the derivative is with
+            %        respect to the quantity at the cell left (=1) of the
+            %        interface or right (=2) of it, and the second index
+            %        corresponds to the variable with which the derivative
+            %        is taken with respect to.  There are only 2 pages in
+            %        the third dimension b/c drhoHde = 0.  drhoH(i,:,1) = 
+            %        [d(\rho_{i+1/2})/d(\rho_i),
+            %        d(\rho_{i+1/2})/d(\rho_{i+1})].   Changing the second
+            %        dimension to a 2 takes all derivatives w.r.t. rho*u
+            %duH   - 1 x 2 x 3 array of derivatives of Roe adjusted
+            %        velocities at cell interface. Explanation similar to
+            %        drhoH case.  
+            %dcH   - 1 x 2 x 3 array of derivatives of Roe adjusted
+            %        sound speeds at cell interface.Explanation similar to
+            %        drhoH case.  
+            %--------------------------------------------------------------
+            
+            %See notes for straightforward (but tedious) derivative
+            %computations.
+            dPdrho = 0.5*(obj.gamma-1)*u.*u;
+            dPdrhou= -(obj.gamma-1)*u;
+            
+            rhoH=sqrt(rho(1))*sqrt(rho(2));
+            rhoGAvg=sqrt(rho(1))+sqrt(rho(2));
+            uH=(sqrt(rho(1))*u(1) + sqrt(rho(2))*u(2))/rhoGAvg;
+            hH=((e(1)+P(1))/sqrt(rho(1)) + (e(2)+P(2))/sqrt(rho(2)))/rhoGAvg;
+            cH=sqrt((obj.gamma-1)*(hH-0.5*uH^2));
+                     
+            drhoH = zeros(length(rhoH),2); %only 1 pages bc derivatives wrt rho*u and e are zero
+            drhoH(:,1) = 0.5*(1/sqrt(rho(1)))*sqrt(rho(2));
+            drhoH(:,2) = 0.5*(1/sqrt(rho(2)))*sqrt(rho(1));
+            
+            irhoSum1 = 1/(rhoH+rho(1));
+            irhoSum2 = 1/(rho(2)+rhoH);
+            
+            duH = zeros(1,2,3); %only 2 pages bc independent of e
+            duH(1,1,1)=-0.5*irhoSum1*(uH+u(1));
+            duH(1,2,1)=-0.5*irhoSum2*(u(2)+uH);
+            duH(1,1,2)=irhoSum1;
+            duH(1,2,2)=irhoSum2;
+            
+            dhH = zeros(1,2,3);
+            dhH(1,1,1) = irhoSum1*(-0.5*hH - 0.5*(e(1)+P(1))/rho(1) + dPdrho(1));
+            dhH(1,2,1) = irhoSum2*(-0.5*hH - 0.5*(e(2)+P(2))/rho(2) + dPdrho(2));
+            dhH(1,1,2) = dPdrhou(1)*irhoSum1;
+            dhH(1,2,2) = dPdrhou(2)*irhoSum2;
+            dhH(1,1,3) = obj.gamma*irhoSum1;
+            dhH(1,2,3) = obj.gamma*irhoSum2;
+            
+            dcH = zeros(1,2,3);
+            dcH(1,1,1) = (obj.gamma-1)*(0.5/cH)*(dhH(1,1,1)' - uH*duH(1,1,1)');
+            dcH(1,2,1) = (obj.gamma-1)*(0.5/cH)*(dhH(1,2,1)' - uH*duH(1,2,1)');
+            
+            dcH(1,1,2) = (obj.gamma-1)*(0.5./cH)*(dhH(1,1,2)' - uH*duH(1,1,2)');
+            dcH(1,2,2) = (obj.gamma-1)*(0.5./cH)*(dhH(1,2,2)' - uH*duH(1,2,2)');
+            
+            dcH(1,1,3) = (obj.gamma-1)*(0.5./cH)*dhH(1,1,3)';
+            dcH(1,2,3) = (obj.gamma-1)*(0.5./cH)*dhH(1,2,3)';
         end
         
         function  [Q,dQ,dQdS] = forceTermGNAT(obj,u,P)
@@ -2872,7 +3072,7 @@ classdef quasi1dEuler < handle
         end
 
         %Debugging Functions
-        function  [rho,u,P,c,e,dc_prim,dc_cons] = getVariables(obj,U,flag)
+        function  [rho,u,P,c,e,dc_prim,dc_cons,nflag] = getVariables(obj,U,flag)
             
             %Reshape U from a stacked vector ([rho_1;rho_1*u_1;e_1;...]) of
             %size 3nVol x 1 to a matrix of size 3 x nVol where U(1,:) =
@@ -2899,7 +3099,68 @@ classdef quasi1dEuler < handle
                 dc_prim=dc_prim*obj.nondim.u;
                 dc_cons=dc_cons*obj.nondim.u;
             end
+  
+            if(min(rho)<0)
+                nflag = true;
+%                error('negative density is detected');
+            end
+            if(min(P)<0)
+                nflag = true;
+%                error('negative pressure is detected');
+            end
+            nflag = false;
+        end
+        
+        function  [rho,u,P,c,e,dc_prim,dc_cons,nflag] = getSpecificVariables(obj,U,ind,flag)
             
+            %Reshape U from a stacked vector ([rho_1;rho_1*u_1;e_1;...]) of
+            %size 3nVol x 1 to a matrix of size 3 x nVol where U(1,:) =
+            %rho, U(2,:) = rho.*u, and U(3,:) = e
+            U = reshape(U(3*(ind-1)+1:3*(ind+1)),3,2);
+            %Extract primitive variables
+            if ind == 1
+                [rho,u,P,c] = obj.conservativeToPrimitive(U(:,2));
+                rho = [U(1,1),rho];
+                u   = [U(2,1),u];
+                P   = [U(3,1),P];
+                c   = [sqrt(obj.gamma*P(1)/rho(1)),c];
+                e   = [P(1)/(obj.gamma-1)+rho(1)*u(1)^2/2,U(3,end)];
+            elseif ind == obj.nVol-1
+                [rho,u,P,c] = obj.conservativeToPrimitive(U(:,1));
+                rho = [rho,U(1,end)];
+                u   = [u,U(2,end)];
+                P   = [P,U(3,end)];
+                c   = [c,sqrt(obj.gamma*P(end)/rho(end))];
+                e   = [U(3,1),P(end)/(obj.gamma-1)+rho(end)*u(end)^2/2];
+            else
+                [rho,u,P,c] = obj.conservativeToPrimitive(U);
+                e   = U(3,:);
+            end
+            
+            dc_prim = [-0.5*obj.gamma*P./(c.*rho.*rho);zeros(1,2);0.5*obj.gamma./(c.*rho)]';
+            dc_cons = [0.5*obj.gamma./(c.*rho).*(0.5*(obj.gamma-1)*u.*u - P./rho);...
+                      -0.5*obj.gamma*(obj.gamma-1)*u./(rho.*c);...
+                       0.5*obj.gamma*(obj.gamma-1)./(rho.*c)]';
+
+            if (nargin > 3) && ~isempty(flag) && strcmpi(flag,'dimensional')
+                rho=rho*obj.nondim.rho;
+                u=u*obj.nondim.u;
+                P=P*obj.nondim.p;
+                c=c*obj.nondim.u;
+                e=e*obj.nondim.p;
+                dc_prim=dc_prim*obj.nondim.u;
+                dc_cons=dc_cons*obj.nondim.u;
+            end
+           
+            if(min(rho)<0)
+                nflag = true;
+%                error('negative density is detected');
+            end
+            if(min(P)<0)
+                nflag = true;
+%                error('negative pressure is detected');
+            end
+            nflag = false;
         end
         
         function  [drhoH,drhoHfd,duH,duHfd,dcH,dcHfd] = checkRoeTermsWithFD(obj,U)

@@ -15,4 +15,10 @@ rho = P./(R*T);
 c   = sqrt(gamma*P./rho);
 u   = M.*c;
 
+deltaP = PexitIncrease*P(end);
+P(end) = P(end) + deltaP;
+rho(end) = rho(end) + deltaP/c(end)^2;
+u(end) = rho(1)*A(1)*u(1)/(rho(end)*A(end));
+
+
 end

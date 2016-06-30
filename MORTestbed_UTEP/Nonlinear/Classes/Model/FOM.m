@@ -24,6 +24,7 @@ classdef FOM < handle
         cTimeIter = 0; %current time iteration number
         
         numExecute=0;
+        Cnorm;
     end
     
     properties (Hidden = true, SetAccess = private, GetAccess = public)
@@ -276,6 +277,8 @@ classdef FOM < handle
             %Store the number of newton iterations at this time step
             obj.newt.iter(obj.cTimeIter) = i_N;
             
+            g = obj.TimeScheme.constraintOneDomain(obj.prob,obj.sv(:,itnump1),obj.sv(:,itnump1-1),t);
+            obj.Cnorm = [obj.Cnorm, norm(g)];
             %if obj.printLevel == 1.5
             %    fprintf('---- Newton Step %4i ----- %10.7e ----- %10.7e ----- %10.7e ----- %10.7e ------\n',i_N,norm(R,2),norm(p,2),tol,tolIt);
             %end
@@ -303,6 +306,7 @@ classdef FOM < handle
             
             obj.killflag=false;
             nstep = obj.time.nstep; %Extract the number of time steps from the object
+            obj.Cnorm = [];
             
             %Restart logic
             if nargin == 2 && restart == 1

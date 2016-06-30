@@ -1,9 +1,9 @@
-Falsesize of not truncated Phi_right inside pinv =  48, 21 
-size of truncated Phi_right inside pinv =  48, 21 
+Falsesize of not truncated Phi_right inside pinv =  39, 21 
+size of truncated Phi_right inside pinv =  39, 21 
  
-size of not truncated Phi_left inside pinv =  48, 21 
-size of truncated Phi_left inside pinv =  48, 21 
+size of not truncated Phi_left inside pinv =  39, 21 
+size of truncated Phi_left inside pinv =  39, 21 
  
-size of not truncated Phi_Q inside pinv =  16, 21 
-size of truncated Phi_Q inside pinv =  16, 16 
+size of not truncated Phi_Q inside pinv =  13, 21 
+size of truncated Phi_Q inside pinv =  13, 13 
  

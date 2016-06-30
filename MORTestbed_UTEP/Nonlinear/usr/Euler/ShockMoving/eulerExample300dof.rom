@@ -4,7 +4,7 @@ GROM:
     basisUpdate = 'border_fast'
     initsnapref = 'ic'
     nsnap = 'all' 
-    nY = 1
+    nY = 10
     saveNL = 1
     maxIter = 20
     eps     = [1e-5,1e-5,1e-5]
@@ -43,15 +43,17 @@ GNAT:
 
     TimeScheme = 'quasiEuler1DImplicitPseudoTime'
 
-    nSample = 10
-    nGreed  = 10
+    nSample = 100
+    nGreed  = 100
     i1 = false
     ie = false
-    nR = 10
-    nJ = 10
+    nFlux = 20
+    nQ = 30  
+    nR = 100
+    nJ = 100
     nI = [] 
     addInd = 'none'
-    maxIter = 500
+    maxIter = 20
     eps = [1e-5,1e-5,1e-5]
     timeQuiet = false 
     newtQuiet = true 

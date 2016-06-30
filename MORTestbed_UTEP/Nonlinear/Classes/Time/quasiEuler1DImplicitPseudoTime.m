@@ -117,48 +117,21 @@ classdef quasiEuler1DImplicitPseudoTime < handle
             J(4:end-3,4:end-3)=J(4:end-3,4:end-3) + speye(N-6)/obj.dt;
             J(end-2:end,end-2:end) = J(end-2:end,end-2:end) + (Cp + [dCp(:,:,1)*dU(end-2:end),dCp(:,:,2)*dU(end-2:end),dCp(:,:,3)*dU(end-2:end)])/obj.dt;
         end
-        
-        function  [R,J,dRdp,prevsv] = TimeIntNLFuncSens(obj,prob,U,Uprev,t)
-            %This function sets up parameters to be used in Backward Euler calculation
-            %dX/dt = R(X) where R is the residual of the nonlinear function
-            %--------------------------------------------------------------------------
-            %Inputs:
-            %-------
-            %modelobj     - Model object
-            %t            - 1 x (nstep+1) vector containing the times at which the
-            %               solution is to be computed (first entry is the time of the
-            %               initial condition)
-            %dt           - scalar indicating the time step size
-            %Outputs:
-            %--------
-            %R            - the residual of the nonlinear function, adjusted for the
-            %               Backward Euler scheme (wrapped in the nonlinear solver)
-            %J            - the jacobian of the nonlinear function, adjusted for the
-            %               Backward Euler scheme (wrapped in the nonlinear solver)
-            %--------------------------------------------------------------------------
-            prevsv=[];
 
-            N=length(U);
+        function  g = constraintOneDomain(obj,prob,U,Uprev,t)
+
             %Determine the Residual and Jacobian (function handles) of the continuous
             %system of equations
-            [R,J,dRdp,Cp,Cpp,dCp,dCpp] = prob.ResSens(U,t);
+            [R,~,~,~,~,~,~] = prob.ResSens(U,t);
             
-            dU=(1/obj.dt)*(U-Uprev);
+            dU=(U-Uprev);
             %Add contribution to the residual for the Backward Euler scheme)
-            R(1:3)     = R(1:3) + Cpp*dU(1:3);
-            R(4:end-3) = R(4:end-3) + dU(4:end-3);
-            R(end-2:end)=R(end-2:end) + Cp*dU(end-2:end);
+            R(4:end-3) = obj.dt*R(4:end-3) + dU(4:end-3);
             
-            %Set up the appropriate jacobian function for the
-            %backward euler integration scheme used (see notes for
-            %details)
-%             J=obj.dt*J;
-            J(1:3,1:3) = J(1:3,1:3) + (1/obj.dt)*Cpp + [dCpp(:,:,1)*dU(1:3),dCpp(:,:,2)*dU(1:3),dCpp(:,:,3)*dU(1:3)];
-            J(4:end-3,4:end-3)=J(4:end-3,4:end-3) + (1/obj.dt)*speye(N-6);
-            J(end-2:end,end-2:end) = J(end-2:end,end-2:end) + (1/obj.dt)*Cp + [dCp(:,:,1)*dU(end-2:end),dCp(:,:,2)*dU(end-2:end),dCp(:,:,3)*dU(end-2:end)];
-      
-%             %Sensitivity
-%             dRdp = dRdp;
+            g = zeros(3,1);
+            g(1) = sum(R(4:3:end-3));
+            g(2) = sum(R(5:3:end-3));
+            g(3) = sum(R(6:3:end-3));
         end
         
         function  [Rhat,JVhat] = TimeIntNLFuncGNAT(obj,probGNAT,partialU,partialUprev,t)

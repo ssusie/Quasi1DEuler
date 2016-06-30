@@ -42,7 +42,7 @@ switch flag
     case 'snapDist'
         baseunit = {'cell'};
         basecols = 3;
-    case {'nY','nYMin','nYMax','nYrelEnergy','nI','nR','nJ','nSample','nGreed','waveLvl','wavenY','sigma','mu'}
+    case {'nY','nYMin','nYMax','nYrelEnergy','nI','nR','nJ','nSample','nFlux','nQ','nGreed','waveLvl','wavenY','sigma','mu'}
         baseunit = {'double'};
         basecols = nan;
     case 'snapInt'

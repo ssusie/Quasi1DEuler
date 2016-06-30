@@ -106,7 +106,7 @@ classdef ROM < handle
     
     methods
         %Constructor
-        function [obj] = ROM(ROMfile,romtype,romid,probobj, method, cellnum, basNum)
+        function [obj] = ROM(ROMfile,romtype,romid,probobj, method, cellnum)
             %This is the constructor of the ROM class.  It reads the
             %appropriate entries from the input file and stores them in the
             %class instance.
@@ -152,7 +152,6 @@ classdef ROM < handle
             obj.prob = probobj;
             obj.ncell = cellnum;
             obj.newtonSolver = method;
-            obj.trunc = basNum;
 %             keyboard
 	    %Copy the time structure and store in the class instance
             %The default time structure is whatever is stored in CONFIG
@@ -258,6 +257,7 @@ classdef ROM < handle
             
             %%%%%%%%% Determine nY, nYrelEnergy, nYMinMax, nYflag %%%%%%%%%
             obj.nY = extractInputROM(ROMtext,N,obj.id,'nY',[]); obj.nY = obj.nY(:);
+            obj.trunc = obj.nY;
             if isempty(obj.nY)
                 %If obj.nY is empty, we will use energy to determine the size of the ROB
                 obj.nYflag = 2;
@@ -908,8 +908,13 @@ classdef ROM < handle
                 %                     out=gradientcheck(@(w) obj.testConst_old(w, ii), w_guess, params);%poblano toolbox
                 %                     if out.RelError>1e-4, keyboard, end
                 %                 end
-                
-                H=Df'*Df; h=Df'*Res;
+
+                H = Df'*Df;
+                minEle = norm(min(min(abs(H))));
+                minDG = norm(min(min(abs(Dg))));
+                minEle = 1.0e-6*minEle/minDG^2;
+                H = H + minEle*(Dg'*Dg);
+                h=Df'*Res+minEle*(Dg'*g);
                 P = H\Dg';
                 S = Dg*P;
                 x = H\h;
@@ -925,9 +930,9 @@ classdef ROM < handle
             obj.Cnorm  = [obj.Cnorm,  norm(g)];
             %             constr=obj.constr;
             %             save Zimconstr9999 constr
-            
-            disp(['norm of the constraint   ', num2str(norm(g))])
-            disp(['number of iterations in the improvedLSPG  ',num2str(k)])
+						if k > 20
+            	fprintf('norm of the constraint   %e, number of iterations   %d\n', norm(g),k);
+						end
         end
         
         
@@ -940,8 +945,7 @@ classdef ROM < handle
             Phi1=obj.phi(1:3:end,:); %basis for the first conserved quantity rho
             Phi2=obj.phi(2:3:end,:); %basis for the second conserved quantity rho*u
             Phi3=obj.phi(3:3:end,:); %basis for the thirs conserved quantity e
-            
-            
+
             g=[(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
                 (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
                 (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi3(2:end-1,:)*w_increment]+...
@@ -957,10 +961,8 @@ classdef ROM < handle
         function   [r,dr]=RightFlux_old(obj, w_increment)
             Phi=obj.phi(:,1:obj.trunc);          
             SV=obj.sv(:,obj.cTimeIter)+Phi(:,1:obj.trunc)*w_increment;
-            [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
+            [rho, u, P,c,e,~,dc,~]=obj.prob.getVariables(SV);
             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
-            dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
-            droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
             dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
             droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
             
@@ -977,7 +979,7 @@ classdef ROM < handle
             Phi = obj.phi(:,1:obj.trunc);
             SV=obj.sv(:,obj.cTimeIter) + Phi * w_increment;
             
-            [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
+            [rho, u, P,c,e,~,dc,~]=obj.prob.getVariables(SV);
             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
             droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
@@ -994,7 +996,7 @@ classdef ROM < handle
         function [sq, sdq]=sumForceTerms_old(obj, w_increment)
             Phi=obj.phi(:,1:obj.trunc);
             SV=obj.sv(:,obj.cTimeIter)+Phi*w_increment;
-            [~, u, P,~,~,~,~]=obj.prob.getVariables(SV);
+            [~, u, P,~,~,~,~,~]=obj.prob.getVariables(SV);
             [Q,dQ]=obj.prob.forceTerm(u,P);
             %keyboard
             sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
@@ -1011,14 +1013,12 @@ classdef ROM < handle
             ci=g(ind);
             dci=Dg(ind,:)';
         end
-        
-        
-        
-        function [g, Dg]=constraintsForGNAT(obj, w_increment,sv,delt)
+
+        function [g, Dg, flag]=constraintsForGNAT(obj, w_increment,sv,delt)
             
             % keyboard
-            [rFlux, drFlux]=obj.RightFlux(sv);
-            [lFlux, dlFlux]=obj.LeftFlux(sv);
+            [rFlux, drFlux,flag]=obj.RightFlux(sv);
+            [lFlux, dlFlux,flag]=obj.LeftFlux(sv);
             [sumQ,sumdQ]= obj.sumForceTerms(sv);
             
             Phi1=obj.phi(1:3:end,:); %basis for the first conserved quantity rho
@@ -1038,9 +1038,96 @@ classdef ROM < handle
             
         end
         
-        function   [r,dr]=RightFlux(obj, SV)
+        function [g, Dg, flag]=constraintsForGNAT_linesearch(obj,alpha,w0,w_increment,sv0,delt)
             
-            [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
+            alpha,obj.sv(:,itnump1),del_w,obj.fullSV(:,obj.cTimeIter),obj.time.dt
+            svc = w0 + alpha*w_increment;
+            sv = sv0 + obj.phi*svc;
+            % keyboard
+            [rFlux, drFlux,flag]=obj.RightFlux(sv);
+            [lFlux, dlFlux,flag]=obj.LeftFlux(sv);
+            [sumQ,sumdQ]= obj.sumForceTerms(sv);
+            
+            Phi1=obj.phi(1:3:end,:); %basis for the first conserved quantity rho
+            Phi2=obj.phi(2:3:end,:); %basis for the second conserved quantity rho*u
+            Phi3=obj.phi(3:3:end,:); %basis for the thirs conserved quantity e
+            
+            
+            g=[(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi1(2:end-1,:)*svc;
+                (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi2(2:end-1,:)*svc;
+                (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi3(2:end-1,:)*svc]+...
+                delt*(rFlux+lFlux-sumQ);
+            
+            Dg= [(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi1(2:end-1,:);
+                (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi2(2:end-1,:);
+                (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi3(2:end-1,:)]+...
+                delt*(dlFlux+ drFlux- sumdQ);
+            Dg = Dg*w_increment;
+            
+        end
+        
+
+%         function [g, Dg]=constrMultiDomain(obj, w_increment,sv,delt)
+%             
+%             dn=floor(obj.prob.nVol/(obj.ncell));
+%             points=1:dn:obj.prob.nVol+1;
+%             if points(end)~=obj.prob.nVol+1 && points(end)~=obj.prob.nVol
+%                 points(end+1)=obj.prob.nVol+1;
+%             else
+%                 points(end)= obj.prob.nVol+1;
+%             end
+%             
+%             %TODO: make it work for two subdomains
+%             start=1;
+%             finish=points(2)-1;
+%             current_points1 = start:finish;
+%             current_points2 = finish+1:obj.prob.nVol-1;
+%             
+%             % keyboard
+%             [rFlux, drFlux]=obj.RightFlux(sv);
+%             [lFlux, dlFlux]=obj.LeftFlux(sv);
+%             [mFlux, dmFlux]=obj.MiddleFlux(sv,finish);
+%             [sumQ1, sumdQ1] = obj.sumPartialForceTerms(sv,current_points1);
+%             [sumQ2, sumdQ2] = obj.sumPartialForceTerms(sv,current_points2);
+% %             [sumQ,sumdQ]= obj.sumForceTerms(sv);
+%             
+%             Phi1=obj.phi(1:3:end,:); %basis for the first conserved quantity rho
+%             Phi2=obj.phi(2:3:end,:); %basis for the second conserved quantity rho*u
+%             Phi3=obj.phi(3:3:end,:); %basis for the thirs conserved quantity e
+%             
+%             g=[[(obj.prob.SVol(current_points1).*obj.prob.dx(current_points1))*Phi1(current_points1,:)*w_increment;
+%                 (obj.prob.SVol(current_points1).*obj.prob.dx(current_points1))*Phi2(current_points1,:)*w_increment;
+%                 (obj.prob.SVol(current_points1).*obj.prob.dx(current_points1))*Phi3(current_points1,:)*w_increment]+...
+%                 delt*(mFlux+lFlux-sumQ1);
+%                 [(obj.prob.SVol(current_points2).*obj.prob.dx(current_points2))*Phi1(current_points2,:)*w_increment;
+%                 (obj.prob.SVol(current_points2).*obj.prob.dx(current_points2))*Phi2(current_points2,:)*w_increment;
+%                 (obj.prob.SVol(current_points2).*obj.prob.dx(current_points2))*Phi3(current_points2,:)*w_increment]+...
+%                 delt*(rFlux-mFlux-sumQ2)];
+%             
+%             Dg= [[(obj.prob.SVol(current_points1).*obj.prob.dx(current_points1))*Phi1(current_points1,:);
+%                 (obj.prob.SVol(current_points1).*obj.prob.dx(current_points1))*Phi2(current_points1,:);
+%                 (obj.prob.SVol(current_points1).*obj.prob.dx(current_points1))*Phi3(current_points1,:)]+...
+%                 delt*(dmFlux + dlFlux- sumdQ1);
+%                  [(obj.prob.SVol(current_points2).*obj.prob.dx(current_points2))*Phi1(current_points2,:);
+%                 (obj.prob.SVol(current_points2).*obj.prob.dx(current_points2))*Phi2(current_points2,:);
+%                 (obj.prob.SVol(current_points2).*obj.prob.dx(current_points2))*Phi3(current_points2,:)]+...
+%                 delt*(drFlux-dmFlux-sumdQ2)];
+%             
+% %             g=[(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi1(2:end-1,:)*w_increment;
+% %                 (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi2(2:end-1,:)*w_increment;
+% %                 (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi3(2:end-1,:)*w_increment]+...
+% %                 delt*(rFlux+lFlux-sumQ);
+% %             
+% %             Dg= [(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi1(2:end-1,:);
+% %                 (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi2(2:end-1,:);
+% %                 (obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))*Phi3(2:end-1,:)]+...
+% %                 delt*(dlFlux+ drFlux- sumdQ);
+%             
+%         end
+        
+        function   [r,dr]=MiddleFlux(obj, SV, middle)
+            
+            [rho, u, P,c,e,~,dc,~]=obj.prob.getVariables(SV);
             [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
             droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
@@ -1050,45 +1137,69 @@ classdef ROM < handle
             % code from fucntion governEqn
             Rright= bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1));
             r=Rright(:,end);
+            derJR=obj.prob.S(middle+1)*droeF(:,:,middle);
+            dr=derJR*obj.phi(3*(middle-1)+1:3*(middle+1),:);
+        end
+    
+        function   [r,dr,flag]=RightFlux(obj, SV)
+
             finish=obj.prob.nVol-1;
-            derJR=obj.prob.S(finish+1)*droeF(:,:,finish);
+            [rho,u,P,c,e,~,dc,flag]=obj.prob.getSpecificVariables(SV,finish);
+            [roeF, droeF]=obj.prob.roeFluxAtInterface(rho,u,P,c,e,dc);
+            dUdV=[1,0,0;u(2),rho(2),0;0.5*u(2)*u(2),rho(2)*u(2),1/(obj.prob.gamma-1)];
+            droeF(:,4:6)=droeF(:,4:6)*dUdV;
+            
+            % code from fucntion governEqn
+            r=roeF*obj.prob.S(finish+1);
+            derJR=obj.prob.S(finish+1)*droeF;
             dr=derJR*obj.phi(3*(finish-1)+1:3*(finish+1),:);
+            
         end
         
-        function   [l,dl]=LeftFlux(obj, SV)
-            
-            [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
-            [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
+        function   [l,dl,flag]=LeftFlux(obj, SV)
+
+            index=1;
+            [rho,u,P,c,e,~,dc,flag]=obj.prob.getSpecificVariables(SV,index);
+            [roeF, droeF]=obj.prob.roeFluxAtInterface(rho,u,P,c,e,dc);
             dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
             droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
-            dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
-            droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
             
-            Rleft= -bsxfun(@times,roeF(:,1:end-1),obj.prob.S(2:end-2));
-            l=Rleft(:,1);
-            start=1;
-            derJL=-obj.prob.S(start+1)*droeF(:,:,start);
-            dl=derJL*obj.phi(3*(start-1)+1:3*(start+1),:);
-            
+            % code from fucntion governEqn
+            l=-roeF*obj.prob.S(index+1);
+            derJR=-obj.prob.S(index+1)*droeF;
+            dl=derJR*obj.phi(3*(index-1)+1:3*(index+1),:);
+                        
         end
         
         function [sq, sdq]=sumForceTerms(obj,SV)
             
-            [~, u, P,~,~,~,~]=obj.prob.getVariables(SV);
+            [~, u, P,~,~,~,~,~]=obj.prob.getVariables(SV);
             [Q,dQ]=obj.prob.forceTerm(u,P);
             sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
             sdq=zeros(3,obj.trunc);
             for i=2:obj.prob.nVol-1
-                %            derivQ=derivQ+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
+                % derivQ=derivQ+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
                 sdq=sdq+squeeze(dQ(:,:,i))*obj.phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
             end
+        end
+        
+        function [sq, sdq]=sumPartialForceTerms(obj,SV,indices)
+            
+            [~, u, P,~,~,~,~,~]=obj.prob.getVariables(SV);
+            [Q,dQ]=obj.prob.forceTerm(u,P);
+            sq=Q(:,indices)*(obj.prob.SVol(indices).*obj.prob.dx(indices))';
+            sdq=zeros(3,obj.trunc);
+            for k=length(indices)
+                i = indices(k);
+                sdq=sdq+squeeze(dQ(:,:,i))*obj.phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
+            end          
         end
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
  function r = RightFluxAll(obj, SV)
       
-      [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
+      [rho, u, P, c, e, ~, dc,~] = obj.prob.getVariables(SV);
       [roeF, ~ ] = obj.prob.roeFlux(rho,u,P,c,e,dc);
 %       dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
 %       droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
@@ -1102,7 +1213,7 @@ classdef ROM < handle
  end
   
  function flux = FluxAll(obj, SV)
-      [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
+      [rho, u, P, c, e, ~, dc,~] = obj.prob.getVariables(SV);
       [roeF, ~] = obj.prob.roeFlux(rho,u,P,c,e,dc);
 %       dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
 %       droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
@@ -1115,7 +1226,7 @@ classdef ROM < handle
  
   function   l = LeftFluxAll(obj, SV)
       
-      [rho, u, P, c, e, ~, dc] = obj.prob.getVariables(SV);
+      [rho, u, P, c, e, ~, dc,~] = obj.prob.getVariables(SV);
       [roeF, ~] = obj.prob.roeFlux(rho,u,P,c,e,dc);
 %       dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
 %       droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
@@ -1129,7 +1240,7 @@ classdef ROM < handle
   end
   
   function [force_q,dforce_q] = ForceTermsAll(obj, SV)
-      [~, u, P, ~,~,~,~]  = obj.prob.getVariables(SV);
+      [~, u, P, ~,~,~,~,~]  = obj.prob.getVariables(SV);
       [force_q, dforce_q] = obj.prob.forceTerm(u,P);
   end
   
@@ -1160,7 +1271,7 @@ classdef ROM < handle
                     obj.LSPG_subdomains();
                 elseif 3*obj.ncell==obj.trunc
                     obj.solveConstraints();
-                elseif 3*obj.ncell>obj.trunc
+                elseif 3*obj.ncell>=obj.trunc
                     obj.minimizeConstraints();
                 end
             end
@@ -1184,31 +1295,36 @@ function  [] = LSPG_subdomains(obj)
     for k=1:obj.newt.maxIter
 
         if obj.cTimeIter==1 && k==1
-%             size(Phi)
-            disp(['LSPG, constraints on several domaines; num of domains ', num2str(obj.ncell)])
+            disp(['LSPG, constraints on several domains; num of domains ', num2str(obj.ncell)])
         end
         obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
         [Res,Jres]=obj.TimeScheme.TimeIntNLFunc(obj.prob,obj.sv(:,itnump1),obj.sv(:,itnump1-1),t);
         Df=Jres*Phi;
-        %                 keyboard
         [g,Dg]=obj.myconstraints(w_guess);
-
-        H=Df'*Df; h=Df'*Res;
+        
+        H = Df'*Df;
+        minEle = 1.0e-6*norm(min(min(H)));
+        H = H + minEle*(Dg'*Dg);
+        h=Df'*Res+minEle*(Dg'*g);
         P = H\Dg';
         S = Dg*P;
         x = H\h;
         del_w = - x - P*(S\(g-Dg*x));
-
         w_guess=w_guess+del_w;
+
+        if(isnan(w_guess))
+            break;
+        end
 
         if norm(del_w,2)<10^(-6)
             break;
         end
     end
-     disp(['number of iterations ', num2str(k)])
     [g,~]=obj.myconstraints(w_guess);
-    disp(['norm of the constraints ', num2str(norm(g))])
-    obj.Cnorm = [obj.Cnorm,  norm(g)];
+    if k > 20
+    	fprintf('norm of the constraints    %e, number of iterations   %d\n', norm(g), k);
+    end
+		obj.Cnorm = [obj.Cnorm,  norm(g)];
     %disp(['number of iterations in truncated case ',num2str(k)])
 end
         
@@ -1339,9 +1455,9 @@ end
       Phi2=Phi(2:3:end,:); %basis for the second conserved quantity rho*u
       Phi3=Phi(3:3:end,:); %basis for the thirs conserved quantity e
       
-      
-      SV=obj.sv(:,obj.cTimeIter)+Phi*w_increment;
-      [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
+      dw = Phi*w_increment;
+      SV=obj.sv(:,obj.cTimeIter)+dw;
+      [rho, u, P,c,e,dc_prim,dc,~]=obj.prob.getVariables(SV);
       [Q,dQ]=obj.prob.forceTerm(u,P);
       [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
       
@@ -1365,32 +1481,31 @@ end
       left = - roeF(:,start)*obj.prob.S(start+1);
       %                 keyboard
       current_points = 2:points(2)-1;
-      cnstr(1:3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
-          obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
-      
-      derivQ1=zeros(3,obj.trunc);
-      for i=2:points(2)-1 %1:points(2)-1
-          derivQ1=derivQ1+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
-      end
-      
-      %                 %keyboard
-      %                 Dcnstr(1:3,:) = [(obj.prob.SVol(2:points(2)-1).*obj.prob.dx(2:points(2)-1))*Phi1(2:points(2)-1,:);
-      %                     (obj.prob.SVol(2:points(2)-1).*obj.prob.dx(2:points(2)-1))*Phi2(2:points(2)-1,:);
-      %                     (obj.prob.SVol(2:points(2)-1).*obj.prob.dx(2:points(2)-1))*Phi3(2:points(2)-1,:)]+...
-      %                     obj.time.dt*(J2L(1:3,1:3)*Phi(1:3,:) +J2L(1:3,4:6)*Phi(4:6,:)+ ...
-      %                      J2R(3*(points(2)-3)+1:3*(points(2)-2),1:3)*Phi(3*(points(2)-2)+1:3*(points(2)-1),:)+J2R(3*(points(2)-3)+1:3*(points(2)-2),4:6)*Phi(3*(points(2)-1)+1:3*points(2),:)- derivQ1);
-      %                 % J2R(3*(points(2)-3)+1:3*(points(2)-2),1:3)*Phi(3*(points(2)-2)+1:3*(points(2)-1),:)+J2R(3*(points(2)-3)+1:3*(points(2)-2),4:6)*Phi(3*(points(2)-1)+1:3*points(2),:)- derivQ1);
-      
-      derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
-      derJR=  obj.prob.S(finish+1)*droeF(:,:,finish);
-      
-      Dcnstr(1:3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
-          obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
-          derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ1);
+%       if isempty(current_points)
+%           [cnstr(1:3,:),J1,Cpp,dCpp,~] = obj.prob.fullImplicitInletBC(rho(1:2),u(1:2),P(1:2),c(1:2),dc_prim(1:2,:));
+%           cnstr(1:3,:) = cnstr(1:3,:) + Cpp*dw(1:3)/obj.time.dt;
+%           J1(:,1:3) = J1(:,1:3) + (Cpp + [dCpp(:,:,1)*dw(1:3),dCpp(:,:,2)*dw(1:3),dCpp(:,:,3)*dw(1:3)])/obj.time.dt;
+%           Dcnstr(1:3,:) = J1(:,1:3)*Phi(1:3,:);
+%       else
+          cnstr(1:3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
+              obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+          
+          derivQ1=zeros(3,obj.trunc);
+          for i=2:points(2)-1
+              derivQ1=derivQ1+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
+          end
+
+          derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+          derJR=  obj.prob.S(finish+1)*droeF(:,:,finish);
+          
+          Dcnstr(1:3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+              obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+              derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ1);
+%       end
       
       
       if obj.ncell>2
@@ -1409,13 +1524,6 @@ end
               for ii=points(kk):points(kk+1)-1
                   derivQ=derivQ+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
               end
-              %keyboard
-              %                         Dcnstr(3*(kk-1)+1:3*kk,:)=[(obj.prob.SVol(points(kk):points(kk+1)-1).*obj.prob.dx(points(kk):points(kk+1)-1))*Phi1(points(kk):points(kk+1)-1,:);
-              %                             (obj.prob.SVol(points(kk):points(kk+1)-1).*obj.prob.dx(points(kk):points(kk+1)-1))*Phi2(points(kk):points(kk+1)-1,:);
-              %                             (obj.prob.SVol(points(kk):points(kk+1)-1).*obj.prob.dx(points(kk):points(kk+1)-1))*Phi3(points(kk):points(kk+1)-1,:)]+...
-              %                             obj.time.dt*(J2L(3*(points(kk)-2)+1:3*(points(kk)-1),1:3)*Phi(3*(points(kk)-2)+1:3*(points(kk)-1),:) +J2L(3*(points(kk)-2)+1:3*(points(kk)-1),4:6)*Phi(3*(points(kk)-1)+1:3*(points(kk)),:)+ ...
-              %                             J2R(3*(points(kk+1)-3)+1:3*(points(kk+1)-2),1:3)*Phi(3*(points(kk+1)-2)+1:3*(points(kk+1)-1),:)+ J2R(3*(points(kk+1)-3)+1:3*(points(kk+1)-2),4:6)*Phi(3*(points(kk+1)-1)+1:3*(points(kk+1)),:)- derivQ);
-              
               derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
               derJR= obj.prob.S(finish+1)*droeF(:,:,finish);
               
@@ -1427,39 +1535,45 @@ end
               
           end
       end
-      
-      
-      %                 keyboard
+
       start=points(end-1)-1;
       finish=points(end)-2;
       right=  roeF(:,finish)*obj.prob.S(finish+1);
       left = -roeF(:,start)*obj.prob.S(start+1);
       current_points=start+1:finish;
-      cnstr((obj.ncell-1)*3+1:obj.ncell*3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
-          obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
-      %                     obj.time.dt*(right(:,end)+left(:,points(end-1)-1)-Q(:,points(end-1):end)*(obj.prob.SVol(points(end-1):end).*obj.prob.dx(points(end-1):end))');
-      derivQ3=zeros(3,obj.trunc);
-      for ii= points(end-1):obj.prob.nVol-1 %points(end-1):obj.prob.nVol
-          derivQ3=derivQ3+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
-      end
       
-      %keyboard
-      %                 Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:) = [(obj.prob.SVol(points(end-1):end-1).*obj.prob.dx(points(end-1):end-1))*Phi1(points(end-1):end-1,:);
-      %                     (obj.prob.SVol(points(end-1):end-1).*obj.prob.dx(points(end-1):end-1))*Phi2(points(end-1):end-1,:);
-      %                     (obj.prob.SVol(points(end-1):end-1).*obj.prob.dx(points(end-1):end-1))*Phi3(points(end-1):end-1,:)]+...
-      %                     obj.time.dt*(J2L(3*(points(end-1)-2)+1:3*(points(end-1)-1),1:3)*Phi(3*(points(end-1)-2)+1:3*(points(end-1)-1),:)+J2L(3*(points(end-1)-2)+1:3*(points(end-1)-1),4:6)*Phi(3*(points(end-1)-1)+1:3*(points(end-1)),:)+ ...
-      %                     J2R(end-2:end,1:3)*Phi(end-5:end-3,:)+ J2R(end-2:end,4:6)*Phi(end-2:end,:)- derivQ3);
-      derJL=-obj.prob.S(start+1)* droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
-      %                 finish=size(roeF,2);
-      derJR=obj.prob.S(finish+1)* droeF(:,:,finish);
-      
-      Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
-          (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
-          obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
-          derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ3);
+%       if isempty(current_points)
+%           [cnstr((obj.ncell-1)*3+1:obj.ncell*3,:),J2,Cp,dCp] = obj.prob.fullImplicitOutletBC(rho(end-1:end),u(end-1:end),P(end-1:end),c(end-1:end),dc_prim(end-1:end,:));
+%           cnstr((obj.ncell-1)*3+1:obj.ncell*3,:) = cnstr((obj.ncell-1)*3+1:obj.ncell*3,:) + Cp*dw(end-2:end)/obj.time.dt;
+%           J2(end-2:end,end-2:end) = J2(end-2:end,end-2:end) + (Cp + [dCp(:,:,1)*dw(end-2:end),dCp(:,:,2)*dw(end-2:end),dCp(:,:,3)*dw(end-2:end)])/obj.time.dt;
+%           Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:) = J2(end-2:end,end-2:end)*Phi(end-2:end,:);
+%       else
+          cnstr((obj.ncell-1)*3+1:obj.ncell*3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*w_increment;
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*w_increment;
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*w_increment ]+...
+              obj.time.dt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+          %     obj.time.dt*(right(:,end)+left(:,points(end-1)-1)-Q(:,points(end-1):end)*(obj.prob.SVol(points(end-1):end).*obj.prob.dx(points(end-1):end))');
+          derivQ3=zeros(3,obj.trunc);
+          for ii= points(end-1):obj.prob.nVol-1 %points(end-1):obj.prob.nVol
+              derivQ3=derivQ3+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
+          end
+
+          %keyboard
+          %                 Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:) = [(obj.prob.SVol(points(end-1):end-1).*obj.prob.dx(points(end-1):end-1))*Phi1(points(end-1):end-1,:);
+          %                     (obj.prob.SVol(points(end-1):end-1).*obj.prob.dx(points(end-1):end-1))*Phi2(points(end-1):end-1,:);
+          %                     (obj.prob.SVol(points(end-1):end-1).*obj.prob.dx(points(end-1):end-1))*Phi3(points(end-1):end-1,:)]+...
+          %                     obj.time.dt*(J2L(3*(points(end-1)-2)+1:3*(points(end-1)-1),1:3)*Phi(3*(points(end-1)-2)+1:3*(points(end-1)-1),:)+J2L(3*(points(end-1)-2)+1:3*(points(end-1)-1),4:6)*Phi(3*(points(end-1)-1)+1:3*(points(end-1)),:)+ ...
+          %                     J2R(end-2:end,1:3)*Phi(end-5:end-3,:)+ J2R(end-2:end,4:6)*Phi(end-2:end,:)- derivQ3);
+          derJL=-obj.prob.S(start+1)* droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+          %                 finish=size(roeF,2);
+          derJR=obj.prob.S(finish+1)* droeF(:,:,finish);
+
+          Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+              (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+              obj.time.dt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+              derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ3);
+%       end
 
   end
 
@@ -1475,7 +1589,7 @@ end
 function  [] = solveConstraints(obj)
     %use if 3*obj.ncell==obj.trunc
     
-    keyboard
+%    keyboard
     itnump1 = obj.cTimeIter + 1;
     Phi=obj.phi(:,1:obj.trunc);
     obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter);
@@ -1488,21 +1602,24 @@ function  [] = solveConstraints(obj)
     if obj.cTimeIter==1
 %         size(Phi)
         disp('num constraint = num basis vectors ')
-        disp(['several domaines ', num2str(obj.ncell)])
+        disp(['several domains ', num2str(obj.ncell)])
     end
     
     for k=1:obj.newt.maxIter
         
         [g,Dg]=obj.myconstraints(w_guess);
         
-        for i=1:length(g)
-            out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
-            if out.RelError>1e-4,keyboard, end
-        end
+%         for i=1:length(g)
+%             out=gradientcheck( @(w) obj.testmyconstraints(w,i), w_guess);
+%             if out.RelError>1e-4,keyboard, end
+%         end
         
         if norm(g,2)<10^(-6)
             break
         end
+%         if isreal(Dg)==false
+%             keyboard
+%         end
         del_w=-Dg\g;
         w_guess=w_guess+del_w;
         
@@ -1510,8 +1627,9 @@ function  [] = solveConstraints(obj)
     obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
     [g,~]=obj.myconstraints(w_guess);
     %if norm(g)>10^(-4), keyboard, end
-    disp(['norm of the constraints ', num2str(norm(g))])
-    disp(['number of iterations  ',num2str(k)])
+	if k > 20
+    	fprintf('norm of the constraints    %e, number of iterations   %d\n', norm(g), k);
+	end
 end
 
      
@@ -1529,7 +1647,7 @@ function  [] = minimizeConstraints(obj)
     if obj.cTimeIter==1
 %         size(Phi)
         disp('num constraint > num basis vectors ')
-        disp(['several domaines ', num2str(obj.ncell)])
+        disp(['several domains ', num2str(obj.ncell)])
     end
     
     for k=1:obj.newt.maxIter
@@ -1549,14 +1667,15 @@ function  [] = minimizeConstraints(obj)
     
     [g,~]=obj.myconstraints(w_guess);
     %if norm(g)>10^(-4), keyboard, end
-    disp(['norm of the constraints ', num2str(norm(g))])
-    disp(['number of iterations  ', num2str(k)])
+    if k > 20
+    	fprintf('norm of the constraints    %e, number of iterations   %d\n', norm(g), k);
+	end
     obj.sv(:,itnump1)=obj.sv(:,obj.cTimeIter)+Phi*w_guess;
     
 end
                
 %%%%%%%%%%%%%%%%%%%%%%% Multiple domains for GNAT  %%%%%%%%%%%
-function [cnstr, Dcnstr]=constrMultiDomain(obj,w_increment,SV,delt)
+function [cnstr, Dcnstr,flag]=constrMultiDomain(obj,w_increment,SV,delt)
     
     dn=floor(obj.prob.nVol/(obj.ncell));
     points=1:dn:obj.prob.nVol+1;
@@ -1571,8 +1690,7 @@ function [cnstr, Dcnstr]=constrMultiDomain(obj,w_increment,SV,delt)
     Phi2=Phi(2:3:end,:); %basis for the second conserved quantity rho*u
     Phi3=Phi(3:3:end,:); %basis for the thirs conserved quantity e
     
-    
-    [rho, u, P,c,e,~,dc]=obj.prob.getVariables(SV);
+    [rho, u, P,c,e,~,dc,flag]=obj.prob.getVariables(SV);
     [Q,dQ]=obj.prob.forceTerm(u,P);
     [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
     
@@ -1659,9 +1777,116 @@ function [cnstr, Dcnstr]=constrMultiDomain(obj,w_increment,SV,delt)
         (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
         delt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
         derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ3);
+
+end
+
+function [cnstr, Dcnstr,flag]=constrMultiDomain_linesearch(obj,alpha,w0,w_increment,SV,delt)
+    
+    svc = w0+alpha*w_increment;
+    
+    dn=floor(obj.prob.nVol/(obj.ncell));
+    points=1:dn:obj.prob.nVol+1;
+    if points(end)~=obj.prob.nVol+1 && points(end)~=obj.prob.nVol
+        points(end+1)=obj.prob.nVol+1;
+    else
+        points(end)= obj.prob.nVol+1;
+    end
+    
+    Phi=obj.phi(:,1:obj.trunc);
+    Phi1=Phi(1:3:end,:); %basis for the first conserved quantity rho
+    Phi2=Phi(2:3:end,:); %basis for the second conserved quantity rho*u
+    Phi3=Phi(3:3:end,:); %basis for the thirs conserved quantity e
+    
+    [rho, u, P,c,e,~,dc,flag]=obj.prob.getVariables(SV+obj.phi*svc);
+    [Q,dQ]=obj.prob.forceTerm(u,P);
+    [roeF, droeF]=obj.prob.roeFlux(rho,u,P,c,e,dc);
+    
+    %from governEqn
+    dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+    droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+    dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+    droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+    
+    start=1;
+    finish=points(2)-1;
+    right=   roeF(:,finish)*obj.prob.S(finish+1);
+    left = - roeF(:,start)*obj.prob.S(start+1);
+    
+    current_points = 2:points(2)-1;
+    cnstr(1:3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*svc;
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*svc;
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*svc ]+...
+        delt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+    
+    derivQ1=zeros(3,obj.trunc);
+    for i=2:points(2)-1 %1:points(2)-1
+        derivQ1=derivQ1+squeeze(dQ(:,:,i))*[Phi1(i,:);Phi2(i,:);Phi3(i,:)]*(obj.prob.SVol(i).*obj.prob.dx(i));
+    end
+    
+    derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+    derJR=  obj.prob.S(finish+1)*droeF(:,:,finish);
+    
+    Dcnstr(1:3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+        delt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+        derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ1);
     
     
+    if obj.ncell>2
+        for kk=2:obj.ncell-1
+            start=points(kk)-1;
+            finish=points(kk+1)-1;
+            right=   roeF(:,finish)*obj.prob.S(finish+1);
+            left = - roeF(:,start)*obj.prob.S(start+1);
+            current_points=start+1:finish;
+            cnstr(3*(kk-1)+1:3*kk,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*svc;
+                (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*svc;
+                (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*svc]+...
+                delt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+            derivQ=zeros(3,obj.trunc);
+            for ii=points(kk):points(kk+1)-1
+                derivQ=derivQ+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
+            end
+            
+            derJL= -obj.prob.S(start+1)*droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+            derJR= obj.prob.S(finish+1)*droeF(:,:,finish);
+            
+            Dcnstr(3*(kk-1)+1:3*kk,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+                (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+                (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+                delt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+                derJR*Phi(3*(finish-1)+1:3*(finish+1),:)- derivQ);
+            
+        end
+    end
     
+    
+    start=points(end-1)-1;
+    finish=points(end)-2;
+    right=  roeF(:,finish)*obj.prob.S(finish+1);
+    left = -roeF(:,start)*obj.prob.S(start+1);
+    current_points=start+1:finish;
+    cnstr((obj.ncell-1)*3+1:obj.ncell*3,:)=[(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:)*svc;
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:)*svc;
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)*svc ]+...
+        delt*(right+left-Q(:,current_points)*(obj.prob.SVol(current_points).*obj.prob.dx(current_points))');
+    
+    derivQ3=zeros(3,obj.trunc);
+    for ii= points(end-1):obj.prob.nVol-1 %points(end-1):obj.prob.nVol
+        derivQ3=derivQ3+squeeze(dQ(:,:,ii))*[Phi1(ii,:);Phi2(ii,:);Phi3(ii,:)]*(obj.prob.SVol(ii).*obj.prob.dx(ii));
+    end
+    
+    derJL=-obj.prob.S(start+1) * droeF(:,:,start); % 3x6 , first dimension  is w.r.t. (rho, rho*u, e); second dimension is w.r.t. cells j and j+1
+    derJR= obj.prob.S(finish+1)* droeF(:,:,finish);
+    Dcnstr((obj.ncell-1)*3+1:obj.ncell*3,:)= [(obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi1(current_points,:);
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi2(current_points,:);
+        (obj.prob.SVol(current_points).*obj.prob.dx(current_points))*Phi3(current_points,:)]+...
+        delt*(derJL*Phi(3*(start-1)+1:3*(start+1),:)+ ...
+        derJR*Phi(3*(finish-1)+1:3*(finish+1),:) - derivQ3);
+    
+    Dcnstr = Dcnstr*w_increment;
+
 end
 
         
@@ -2978,102 +3203,6 @@ end
                 end
             end
         end %Done
-        
-        function buildFluxBasisFromFOM(obj,soln) 
-
-            for jj=1:size(soln,2)
-                
-                U = reshape(soln(:,jj),3,obj.prob.nVol);
-                [rho,u,P,c] = obj.prob.conservativeToPrimitive(U(:,2:end-1));
-                rho = [U(1,1),rho,U(1,end)]; %Density
-                u   = [U(2,1),u,U(2,end)]; %Velocity
-                P   = [U(3,1),P,U(3,end)]; %Pressure
-                c   = [sqrt(obj.prob.gamma*P(1)/rho(1)),c,sqrt(obj.prob.gamma*P(end)/rho(end))]; %Speed of sound
-                e   = [P(1)/(obj.prob.gamma-1)+rho(1)*u(1)^2/2,U(3,2:end-1),P(end)/(obj.prob.gamma-1)+rho(end)*u(end)^2/2];
-                dc_cons = [0.5*obj.prob.gamma./(c.*rho).*(0.5*(obj.prob.gamma-1)*u.*u - P./rho);...
-                    -0.5*obj.prob.gamma*(obj.prob.gamma-1)*u./(rho.*c);...
-                    0.5*obj.prob.gamma*(obj.prob.gamma-1)./(rho.*c)]';
-                [roeF,droeF] = obj.prob.roeFlux(rho,u,P,c,e,dc_cons);
-                [Q,dQ]=obj.prob.forceTerm(u,P);
-                
-                dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
-                droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
-                dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
-                droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
-                
-                roeF1(:,jj) = roeF(1,:)';
-                roeF2(:,jj) = roeF(2,:)';
-                roeF3(:,jj) = roeF(3,:)';
-                %keyboard
-                
-                Flux(:,jj) = reshape(bsxfun(@times,roeF(:,1:end),obj.prob.S(2:end-1)), size(roeF,1)*size(roeF,2),1);
-                Fright(:,jj)= reshape(bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1)), size(roeF,1)*size(roeF(:, 2:end),2),1);
-                Fleft(:,jj) = reshape(-bsxfun(@times,roeF(:,1:end-1),obj.prob.S(2:end-2)),size(roeF,1)*size(roeF(:,2:end),2),1);
-                forceQ(:,jj)= reshape(Q, size(Q,1)*size(Q,2), 1);
-                J2L=zeros(3*(obj.prob.nVol-2), 3*obj.prob.nVol);
-                J2R=J2L;
-                J2=zeros(3*(obj.prob.nVol-2), 3*obj.prob.nVol);
-                for kl= 2:obj.prob.nVol-1
-                    i=kl-1;
-                    J2L(3*(i-1)+1:3*i,3*(kl-2)+1:3*kl) = [-obj.prob.S(kl)*droeF(:,1:3,kl-1), -obj.prob.S(kl)*droeF(:,4:6,kl-1)];
-                    J2R(3*(i-1)+1:3*i,3*(kl-1)+1:3*(kl+1)) = [obj.prob.S(kl+1)*droeF(:,1:3,kl), obj.prob.S(kl+1)*droeF(:,4:6,kl)];
-                    J2(3*(i-1)+1:3*i,3*(kl-2)+1:3*(kl+1)) = [-obj.prob.S(kl)*droeF(:,1:3,kl-1),...
-                        (obj.prob.S(kl+1)*droeF(:,1:3,kl) - obj.prob.S(kl)*droeF(:,4:6,kl-1)),...
-                        obj.prob.S(kl+1)*droeF(:,4:6,kl)];
-                end
-                
-                
-                if jj==1
-                    
-                    sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
-                    sdq=zeros(3,obj.trunc);
-                    Phi = obj.phi(:,1:obj.trunc);
-                    for i=2:obj.prob.nVol-1
-                        sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
-                    end
-                    sq_true = sq;
-                    sdq_true = sdq;
-                    
-                    J2L_true=J2L;
-                    J2R_true=J2R;
-                    J2_true=J2;
-                    DforceQ=dQ;
-                    romdroeF= droeF;
-                    Q2_true=Q(2,:);
-                    %keyboard
-                    save fom_Flux Flux
-                    save fom_Fright Fright
-                    save fom_Fleft Fleft
-                    save fom_forceQ forceQ
-                    save fom_DforceQ DforceQ
-                    save fom_J2_true J2_true
-                    save fom_J2R_true J2R_true
-                    save fom_Q2_true Q2_true
-                    save fom_J2L_true J2L_true
-                    %                            save fom_romdroeF romdroeF
-                end
-
-                romroeF(:,jj)=roeF(:);
-                if imag(Fright(:,jj)) ~= 0
-                    disp(['righ flux is complex for snapshot number', num2str(jj)])
-                elseif imag(Fleft(:,jj)) ~= 0
-                    disp(['left flux is complex for snapshot number', num2str(jj)])
-                elseif imag(forceQ) ~= 0
-                    disp(['force term is complex for snapshot number', num2str(jj)])
-                end
-            end
-
-            [urFull,srFull,~] = svd(Flux,0);
-            [ur,sr,~]   = svd(Fright,0);
-            [ul, sl, ~] = svd(Fleft,0);
-            [uQ,sQ,~]   = svd(forceQ,0);
-
-            obj.phiFlux_fom = urFull;%(:,1:mF); %99.9%
-            obj.phiFright_fom = ur;%(:,1:mF); %99.9%
-            obj.phiFleft_fom  = ul;%(:,1:mF);  %99.9%
-            obj.phiQ_fom = uQ;%(:,1:mQ);
-
-        end        
 
         function [] = buildFluxBasis(obj,soln)
             % YC: This is implemented only for reproductive case
@@ -3119,10 +3248,8 @@ end
                         (obj.prob.S(kl+1)*droeF(:,1:3,kl) - obj.prob.S(kl)*droeF(:,4:6,kl-1)),...
                         obj.prob.S(kl+1)*droeF(:,4:6,kl)];
                 end
-                
-                
+
                 if jj==1
-                    
                     sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
                     sdq=zeros(3,obj.trunc);
                     Phi = obj.phi(:,1:obj.trunc);
@@ -3143,8 +3270,6 @@ end
                     
                     save romroeF roeF
                     save Flux Flux
-                    save Fright Fright
-                    save Fleft Fleft
                     save forceQ forceQ
                     
                     save DforceQ DforceQ
@@ -3155,27 +3280,36 @@ end
                     save romdroeF romdroeF
                 end
                 
+
                 NewFrBasis = [NewFrBasis, Fright(:,jj), J2R*obj.phi];
                 NewFlBasis = [NewFlBasis, Fleft(:,jj), J2L*obj.phi];
                 %                         NewQBasis  = [NewQBasis, forceQ(:,jj), dQ*obj.phi];
                 romroeF(:,jj)=roeF(:);
+                if imag(Flux(:,jj))~=0
+                    disp(['righ flux is complex for snapshot number', num2str(jj)])
+                    Flux(:,jj) = real(Flux(:,jj));
+                end
                 if imag(Fright(:,jj))~=0
                     disp(['righ flux is complex for snapshot number', num2str(jj)])
-                elseif imag(Fleft(:,jj))~=0
+                    Fright(:,jj) = real(Fright(:,jj));
+                end
+                if imag(Fleft(:,jj))~=0
                     disp(['left flux is complex for snapshot number', num2str(jj)])
-                elseif imag(forceQ)~=0
+                    Fleft(:,jj) = real(Fleft(:,jj));
+                end
+                if imag(forceQ)~=0
                     disp(['force term is complex for snapshot number', num2str(jj)])
+                    forceQ = real(forceQ);
                 end
             end
             
             %save romroeF romroeF
             %keyboard
-            
             [ur2,sr2,~] = svd(NewFrBasis,0);
             [ul2,sl2,~] = svd(NewFlBasis,0);
             [uFull,sFull,~]   = svd(Flux,0);
-            [ur,sr,~]   = svd(Fright,0);
-            [ul, sl, ~] = svd(Fleft,0);
+%             [ur,sr,~]   = svd(Fright,0);
+%             [ul,sl,~] = svd(Fleft,0);
             [uQ,sQ,~]   = svd(forceQ,0);
             [uroe1,s1,~] = svd(roeF1,0);
             [uroe2,s2,~] = svd(roeF2,0);
@@ -3187,15 +3321,157 @@ end
             % mr=min(find(cumsum(diag(s1))/sum(diag(s1))>0.9999));
             
             %keyboard
-            
             obj.phiFrnew=ur2;%(:,1:mFr);
             obj.phiFlnew=ul2;%(:,1:mFr);
             obj.phiFlux=uFull;
-            obj.phiFright=ur;%(:,1:mF); %99.9%
-            obj.phiFleft=ul;%(:,1:mF);  %99.9%
+%             obj.phiFright=ur;%(:,1:mF); %99.9%
+%             obj.phiFleft=ul;%(:,1:mF);  %99.9%
             obj.phiRoeF1=uroe1;%(:,1:mr);
             obj.phiRoeF2=uroe2;%(:,1:mr);
             obj.phiRoeF3=uroe3;%(:,1:mr);
+            obj.phiQ=uQ;%(:,1:mQ);
+        end
+        
+        function [] = buildFluxBasisFromTranings(obj,trainings)
+            % YC: This is implemented only for reproductive case
+            %     It should be generalized for predictive case
+            NewFrBasis=[];
+            NewFlBasis=[];
+            
+            nTrain = length(trainings);
+            nSoln = 0;
+            for i=1:nTrain
+                soln = trainings(i).sv;
+                size2soln = size(soln,2);
+                for jj=1:size2soln
+                    
+                    U = reshape(soln(:,jj),3,obj.prob.nVol);
+                    [rho,u,P,c] = obj.prob.conservativeToPrimitive(U(:,2:end-1));
+                    rho = [U(1,1),rho,U(1,end)]; %Density
+                    u   = [U(2,1),u,U(2,end)];   %Velocity
+                    P   = [U(3,1),P,U(3,end)];   %Pressure
+                    c   = [sqrt(obj.prob.gamma*P(1)/rho(1)),c,sqrt(obj.prob.gamma*P(end)/rho(end))]; %Speed of sound
+                    e   = [P(1)/(obj.prob.gamma-1)+rho(1)*u(1)^2/2,U(3,2:end-1),P(end)/(obj.prob.gamma-1)+rho(end)*u(end)^2/2];
+                    dc_cons = [0.5*obj.prob.gamma./(c.*rho).*(0.5*(obj.prob.gamma-1)*u.*u - P./rho);...
+                        -0.5*obj.prob.gamma*(obj.prob.gamma-1)*u./(rho.*c);...
+                        0.5*obj.prob.gamma*(obj.prob.gamma-1)./(rho.*c)]';
+                    [roeF,droeF] = obj.prob.roeFlux(rho,u,P,c,e,dc_cons);
+                    [Q,dQ]=obj.prob.forceTerm(u,P);
+                    
+                    dUdV=[1,0,0;u(1),rho(1),0;0.5*u(1)*u(1),rho(1)*u(1),1/(obj.prob.gamma-1)];
+                    droeF(:,1:3,1)=droeF(:,1:3,1)*dUdV;
+                    dUdV=[1,0,0;u(end),rho(end),0;0.5*u(end)*u(end),rho(end)*u(end),1/(obj.prob.gamma-1)];
+                    droeF(:,4:6,end)=droeF(:,4:6,end)*dUdV;
+                    
+                    roeF1(:,nSoln+jj) = roeF(1,:)';
+                    roeF2(:,nSoln+jj) = roeF(2,:)';
+                    roeF3(:,nSoln+jj) = roeF(3,:)';
+                    
+                    Flux(:,nSoln+jj) = reshape(bsxfun(@times,roeF(:,1:end),obj.prob.S(2:end-1)), size(roeF,1)*size(roeF,2),1);
+                    Fright(:,nSoln+jj)= reshape(bsxfun(@times,roeF(:,2:end),obj.prob.S(3:end-1)), size(roeF,1)*size(roeF(:, 2:end),2),1);
+                    Fleft(:,nSoln+jj) = reshape(-bsxfun(@times,roeF(:,1:end-1),obj.prob.S(2:end-2)),size(roeF,1)*size(roeF(:,2:end),2),1);
+                    forceQ(:,nSoln+jj)= reshape(Q, size(Q,1)*size(Q,2), 1);
+                    J2L=zeros(3*(obj.prob.nVol-2), 3*obj.prob.nVol);
+                    J2R=J2L;
+                    J2=zeros(3*(obj.prob.nVol-2), 3*obj.prob.nVol);
+                    for kl= 2:obj.prob.nVol-1
+                        i=kl-1;
+                        J2L(3*(i-1)+1:3*i,3*(kl-2)+1:3*kl) = [-obj.prob.S(kl)*droeF(:,1:3,kl-1), -obj.prob.S(kl)*droeF(:,4:6,kl-1)];
+                        J2R(3*(i-1)+1:3*i,3*(kl-1)+1:3*(kl+1)) = [obj.prob.S(kl+1)*droeF(:,1:3,kl), obj.prob.S(kl+1)*droeF(:,4:6,kl)];
+                        J2(3*(i-1)+1:3*i,3*(kl-2)+1:3*(kl+1)) = [-obj.prob.S(kl)*droeF(:,1:3,kl-1),...
+                            (obj.prob.S(kl+1)*droeF(:,1:3,kl) - obj.prob.S(kl)*droeF(:,4:6,kl-1)),...
+                            obj.prob.S(kl+1)*droeF(:,4:6,kl)];
+                    end
+                    
+%                     if jj==1
+%                         sq=Q(:,2:end-1)*(obj.prob.SVol(2:end-1).*obj.prob.dx(2:end-1))';
+%                         sdq=zeros(3,obj.trunc);
+%                         Phi = obj.phi(:,1:obj.trunc);
+%                         for i=2:obj.prob.nVol-1
+%                             sdq=sdq+squeeze(dQ(:,:,i))*Phi(3*i-2:3*i,:)*(obj.prob.SVol(i).*obj.prob.dx(i));
+%                         end
+%                         sq_true = sq;
+%                         sdq_true = sdq;
+%                         save sq_true sq_true
+%                         save sdq_true sdq_true
+%                         
+%                         J2L_true=J2L;
+%                         J2R_true=J2R;
+%                         J2_true=J2;
+%                         DforceQ=dQ;
+%                         romdroeF= droeF;
+%                         Q2_true=Q(2,:);
+%                         
+%                         save romroeF roeF
+%                         save Flux Flux
+%                         save forceQ forceQ
+%                         
+%                         save DforceQ DforceQ
+%                         save J2_true J2_true
+%                         save J2R_true J2R_true
+%                         save Q2_true Q2_true
+%                         save J2L_true J2L_true
+%                         save romdroeF romdroeF
+%                     end
+                    
+                    
+                    NewFrBasis = [NewFrBasis, Fright(:,nSoln+jj), J2R*obj.phi];
+                    NewFlBasis = [NewFlBasis, Fleft(:,nSoln+jj), J2L*obj.phi];
+                    %                         NewQBasis  = [NewQBasis, forceQ(:,jj), dQ*obj.phi];
+                    romroeF(:,nSoln+jj)=roeF(:);
+                    if imag(Flux(:,nSoln+jj))~=0
+                        disp(['righ flux is complex for snapshot number', num2str(nSoln+jj)])
+                        Flux(:,nSoln+jj) = real(Flux(:,nSoln+jj));
+                    end
+                    if sum(isnan(Flux(:,nSoln+jj)))>0
+                        Flux(:,nSoln+jj) = zeros(size(Flux(:,nSoln+jj)));
+                    end
+ %                   if imag(Fright(:,nSoln+jj))~=0
+ %                       disp(['righ flux is complex for snapshot number', num2str(nSoln+jj)])
+ %                       Fright(:,nSoln+jj) = real(Fright(:,nSoln+jj));
+ %                   end
+ %                   if imag(Fleft(:,nSoln+jj))~=0
+ %                       disp(['left flux is complex for snapshot number', num2str(nSoln+jj)])
+ %                       Fleft(:,nSoln+jj) = real(Fleft(:,nSoln+jj));
+ %                   end
+
+                    if imag(forceQ(:,nSoln+jj))~=0
+                        disp(['force term is complex for snapshot number', num2str(nSoln+jj)]);
+                        forceQ(:,nSoln+jj) = real(forceQ(:,nSoln+jj));
+                    end
+                    if sum(isnan(forceQ(:,nSoln+jj)))>0
+                        forceQ(:,nSoln+jj) = zeros(size(forceQ(:,nSoln+jj)));
+                    end
+                end
+                nSoln = nSoln + size2soln;
+            end
+            
+            %save romroeF romroeF
+            %keyboard
+%            [ur2,sr2,~] = svd(NewFrBasis,0);
+%            [ul2,sl2,~] = svd(NewFlBasis,0);
+            [uFull,sFull,~]   = svd(Flux,0);
+%             [ur,sr,~]   = svd(Fright,0);
+%             [ul,sl,~] = svd(Fleft,0);
+            [uQ,sQ,~]   = svd(forceQ,0);
+%            [uroe1,s1,~] = svd(roeF1,0);
+%            [uroe2,s2,~] = svd(roeF2,0);
+%            [uroe3,s3,~] = svd(roeF3,0);
+            
+            % mFr=min(find(cumsum(diag(sr2))/sum(diag(sr2))>0.9999));
+            % mF=min(find(cumsum(diag(sr))/sum(diag(sr))>0.9999));
+            % mQ=min(find(cumsum(diag(sQ))/sum(diag(sQ))>0.9999));
+            % mr=min(find(cumsum(diag(s1))/sum(diag(s1))>0.9999));
+            
+            %keyboard
+%            obj.phiFrnew=ur2;%(:,1:mFr);
+%            obj.phiFlnew=ul2;%(:,1:mFr);
+            obj.phiFlux=uFull;
+%             obj.phiFright=ur;%(:,1:mF); %99.9%
+%             obj.phiFleft=ul;%(:,1:mF);  %99.9%
+%            obj.phiRoeF1=uroe1;%(:,1:mr);
+%            obj.phiRoeF2=uroe2;%(:,1:mr);
+%            obj.phiRoeF3=uroe3;%(:,1:mr);
             obj.phiQ=uQ;%(:,1:mQ);
         end
         

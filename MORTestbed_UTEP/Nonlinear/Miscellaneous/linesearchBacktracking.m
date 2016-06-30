@@ -50,7 +50,7 @@ while (iter<iterMax)
         iter = iter + 1;
     end
 end
-disp('Sufficient Descent condition is not satisfied !');
+% disp('Sufficient Descent condition is not satisfied !');
 success = 0;
 alpha_star = sign*alpha_new;
 end
