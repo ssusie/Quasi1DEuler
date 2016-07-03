@@ -93,44 +93,44 @@ for i=[loops]
     ylim([0 5]);
 end
 
-%% Movie (either comment or do not comment)   
-loops = size(fom.sv,2);
-figure(7)
-F(loops) = struct('cdata',[],'colormap',[]);
-gap = 2;
-for i=1:10:loops
-    [rhoF,uF,PF,cF,eF] = prob.getVariables(fom.sv(:,i));
-    [rhoR1,uR1,PR1,cR1,eR1] = prob.getVariables(rom1.sv(:,i));
-    [rhoR2,uR2,PR2,cR2,eR2] = prob.getVariables(rom2.sv(:,i));
-    [rhoR3,uR3,PR3,cR3,eR3] = prob.getVariables(rom3.sv(:,i));
-    [rhoGN0,uGN0,PGN0,cGN0,eGN0] = prob.getVariables(svG0(:,i));
-    [rhoGN1,uGN1,PGN1,cGN1,eGN1] = prob.getVariables(svG1(:,i));
-    [rhoGN2,uGN2,PGN2,cGN2,eGN2] = prob.getVariables(svG2(:,i));
-    [rhoGN3,uGN3,PGN3,cGN3,eGN3] = prob.getVariables(svG3(:,i));
-    [rhoGN4,uGN4,PGN4,cGN4,eGN4] = prob.getVariables(svG4(:,i));  
-    [rhoGN5,uGN5,PGN5,cGN5,eGN5] = prob.getVariables(svG5(:,i)); 
-    [rhoGN6,uGN6,PGN6,cGN6,eGN6] = prob.getVariables(svG6(:,i));
-    hfom  = plot(uF(1:gap:end)./cF(1:gap:end),'k-*','linewidth',2,'markersize',13); hold on;
-    hrom1  = plot(uR1(1:gap:end)./cR1(1:gap:end),'b-o','linewidth',2,'markersize',10);
-    hrom2  = plot(uR2(1:gap:end)./cR2(1:gap:end),'g-x','linewidth',2,'markersize',7);
-    hrom3  = plot(uR3(1:gap:end)./cR3(1:gap:end),'c-v','linewidth',2,'markersize',7);
-    hgnat0 = plot(uGN0(1:gap:end)./cGN0(1:gap:end),'-.','linewidth',2,'markersize',7,'color',[0.7,0.7,0.9]);
-    hgnat1 = plot(uGN1(1:gap:end)./cGN1(1:gap:end),'-.','linewidth',2,'markersize',7,'color',[0.5,0.2,0.1]);
-    hgnat2 = plot(uGN2(1:gap:end)./cGN2(1:gap:end),'--v','linewidth',2,'markersize',7,'color',[0.1,0.8,0.2]);
-    hgnat3 = plot(uGN3(1:gap:end)./cGN3(1:gap:end),'m-.','linewidth',2,'markersize',3);
-    hgnat4 = plot(uGN4(1:gap:end)./cGN4(1:gap:end),'--.','linewidth',2,'markersize',7,'color',[0.1,0.1,0.1]);
-    hgnat5 = plot(uGN5(1:gap:end)./cGN5(1:gap:end),'-*','linewidth',2,'markersize',7,'color',[0.1,0.55,0.1]);
-    hgnat6 = plot(uGN6(1:gap:end)./cGN6(1:gap:end),'-+','linewidth',2,'markersize',7,'color',[0.1,0.55,1]);
-   legend([hfom,hrom1,hrom2,hrom3,hgnat0,hgnat1,hgnat2,hgnat3,hgnat4,hgnat5,hgnat6],METHODS);
-%     legend([hfom],METHODS);
-%     axis([0 length(uF(:,i)) -0.5 3])
-    xlabel('spatial domain')
-    ylabel('Mach')
-    ylim([-1 1.5])
-    drawnow
-    F(i) = getframe(gcf);
-    hold off;
-end
+% %% Movie (either comment or do not comment)   
+% loops = size(fom.sv,2);
+% figure(7)
+% F(loops) = struct('cdata',[],'colormap',[]);
+% gap = 2;
+% for i=1:10:loops
+%     [rhoF,uF,PF,cF,eF] = prob.getVariables(fom.sv(:,i));
+%     [rhoR1,uR1,PR1,cR1,eR1] = prob.getVariables(rom1.sv(:,i));
+%     [rhoR2,uR2,PR2,cR2,eR2] = prob.getVariables(rom2.sv(:,i));
+%     [rhoR3,uR3,PR3,cR3,eR3] = prob.getVariables(rom3.sv(:,i));
+%     [rhoGN0,uGN0,PGN0,cGN0,eGN0] = prob.getVariables(svG0(:,i));
+%     [rhoGN1,uGN1,PGN1,cGN1,eGN1] = prob.getVariables(svG1(:,i));
+%     [rhoGN2,uGN2,PGN2,cGN2,eGN2] = prob.getVariables(svG2(:,i));
+%     [rhoGN3,uGN3,PGN3,cGN3,eGN3] = prob.getVariables(svG3(:,i));
+%     [rhoGN4,uGN4,PGN4,cGN4,eGN4] = prob.getVariables(svG4(:,i));  
+%     [rhoGN5,uGN5,PGN5,cGN5,eGN5] = prob.getVariables(svG5(:,i)); 
+%     [rhoGN6,uGN6,PGN6,cGN6,eGN6] = prob.getVariables(svG6(:,i));
+%     hfom  = plot(uF(1:gap:end)./cF(1:gap:end),'k-*','linewidth',2,'markersize',13); hold on;
+%     hrom1  = plot(uR1(1:gap:end)./cR1(1:gap:end),'b-o','linewidth',2,'markersize',10);
+%     hrom2  = plot(uR2(1:gap:end)./cR2(1:gap:end),'g-x','linewidth',2,'markersize',7);
+%     hrom3  = plot(uR3(1:gap:end)./cR3(1:gap:end),'c-v','linewidth',2,'markersize',7);
+%     hgnat0 = plot(uGN0(1:gap:end)./cGN0(1:gap:end),'-.','linewidth',2,'markersize',7,'color',[0.7,0.7,0.9]);
+%     hgnat1 = plot(uGN1(1:gap:end)./cGN1(1:gap:end),'-.','linewidth',2,'markersize',7,'color',[0.5,0.2,0.1]);
+%     hgnat2 = plot(uGN2(1:gap:end)./cGN2(1:gap:end),'--v','linewidth',2,'markersize',7,'color',[0.1,0.8,0.2]);
+%     hgnat3 = plot(uGN3(1:gap:end)./cGN3(1:gap:end),'m-.','linewidth',2,'markersize',3);
+%     hgnat4 = plot(uGN4(1:gap:end)./cGN4(1:gap:end),'--.','linewidth',2,'markersize',7,'color',[0.1,0.1,0.1]);
+%     hgnat5 = plot(uGN5(1:gap:end)./cGN5(1:gap:end),'-*','linewidth',2,'markersize',7,'color',[0.1,0.55,0.1]);
+%     hgnat6 = plot(uGN6(1:gap:end)./cGN6(1:gap:end),'-+','linewidth',2,'markersize',7,'color',[0.1,0.55,1]);
+%    legend([hfom,hrom1,hrom2,hrom3,hgnat0,hgnat1,hgnat2,hgnat3,hgnat4,hgnat5,hgnat6],METHODS);
+% %     legend([hfom],METHODS);
+% %     axis([0 length(uF(:,i)) -0.5 3])
+%     xlabel('spatial domain')
+%     ylabel('Mach')
+%     ylim([-1 1.5])
+%     drawnow
+%     F(i) = getframe(gcf);
+%     hold off;
+% end
 
 
 %%
